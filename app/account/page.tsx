@@ -6,17 +6,11 @@ import { useState, useEffect } from "react";
 import {
   User,
   ShoppingBag,
-  Heart,
-  MapPin,
   Shield,
-  Award,
-  Wallet,
   LogOut,
   ChevronRight,
   Package,
-  Truck,
   CheckCircle,
-  Clock,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -27,7 +21,7 @@ type CustomerTab = "overview" | "orders" | "profile";
 
 export default function AccountPage() {
   const router = useRouter();
-  const { user, logout, isAuthenticated, isLoading } = useAuthStore();
+  const { user, setUser, logout, isAuthenticated, isLoading } = useAuthStore();
   useRequireAuth({ redirectTo: "/auth/login" });
 
   const [activeTab, setActiveTab] = useState<CustomerTab>("overview");
@@ -36,11 +30,12 @@ export default function AccountPage() {
   const [profileEmail, setProfileEmail] = useState(user?.email || "");
   const [userOrders, setUserOrders] = useState<any[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     if (user) {
-      setProfileName(user.name);
-      setProfileEmail(user.email);
+      setProfileName(user.name || "");
+      setProfileEmail(user.email || "");
       if (user.phone) setProfilePhone(user.phone);
     }
   }, [user]);
@@ -77,9 +72,47 @@ export default function AccountPage() {
     router.push("/auth/login");
   };
 
-  const handleUpdateProfile = (e: React.FormEvent) => {
+  const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success("Profile information updated!");
+    if (!profileName.trim()) {
+      toast.error("Name cannot be empty");
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      const res = await fetch("/api/auth/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: user?.id || user?.email,
+          name: profileName.trim(),
+          phone: profilePhone.trim(),
+        }),
+      });
+
+      const updated = await res.json();
+
+      if (!res.ok) {
+        throw new Error(updated.error || "Failed to update profile");
+      }
+
+      // Update state in zustand store and localStorage immediately
+      if (user) {
+        setUser({
+          ...user,
+          name: updated.name || profileName.trim(),
+          phone: updated.phone || profilePhone.trim(),
+        });
+      }
+
+      toast.success("Profile information updated successfully!");
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Failed to update profile");
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   if (isLoading || !isAuthenticated) {
@@ -151,15 +184,15 @@ export default function AccountPage() {
                 <div className="grid sm:grid-cols-3 gap-4">
                   <div className="bg-card p-6 rounded-3xl border border-border shadow-sm">
                     <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Orders Placed</p>
-                    <p className="font-serif text-3xl font-bold mt-2">{userOrders.length}</p>
+                    <p className="font-sans text-3xl font-bold mt-2">{userOrders.length}</p>
                   </div>
                   <div className="bg-card p-6 rounded-3xl border border-border shadow-sm">
                     <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Wallet Balance</p>
-                    <p className="font-serif text-3xl font-bold mt-2 text-primary">৳0</p>
+                    <p className="font-sans text-3xl font-bold mt-2 text-primary">৳0</p>
                   </div>
                   <div className="bg-card p-6 rounded-3xl border border-border shadow-sm">
                     <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Reward Points</p>
-                    <p className="font-serif text-3xl font-bold mt-2 text-amber-600">150 pts</p>
+                    <p className="font-sans text-3xl font-bold mt-2 text-amber-600">150 pts</p>
                   </div>
                 </div>
 
@@ -243,7 +276,7 @@ export default function AccountPage() {
                             <p className="text-muted-foreground">Payment Method: <strong className="text-foreground">{order.paymentMethod}</strong></p>
                             <p className="text-muted-foreground">Shipping: {order.shippingAddress?.area}, {order.shippingAddress?.district}</p>
                           </div>
-                          <p className="font-serif font-bold text-base text-primary">
+                          <p className="font-sans font-bold text-base text-primary">
                             ৳{order.total?.toLocaleString()}
                           </p>
                         </div>
@@ -257,13 +290,17 @@ export default function AccountPage() {
             {/* Profile Tab */}
             {activeTab === "profile" && (
               <div className="bg-card p-6 lg:p-8 rounded-3xl border border-border shadow-sm space-y-6 animate-fade-up">
-                <h2 className="font-serif text-2xl">Profile Settings</h2>
+                <div>
+                  <h2 className="font-serif text-2xl">Profile Settings</h2>
+                  <p className="text-xs text-muted-foreground mt-0.5">Manage your personal information and contact details</p>
+                </div>
 
                 <form onSubmit={handleUpdateProfile} className="space-y-4 max-w-lg">
                   <div>
                     <label className="text-xs text-muted-foreground block mb-1 font-medium">Full Name</label>
                     <input
                       type="text"
+                      required
                       value={profileName}
                       onChange={(e) => setProfileName(e.target.value)}
                       className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
@@ -292,9 +329,10 @@ export default function AccountPage() {
 
                   <button
                     type="submit"
-                    className="bg-primary text-primary-foreground px-6 py-3 rounded-full text-xs font-medium hover:opacity-90 transition"
+                    disabled={isUpdating}
+                    className="bg-primary text-primary-foreground px-7 py-3 rounded-full text-xs font-semibold hover:opacity-90 transition shadow-md shadow-primary/20 disabled:opacity-50"
                   >
-                    Save Profile Changes
+                    {isUpdating ? "Saving Changes..." : "Save Profile Changes"}
                   </button>
                 </form>
               </div>

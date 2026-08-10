@@ -106,8 +106,13 @@ orderSchema.index({ trackingId: 1 });
 // Auto-generate order number
 orderSchema.pre("validate", async function () {
   if (!this.orderNumber) {
-    const count = await mongoose.models.Order.countDocuments();
-    this.orderNumber = `NB-${String(count + 1).padStart(6, "0")}`;
+    try {
+      const model = this.constructor as mongoose.Model<OrderDocument>;
+      const count = await model.countDocuments();
+      this.orderNumber = `NB-${String(count + 1).padStart(6, "0")}`;
+    } catch {
+      this.orderNumber = `NB-${Date.now().toString().slice(-6)}`;
+    }
   }
 });
 

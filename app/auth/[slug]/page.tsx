@@ -2,52 +2,13 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ShieldCheck, Sparkles, UserCheck, KeyRound, Check } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { use, useState } from "react";
 import { toast } from "sonner";
 
 import { useAuthStore } from "@/store/auth.store";
 
 type RouteParams = { slug: string };
-
-const DEMO_USERS = [
-  {
-    email: "superadmin@noors.bd",
-    name: "Super Admin",
-    role: "super_admin" as const,
-    pass: "admin123",
-    label: "Super Admin",
-    badge: "Full Access",
-    color: "border-purple-500/40 bg-purple-500/5 hover:bg-purple-500/10 text-purple-700 dark:text-purple-400",
-  },
-  {
-    email: "admin@noors.bd",
-    name: "Noors Admin",
-    role: "admin" as const,
-    pass: "admin123",
-    label: "Store Admin",
-    badge: "Catalog & Settings",
-    color: "border-primary/40 bg-primary/5 hover:bg-primary/10 text-primary",
-  },
-  {
-    email: "staff@noors.bd",
-    name: "Store Staff",
-    role: "staff" as const,
-    pass: "staff123",
-    label: "Staff Moderator",
-    badge: "Order Processing",
-    color: "border-amber-500/40 bg-amber-500/5 hover:bg-amber-500/10 text-amber-700 dark:text-amber-400",
-  },
-  {
-    email: "customer@noors.bd",
-    name: "Nusrat Jahan",
-    role: "customer" as const,
-    pass: "customer123",
-    label: "Demo Customer",
-    badge: "Shopping & Checkout",
-    color: "border-border bg-secondary hover:bg-secondary/80 text-foreground",
-  },
-];
 
 export default function AuthPage({ params }: { params: Promise<RouteParams> }) {
   const { slug } = use(params);
@@ -77,14 +38,20 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const performLogin = async (targetEmail: string, targetPass: string) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!email || !password) {
+      toast.error("Please enter your email and password");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      const cleanEmail = targetEmail.trim().toLowerCase();
+      const cleanEmail = email.trim().toLowerCase();
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: cleanEmail, password: targetPass }),
+        body: JSON.stringify({ email: cleanEmail, password }),
       });
 
       const data = await res.json();
@@ -109,60 +76,14 @@ function LoginPage() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!email || !password) {
-      toast.error("Please enter your email and password");
-      return;
-    }
-    performLogin(email, password);
-  };
-
-  const handleQuickDemoLogin = (demo: (typeof DEMO_USERS)[number]) => {
-    setEmail(demo.email);
-    setPassword(demo.pass);
-    performLogin(demo.email, demo.pass);
-  };
-
   return (
-    <section className="container-x py-14 lg:py-20 max-w-lg">
+    <section className="container-x py-16 lg:py-24 max-w-md">
       <div className="text-center mb-8">
         <p className="text-xs tracking-[0.25em] uppercase text-primary font-bold">Access Your Account</p>
         <h1 className="font-serif text-4xl lg:text-5xl mt-2">Welcome Back</h1>
         <p className="text-xs text-muted-foreground mt-1">Sign in to manage orders, wishlist, or store operations</p>
       </div>
 
-      {/* Quick 1-Click Role Login for instant testing */}
-      <div className="mb-6 p-5 rounded-3xl border border-border bg-card shadow-sm space-y-3">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-            <KeyRound className="w-3.5 h-3.5 text-primary" /> Instant 1-Click Role Logins:
-          </span>
-          <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-semibold">
-            One Click Test
-          </span>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2.5">
-          {DEMO_USERS.map((demo) => (
-            <button
-              key={demo.email}
-              type="button"
-              onClick={() => handleQuickDemoLogin(demo)}
-              disabled={isSubmitting}
-              className={`p-3 rounded-2xl border text-left transition-all ${demo.color} flex flex-col justify-between`}
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-semibold text-xs">{demo.label}</span>
-                <Sparkles className="w-3 h-3 opacity-70" />
-              </div>
-              <span className="text-[10px] opacity-80 mt-1 font-mono">{demo.email}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Standard Login Form */}
       <form
         onSubmit={handleSubmit}
         className="space-y-4 rounded-3xl border border-border bg-card p-6 lg:p-8 shadow-sm"
@@ -170,8 +91,10 @@ function LoginPage() {
         <div>
           <label className="text-xs text-muted-foreground block mb-1 font-medium">Email Address</label>
           <input
+            type="email"
+            required
             className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-            placeholder="admin@noors.bd"
+            placeholder="name@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             autoComplete="email"
@@ -186,9 +109,10 @@ function LoginPage() {
             </Link>
           </div>
           <input
+            type="password"
+            required
             className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
             placeholder="••••••••"
-            type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="current-password"
@@ -250,7 +174,7 @@ function RegisterPage() {
   };
 
   return (
-    <section className="container-x py-14 lg:py-20 max-w-lg">
+    <section className="container-x py-16 lg:py-24 max-w-md">
       <div className="text-center mb-8">
         <p className="text-xs tracking-[0.25em] uppercase text-primary font-bold">Join Noors.bd</p>
         <h1 className="font-serif text-4xl lg:text-5xl mt-2">Create Account</h1>
@@ -264,6 +188,8 @@ function RegisterPage() {
         <div>
           <label className="text-xs text-muted-foreground block mb-1 font-medium">Full Name</label>
           <input
+            type="text"
+            required
             className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
             placeholder="Nusrat Jahan"
             value={name}
@@ -275,6 +201,8 @@ function RegisterPage() {
         <div>
           <label className="text-xs text-muted-foreground block mb-1 font-medium">Email Address</label>
           <input
+            type="email"
+            required
             className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
             placeholder="name@example.com"
             value={email}
@@ -286,9 +214,10 @@ function RegisterPage() {
         <div>
           <label className="text-xs text-muted-foreground block mb-1 font-medium">Create Password</label>
           <input
+            type="password"
+            required
             className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
             placeholder="••••••••"
-            type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="new-password"
@@ -328,7 +257,7 @@ function ForgotPasswordPage() {
   };
 
   return (
-    <section className="container-x py-14 lg:py-20 max-w-md">
+    <section className="container-x py-16 lg:py-24 max-w-md">
       <div className="text-center mb-8">
         <p className="text-xs tracking-[0.25em] uppercase text-primary font-bold">Account Security</p>
         <h1 className="font-serif text-4xl mt-2">Reset Password</h1>
@@ -341,6 +270,8 @@ function ForgotPasswordPage() {
         <div>
           <label className="text-xs text-muted-foreground block mb-1 font-medium">Email Address</label>
           <input
+            type="email"
+            required
             className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
             placeholder="name@example.com"
             value={email}

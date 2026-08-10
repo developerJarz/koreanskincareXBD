@@ -1,29 +1,42 @@
-# Welcome to your Lovable project
+# Noors.bd — Premium Luxury Accessories E-Commerce Platform
 
-This project was built with [Lovable](https://lovable.dev).
+A production-ready e-commerce platform for women's luxury accessories (bags, rings, earrings, necklaces, watches, sunglasses) tailored for Bangladesh with Cash on Delivery, bKash, and Nagad.
 
-## Build with Lovable
+## ✨ Features
+- **Modern Luxury E-Commerce**: Next.js 15, React 19, TypeScript, Tailwind CSS, Lucide icons.
+- **Redesigned Single Product Page**: Clean 2-column luxury buying stack, interactive image gallery, readable price typography, live stock status, and authentic trust guarantees.
+- **Admin Operations Hub (`/admin`)**:
+  - Store Customization (Store title, hotline, email, delivery rates inside/outside Dhaka, social channels).
+  - Product Catalog Management (Add, Edit, Delete with category & badges).
+  - Category Management (Add, Edit, Delete).
+  - Order Fulfillment & Status Tracker (Pending, Confirmed, Shipped, Delivered).
+  - Promo Discount Coupon Manager.
+  - User Role Manager (Super Admin, Admin, Staff, Customer).
+  - Sales Analytics & Payment Breakdown (COD, bKash, Nagad).
+- **Authentication & Database**:
+  - MongoDB connection with Mongoose models.
+  - One-Click Test Role logins on `/auth/login` (Super Admin, Admin, Staff, Customer).
+  - Live Database Seed API (`/api/seed?force=true`).
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
+## 🚀 Getting Started
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
+```bash
+# Install dependencies
+npm install
 
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
-
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
+# Run development server
 npm run dev
+
+# Build for production
+npm run build
+npm start
 ```
 
-## Built with
+## 🔐 Default Test Accounts
 
-- TanStack Start
-- TypeScript
-- React
-- Tailwind CSS
+| Role | Email | Password |
+| :--- | :--- | :--- |
+| **Super Admin** | `superadmin@noors.bd` | `admin123` |
+| **Admin** | `admin@noors.bd` | `admin123` |
+| **Staff (Moderator)** | `staff@noors.bd` | `staff123` |
+| **Customer** | `customer@noors.bd` | `customer123` |

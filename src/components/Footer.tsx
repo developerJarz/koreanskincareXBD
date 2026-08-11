@@ -4,8 +4,8 @@ import { Instagram, Facebook, Youtube } from "lucide-react";
 export function Footer() {
   return (
     <footer className="bg-foreground text-background mt-24">
-      <div className="container-x py-16 grid gap-10 md:grid-cols-4">
-        <div>
+      <div className="container-x py-16 grid grid-cols-2 md:grid-cols-4 gap-y-10 gap-x-8 md:gap-10">
+        <div className="col-span-2 md:col-span-1">
           <p className="font-serif text-2xl">
             Noors<span className="text-primary">.bd</span>
           </p>

@@ -118,12 +118,12 @@ export const ADMIN_PAGE_SIZE = 20;
 
 // ─── Cloudinary ───
 export const CLOUDINARY_FOLDERS = {
-  products: "noors/products",
-  categories: "noors/categories",
-  brands: "noors/brands",
-  banners: "noors/banners",
-  blog: "noors/blog",
-  avatars: "noors/avatars",
+  products: "shajgoj/products",
+  categories: "shajgoj/categories",
+  brands: "shajgoj/brands",
+  banners: "shajgoj/banners",
+  blog: "shajgoj/blog",
+  avatars: "shajgoj/avatars",
 } as const;
 
 // ─── Currency ───

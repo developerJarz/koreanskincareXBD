@@ -265,7 +265,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
             {/* Product Short Description */}
             <p className="text-sm text-muted-foreground leading-relaxed">
               {p.description ||
-                `Thoughtfully designed ${p.name.toLowerCase()} crafted for modern elegance. Hand-finished with durable luxury plating, lightweight wearability, and delivered in signature Noors packaging.`}
+                `Thoughtfully designed ${p.name.toLowerCase()} crafted for modern elegance. Hand-finished with durable luxury plating, lightweight wearability, and delivered in signature Shajgoj packaging.`}
             </p>
 
             {/* Color Option Selector */}
@@ -425,7 +425,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
             {activeTab === "details" && (
               <div className="space-y-6">
                 <p>
-                  Every piece in the Noors.bd collection is inspected individually for perfection in
+                  Every piece in the Shajgoj.bd collection is inspected individually for perfection in
                   metal plating, stitching, and finishing. Designed for modern Bangladeshi women who
                   appreciate understated elegance and enduring durability.
                 </p>
@@ -529,7 +529,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                 <p>To preserve the pristine luster and protective coating of your accessories:</p>
                 <ul className="list-disc pl-5 space-y-2 text-xs">
                   <li>Avoid direct exposure to perfume, hairsprays, and harsh detergents.</li>
-                  <li>Store in the provided airtight Noors pouch when not in use.</li>
+                  <li>Store in the provided airtight Shajgoj pouch when not in use.</li>
                   <li>Gently wipe with a soft microfibre cloth after wearing to remove moisture.</li>
                   <li>Remove before swimming, exercising, or bathing.</li>
                 </ul>

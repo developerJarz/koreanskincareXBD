@@ -10,9 +10,9 @@ import { CartSheet } from "@/components/CartSheet";
 import "../src/styles.css";
 
 export const metadata: Metadata = {
-  title: "Noors.bd — Premium Accessories for Women in Bangladesh",
+  title: "Shajgoj.bd — Premium Beauty, Accessories & Lifestyle in Bangladesh",
   description:
-    "Discover Noors.bd — bags, rings, earrings, necklaces, watches & sunglasses. Cash on delivery all over Bangladesh.",
+    "Discover Shajgoj.bd — premium beauty, bags, rings, earrings, necklaces, watches & accessories. Cash on delivery all over Bangladesh.",
 };
 
 export const viewport = {

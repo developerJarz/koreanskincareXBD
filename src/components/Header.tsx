@@ -39,7 +39,7 @@ export function Header() {
             <Menu className="w-5 h-5" />
           </button>
           <Link href="/" className="font-serif text-xl lg:text-2xl tracking-tight">
-            Noors<span className="text-primary">.bd</span>
+            Shajgoj<span className="text-primary">.bd</span>
           </Link>
           <nav className="hidden lg:flex items-center gap-8 text-sm">
             {NAV.map((n) => (
@@ -98,7 +98,7 @@ export function Header() {
         <div className="fixed inset-0 z-50 bg-background lg:hidden animate-fade-up">
           <div className="flex items-center justify-between h-14 px-5 border-b border-border">
             <span className="font-serif text-xl">
-              Noors<span className="text-primary">.bd</span>
+              Shajgoj<span className="text-primary">.bd</span>
             </span>
             <button onClick={() => setMenu(false)} aria-label="Close">
               <X className="w-5 h-5" />

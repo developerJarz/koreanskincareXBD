@@ -29,8 +29,8 @@ export const seedDatabase = createServerFn({ method: "POST" })
     // ─── 1. Create Super Admin ───
     const hashedPassword = await bcryptjs.hash("admin123", 12);
     const admin = await User.create({
-      name: "Noors Admin",
-      email: "admin@noors.bd",
+      name: "Shajgoj Admin",
+      email: "admin@shajgoj.bd",
       password: hashedPassword,
       role: "super_admin",
       emailVerified: true,
@@ -415,7 +415,7 @@ export const seedDatabase = createServerFn({ method: "POST" })
               name: "Tasnia H.",
               city: "Sylhet",
               quote:
-                "Fast delivery, beautiful pieces. Noors is my go-to for gifting.",
+                "Fast delivery, beautiful pieces. Shajgoj is my go-to for gifting.",
             },
           ],
         },
@@ -436,11 +436,11 @@ export const seedDatabase = createServerFn({ method: "POST" })
 
     // ─── 5. Create Default Settings ───
     await Settings.create({
-      siteName: "Noors.bd",
+      siteName: "Shajgoj.bd",
       siteDescription:
-        "Premium accessories for the modern woman of Bangladesh",
-      contactEmail: "hello@noors.bd",
-      contactPhone: "+880 1XXX-XXXXXX",
+        "Premium beauty, jewelry & lifestyle accessories for Bangladesh",
+      contactEmail: "hello@shajgoj.bd",
+      contactPhone: "+880 1711-223344",
       address: "House 42, Road 11, Banani, Dhaka 1213",
       shipping: {
         freeShippingThreshold: 2000,
@@ -470,7 +470,7 @@ export const seedDatabase = createServerFn({ method: "POST" })
       message: "Database seeded successfully!",
       skipped: false,
       data: {
-        admin: { email: "admin@noors.bd", password: "admin123" },
+        admin: { email: "admin@shajgoj.bd", password: "admin123" },
         categories: categories.length,
         products: productData.length,
         homepageSections: 8,

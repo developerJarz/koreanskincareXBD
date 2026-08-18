@@ -35,13 +35,14 @@ export default function CartPage() {
     e.preventDefault();
     if (!couponInput.trim()) return;
 
-    if (couponInput.trim().toUpperCase() === "NOORS10") {
+    const code = couponInput.trim().toUpperCase();
+    if (code === "SHAJGOJ10" || code === "NOORS10") {
       const discount = Math.round(subtotal * 0.1);
-      setCoupon("NOORS10", discount);
-      toast.success("Coupon NOORS10 applied! (10% OFF)");
+      setCoupon("SHAJGOJ10", discount);
+      toast.success("Coupon SHAJGOJ10 applied! (10% OFF)");
       setCouponInput("");
     } else {
-      toast.error("Invalid coupon code. Try NOORS10");
+      toast.error("Invalid coupon code. Try SHAJGOJ10");
     }
   };
 
@@ -194,7 +195,7 @@ export default function CartPage() {
                   <form onSubmit={handleApplyCoupon} className="flex gap-2">
                     <input
                       type="text"
-                      placeholder="Promo Code (NOORS10)"
+                      placeholder="Promo Code (SHAJGOJ10)"
                       value={couponInput}
                       onChange={(e) => setCouponInput(e.target.value)}
                       className="flex-1 px-4 py-2.5 rounded-xl border border-border bg-background text-xs focus:outline-none focus:ring-2 focus:ring-primary/20"

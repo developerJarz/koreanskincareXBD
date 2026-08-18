@@ -176,7 +176,7 @@ function RegisterPage() {
   return (
     <section className="container-x py-16 lg:py-24 max-w-md">
       <div className="text-center mb-8">
-        <p className="text-xs tracking-[0.25em] uppercase text-primary font-bold">Join Noors.bd</p>
+        <p className="text-xs tracking-[0.25em] uppercase text-primary font-bold">Join Shajgoj.bd</p>
         <h1 className="font-serif text-4xl lg:text-5xl mt-2">Create Account</h1>
         <p className="text-xs text-muted-foreground mt-1">Enjoy exclusive member discounts & reward points</p>
       </div>

@@ -7,10 +7,10 @@ export function Footer() {
       <div className="container-x py-16 grid grid-cols-2 md:grid-cols-4 gap-y-10 gap-x-8 md:gap-10">
         <div className="col-span-2 md:col-span-1">
           <p className="font-serif text-2xl">
-            Noors<span className="text-primary">.bd</span>
+            Shajgoj<span className="text-primary">.bd</span>
           </p>
           <p className="mt-4 text-sm opacity-70 max-w-xs">
-            Premium accessories for the modern woman of Bangladesh — bags, jewelry, watches & more.
+            Premium beauty, fashion & lifestyle accessories for the modern woman of Bangladesh.
           </p>
           <div className="mt-5 flex gap-3">
             {[
@@ -87,7 +87,7 @@ export function Footer() {
           </ul>
         </div>
         <div>
-          <p className="text-sm font-medium mb-4">About Noors</p>
+          <p className="text-sm font-medium mb-4">About Shajgoj</p>
           <ul className="space-y-2.5 text-sm opacity-70">
             <li>
               <Link href="/about" className="hover:opacity-100 hover:text-primary transition">
@@ -96,7 +96,7 @@ export function Footer() {
             </li>
             <li>
               <Link href="/blog" className="hover:opacity-100 hover:text-primary transition">
-                Journal & Journal
+                Journal & Stories
               </Link>
             </li>
             <li>
@@ -109,7 +109,7 @@ export function Footer() {
       </div>
       <div className="border-t border-background/10">
         <div className="container-x py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs opacity-70">
-          <p>© {new Date().getFullYear()} Noors.bd — All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Shajgoj.bd — All rights reserved.</p>
           <p>
             Powered by{" "}
             <a

@@ -58,7 +58,7 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
     {
-      name: "noors-auth",
+      name: "shajgoj-auth",
       storage: createJSONStorage(() => {
         if (typeof window !== "undefined") {
           return localStorage;

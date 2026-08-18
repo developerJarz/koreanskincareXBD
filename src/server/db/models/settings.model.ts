@@ -5,16 +5,16 @@ export interface SettingsDocument extends Omit<ISiteSettings, "_id">, Document {
 
 const settingsSchema = new Schema<SettingsDocument>(
   {
-    siteName: { type: String, default: "Noors.bd" },
+    siteName: { type: String, default: "Shajgoj.bd" },
     siteDescription: {
       type: String,
       default:
-        "Premium accessories for the modern woman of Bangladesh",
+        "Premium beauty, jewelry & lifestyle accessories for Bangladesh",
     },
     logo: { type: String },
     favicon: { type: String },
-    contactEmail: { type: String, default: "hello@noors.bd" },
-    contactPhone: { type: String, default: "+880 1XXX-XXXXXX" },
+    contactEmail: { type: String, default: "hello@shajgoj.bd" },
+    contactPhone: { type: String, default: "+880 1711-223344" },
     address: {
       type: String,
       default: "House 42, Road 11, Banani, Dhaka 1213",
@@ -29,12 +29,12 @@ const settingsSchema = new Schema<SettingsDocument>(
     seo: {
       defaultTitle: {
         type: String,
-        default: "Noors.bd — Premium Modern Fashion for Women in Bangladesh",
+        default: "Shajgoj.bd — Premium Beauty & Lifestyle in Bangladesh",
       },
       defaultDescription: {
         type: String,
         default:
-          "Discover Noors.bd — a curated collection of premium, modern, and elegant fashion for the women of Bangladesh.",
+          "Discover Shajgoj.bd — a curated collection of premium beauty, jewelry, and modern lifestyle fashion for Bangladesh.",
       },
       ogImage: { type: String },
       googleAnalyticsId: { type: String },

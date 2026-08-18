@@ -11,14 +11,14 @@ export async function GET() {
     if (!settings) {
       // Create default settings if not exists
       settings = await Settings.create({
-        siteName: "Noors.bd",
-        siteDescription: "Premium accessories for the modern woman of Bangladesh",
-        contactEmail: "hello@noors.bd",
+        siteName: "Shajgoj.bd",
+        siteDescription: "Premium beauty, jewelry & lifestyle accessories for Bangladesh",
+        contactEmail: "hello@shajgoj.bd",
         contactPhone: "+880 1711-223344",
         address: "House 42, Road 11, Banani, Dhaka 1213",
         socialLinks: {
-          instagram: "https://instagram.com/noorsbd",
-          facebook: "https://facebook.com/noorsbd",
+          instagram: "https://instagram.com/shajgojbd",
+          facebook: "https://facebook.com/shajgojbd",
           whatsapp: "https://wa.me/8801711223344",
         },
         shipping: {

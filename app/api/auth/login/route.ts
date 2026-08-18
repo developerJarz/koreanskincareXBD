@@ -5,8 +5,13 @@ import bcryptjs from "bcryptjs";
 import type { AuthUser, UserRole } from "@/types";
 
 const DEMO_USERS: Record<string, { name: string; role: UserRole; pass: string }> = {
+  "superadmin@shajgoj.bd": { name: "Super Admin", role: "super_admin", pass: "admin123" },
+  "admin@shajgoj.bd": { name: "Shajgoj Admin", role: "admin", pass: "admin123" },
+  "staff@shajgoj.bd": { name: "Store Staff", role: "staff", pass: "staff123" },
+  "customer@shajgoj.bd": { name: "Nusrat Jahan", role: "customer", pass: "customer123" },
+  // Backward compatibility
   "superadmin@noors.bd": { name: "Super Admin", role: "super_admin", pass: "admin123" },
-  "admin@noors.bd": { name: "Noors Admin", role: "admin", pass: "admin123" },
+  "admin@noors.bd": { name: "Shajgoj Admin", role: "admin", pass: "admin123" },
   "staff@noors.bd": { name: "Store Staff", role: "staff", pass: "staff123" },
   "customer@noors.bd": { name: "Nusrat Jahan", role: "customer", pass: "customer123" },
 };
@@ -59,7 +64,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: "Invalid email or password. Try admin@noors.bd / admin123" },
+      { error: "Invalid email or password. Try admin@shajgoj.bd / admin123" },
       { status: 401 },
     );
   } catch (err) {

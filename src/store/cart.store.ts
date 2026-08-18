@@ -108,7 +108,7 @@ export const useCartStore = create<CartState>()(
       },
     }),
     {
-      name: "noors-cart",
+      name: "shajgoj-cart",
       storage: createJSONStorage(() => {
         // Safe localStorage access for SSR
         if (typeof window !== "undefined") {

@@ -5,7 +5,7 @@ import { use } from "react";
 const POSTS: Record<string, { title: string; body: string }> = {
   "the-rose-gold-story": {
     title: "The Rose Gold Story",
-    body: "A note on the signature tone behind Noors.bd's most-loved pieces and why it works across seasons.",
+    body: "A note on the signature tone behind Shajgoj.bd's most-loved pieces and why it works across seasons.",
   },
   "accessories-for-everyday-dressing": {
     title: "Accessories for Everyday Dressing",

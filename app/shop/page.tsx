@@ -3,9 +3,9 @@ import type { Metadata } from "next";
 import ShopPageClient from "./ShopPageClient";
 
 export const metadata: Metadata = {
-  title: "Shop All Accessories — Noors.bd",
+  title: "Shop All Beauty & Accessories — Shajgoj.bd",
   description:
-    "Shop the full Noors.bd collection — premium bags, rings, earrings, necklaces, watches and sunglasses.",
+    "Shop the full Shajgoj.bd collection — premium bags, rings, earrings, necklaces, watches and lifestyle accessories.",
 };
 
 export default async function ShopPage({

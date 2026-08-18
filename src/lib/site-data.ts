@@ -213,7 +213,7 @@ export const HOMEPAGE_TESTIMONIALS: HomepageTestimonial[] = [
   {
     name: "Tasnia H.",
     city: "Sylhet",
-    quote: "Fast delivery, beautiful pieces. Noors is my go-to for gifting.",
+    quote: "Fast delivery, beautiful pieces. Shajgoj is my go-to for gifting.",
   },
 ];
 
@@ -313,7 +313,7 @@ export const HOMEPAGE_SETTINGS = {
     title: "Loved by our customers",
   },
   promise: {
-    eyebrow: "The Noors Promise",
+    eyebrow: "The Shajgoj Promise",
     title: ["Small details,", "big statements."],
     description:
       "Every piece is handpicked from premium makers, so you carry pieces that feel as good as they look.",

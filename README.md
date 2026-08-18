@@ -1,22 +1,22 @@
-# Noors.bd — Premium Luxury Accessories E-Commerce Platform
+# Shajgoj.bd — Enterprise Bangladeshi E-Commerce Management System & Storefront
 
-A production-ready e-commerce platform for women's luxury accessories (bags, rings, earrings, necklaces, watches, sunglasses) tailored for Bangladesh with Cash on Delivery, bKash, and Nagad.
+A production-ready enterprise e-commerce platform and comprehensive Bangladeshi management system tailored with Cash on Delivery, bKash, Nagad, SSLCommerz, Pathao, RedX, Steadfast, Multi-Warehouse Inventory, and Advanced Business Intelligence.
 
 ## ✨ Features
 - **Modern Luxury E-Commerce**: Next.js 15, React 19, TypeScript, Tailwind CSS, Lucide icons.
-- **Redesigned Single Product Page**: Clean 2-column luxury buying stack, interactive image gallery, readable price typography, live stock status, and authentic trust guarantees.
-- **Admin Operations Hub (`/admin`)**:
-  - Store Customization (Store title, hotline, email, delivery rates inside/outside Dhaka, social channels).
-  - Product Catalog Management (Add, Edit, Delete with category & badges).
-  - Category Management (Add, Edit, Delete).
-  - Order Fulfillment & Status Tracker (Pending, Confirmed, Shipped, Delivered).
-  - Promo Discount Coupon Manager.
-  - User Role Manager (Super Admin, Admin, Staff, Customer).
-  - Sales Analytics & Payment Breakdown (COD, bKash, Nagad).
-- **Authentication & Database**:
-  - MongoDB connection with Mongoose models.
-  - One-Click Test Role logins on `/auth/login` (Super Admin, Admin, Staff, Customer).
-  - Live Database Seed API (`/api/seed?force=true`).
+- **Enterprise Admin Operations Hub (`/admin`)**:
+  - Advanced Sales Analytics & Business Intelligence (Real-time revenue, profit margin, CAC, LTV, Bangladesh district sales).
+  - Order Fulfillment & Bangladeshi Courier Integrations (Pathao, Steadfast, RedX, Paperfly, eCourier).
+  - Payment Gateways & Reconciliation (bKash, Nagad, Rocket, SSLCommerz, COD).
+  - Customer CRM & RFM Segmentation (VIP, At Risk, Loyal, WhatsApp / SMS blast integration).
+  - Multi-Warehouse & Inventory Management (Dhaka Central, Banani Showroom, Chattogram Hub).
+  - Multi-Vendor Ready Marketplace Module.
+  - Return, Refund & Exchange Management.
+  - Coupon & Seasonal Campaign Engine (Eid-ul-Fitr, Ramadan, Pohela Boishakh).
+  - AI Studio (Content Generator, SEO Meta Optimizer, Image Enhancer, Sales Recommendations).
+  - Security Center (2FA, Active Sessions, IP Blacklist, Audit Logs).
+  - Financial Dashboard, P&L, Expense Tracking & Report Export Center (CSV/Excel/PDF).
+  - Global Search (Ctrl+K), Notification Center & Seasonal Theme Switcher.
 
 ## 🚀 Getting Started
 
@@ -36,7 +36,7 @@ npm start
 
 | Role | Email | Password |
 | :--- | :--- | :--- |
-| **Super Admin** | `superadmin@noors.bd` | `admin123` |
-| **Admin** | `admin@noors.bd` | `admin123` |
-| **Staff (Moderator)** | `staff@noors.bd` | `staff123` |
-| **Customer** | `customer@noors.bd` | `customer123` |
+| **Super Admin** | `superadmin@shajgoj.bd` | `admin123` |
+| **Admin** | `admin@shajgoj.bd` | `admin123` |
+| **Staff (Moderator)** | `staff@shajgoj.bd` | `staff123` |
+| **Customer** | `customer@shajgoj.bd` | `customer123` |

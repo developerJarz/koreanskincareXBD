@@ -52,7 +52,7 @@ function AboutPage() {
             <span className="italic text-primary">Made in Bangladesh.</span>
           </h1>
           <p className="mt-6 text-muted-foreground leading-relaxed">
-            Noors.bd was born in Dhaka out of a simple frustration — that the modern women of
+            Shajgoj.bd was born in Dhaka out of a simple frustration — that the modern women of
             Bangladesh deserved better than the same tired accessories, sold the same tired way.
           </p>
           <p className="mt-4 text-muted-foreground leading-relaxed">
@@ -70,7 +70,7 @@ function AboutPage() {
           <div className="absolute -inset-4 bg-blush blur-3xl opacity-40 rounded-3xl" />
           <img
             src={getImageSrc(hero)}
-            alt="Noors.bd accessories"
+            alt="Shajgoj.bd accessories"
             className="relative rounded-3xl w-full object-cover aspect-[4/5]"
           />
         </div>
@@ -146,7 +146,7 @@ function ContactPage() {
           back to you quickly.
         </p>
         <div className="mt-8 space-y-3 text-sm">
-          <p>Email: hello@noors.bd</p>
+          <p>Email: hello@shajgoj.bd</p>
           <p>Phone: +880 1711-223344</p>
           <p>Banani, Dhaka, Bangladesh</p>
         </div>

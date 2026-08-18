@@ -29,10 +29,10 @@ async function handleSeed(request: NextRequest) {
         usersCount: existingUsers,
         productsCount: existingProducts,
         credentials: {
-          superAdmin: { email: "superadmin@noors.bd", password: "admin123", role: "super_admin" },
-          admin: { email: "admin@noors.bd", password: "admin123", role: "admin" },
-          staff: { email: "staff@noors.bd", password: "staff123", role: "staff" },
-          customer: { email: "customer@noors.bd", password: "customer123", role: "customer" },
+          superAdmin: { email: "superadmin@shajgoj.bd", password: "admin123", role: "super_admin" },
+          admin: { email: "admin@shajgoj.bd", password: "admin123", role: "admin" },
+          staff: { email: "staff@shajgoj.bd", password: "staff123", role: "staff" },
+          customer: { email: "customer@shajgoj.bd", password: "customer123", role: "customer" },
         },
       });
     }
@@ -45,8 +45,8 @@ async function handleSeed(request: NextRequest) {
     await User.deleteMany({});
     const seededUsers = await User.insertMany([
       {
-        name: "Noors Super Admin",
-        email: "superadmin@noors.bd",
+        name: "Shajgoj Super Admin",
+        email: "superadmin@shajgoj.bd",
         password: adminPasswordHash,
         role: "super_admin",
         emailVerified: true,
@@ -57,8 +57,8 @@ async function handleSeed(request: NextRequest) {
         rewardPoints: 1200,
       },
       {
-        name: "Noors Store Admin",
-        email: "admin@noors.bd",
+        name: "Shajgoj Store Admin",
+        email: "admin@shajgoj.bd",
         password: adminPasswordHash,
         role: "admin",
         emailVerified: true,
@@ -70,7 +70,7 @@ async function handleSeed(request: NextRequest) {
       },
       {
         name: "Store Staff (Moderator)",
-        email: "staff@noors.bd",
+        email: "staff@shajgoj.bd",
         password: staffPasswordHash,
         role: "staff",
         emailVerified: true,
@@ -82,7 +82,7 @@ async function handleSeed(request: NextRequest) {
       },
       {
         name: "Nusrat Jahan",
-        email: "customer@noors.bd",
+        email: "customer@shajgoj.bd",
         password: customerPasswordHash,
         role: "customer",
         emailVerified: true,
@@ -112,7 +112,7 @@ async function handleSeed(request: NextRequest) {
       CATEGORIES.map((c, i) => ({
         name: c.name,
         slug: c.slug,
-        description: `Premium ${c.name.toLowerCase()} handcrafted for luxury and elegance at Noors.bd`,
+        description: `Premium ${c.name.toLowerCase()} handcrafted for luxury and elegance at Shajgoj.bd`,
         image: typeof c.img === "string" ? c.img : (c.img as any)?.src || "",
         sortOrder: i,
         isActive: true,
@@ -177,7 +177,7 @@ async function handleSeed(request: NextRequest) {
         startsAt: new Date(),
       },
       {
-        code: "NOORSVIP",
+        code: "SHAJGOJVIP",
         type: "percentage",
         value: 20,
         minOrderAmount: 3000,
@@ -192,14 +192,14 @@ async function handleSeed(request: NextRequest) {
     // 5. Seed Store Settings
     await Settings.deleteMany({});
     await Settings.create({
-      siteName: "Noors.bd",
-      siteDescription: "Premium accessories for the modern woman of Bangladesh",
-      contactEmail: "hello@noors.bd",
+      siteName: "Shajgoj.bd",
+      siteDescription: "Premium beauty, jewelry & accessories for modern Bangladeshi lifestyles",
+      contactEmail: "hello@shajgoj.bd",
       contactPhone: "+880 1711-223344",
       address: "House 42, Road 11, Banani, Dhaka 1213, Bangladesh",
       socialLinks: {
-        instagram: "https://instagram.com/noorsbd",
-        facebook: "https://facebook.com/noorsbd",
+        instagram: "https://instagram.com/shajgojbd",
+        facebook: "https://facebook.com/shajgojbd",
         whatsapp: "https://wa.me/8801711223344",
       },
       shipping: {
@@ -218,7 +218,7 @@ async function handleSeed(request: NextRequest) {
 
     // 6. Seed Realistic Sample Orders for Analytics & Testing
     await Order.deleteMany({});
-    const customerUser = seededUsers.find((u) => u.email === "customer@noors.bd") || seededUsers[3];
+    const customerUser = seededUsers.find((u) => u.email === "customer@shajgoj.bd") || seededUsers[3];
     await Order.insertMany([
       {
         orderNumber: "ORD-2026-8801",
@@ -333,10 +333,10 @@ async function handleSeed(request: NextRequest) {
         orders: 3,
       },
       credentials: {
-        superAdmin: { email: "superadmin@noors.bd", password: "admin123", role: "super_admin" },
-        admin: { email: "admin@noors.bd", password: "admin123", role: "admin" },
-        staff: { email: "staff@noors.bd", password: "staff123", role: "staff" },
-        customer: { email: "customer@noors.bd", password: "customer123", role: "customer" },
+        superAdmin: { email: "superadmin@shajgoj.bd", password: "admin123", role: "super_admin" },
+        admin: { email: "admin@shajgoj.bd", password: "admin123", role: "admin" },
+        staff: { email: "staff@shajgoj.bd", password: "staff123", role: "staff" },
+        customer: { email: "customer@shajgoj.bd", password: "customer123", role: "customer" },
       },
     });
   } catch (err: any) {

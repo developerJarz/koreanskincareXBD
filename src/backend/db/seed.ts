@@ -26,15 +26,15 @@ export const seedDatabase = createServerFn({ method: "POST" })
     await User.create([
       {
         name: "Super Admin",
-        email: "superadmin@noors.bd",
+        email: "superadmin@shajgoj.bd",
         password: defaultPasswordHash,
         role: "super_admin",
         emailVerified: true,
         provider: "credentials",
       },
       {
-        name: "Noors Admin",
-        email: "admin@noors.bd",
+        name: "Shajgoj Admin",
+        email: "admin@shajgoj.bd",
         password: defaultPasswordHash,
         role: "admin",
         emailVerified: true,
@@ -42,7 +42,7 @@ export const seedDatabase = createServerFn({ method: "POST" })
       },
       {
         name: "Store Staff",
-        email: "staff@noors.bd",
+        email: "staff@shajgoj.bd",
         password: staffPasswordHash,
         role: "staff",
         emailVerified: true,
@@ -50,7 +50,7 @@ export const seedDatabase = createServerFn({ method: "POST" })
       },
       {
         name: "Nusrat Jahan",
-        email: "customer@noors.bd",
+        email: "customer@shajgoj.bd",
         password: customerPasswordHash,
         role: "customer",
         emailVerified: true,
@@ -436,7 +436,7 @@ export const seedDatabase = createServerFn({ method: "POST" })
               name: "Tasnia H.",
               city: "Sylhet",
               quote:
-                "Fast delivery, beautiful pieces. Noors is my go-to for gifting.",
+                "Fast delivery, beautiful pieces. Shajgoj is my go-to for gifting.",
             },
           ],
         },
@@ -457,11 +457,11 @@ export const seedDatabase = createServerFn({ method: "POST" })
 
     // ─── 5. Create Default Settings ───
     await Settings.create({
-      siteName: "Noors.bd",
+      siteName: "Shajgoj.bd",
       siteDescription:
-        "Premium accessories for the modern woman of Bangladesh",
-      contactEmail: "hello@noors.bd",
-      contactPhone: "+880 1XXX-XXXXXX",
+        "Premium beauty, jewelry & lifestyle accessories for Bangladesh",
+      contactEmail: "hello@shajgoj.bd",
+      contactPhone: "+880 1711-223344",
       address: "House 42, Road 11, Banani, Dhaka 1213",
       shipping: {
         freeShippingThreshold: 2000,
@@ -491,10 +491,10 @@ export const seedDatabase = createServerFn({ method: "POST" })
       message: "Database seeded successfully!",
       skipped: false,
       roles: {
-        super_admin: { email: "superadmin@noors.bd", password: "admin123" },
-        admin: { email: "admin@noors.bd", password: "admin123" },
-        staff: { email: "staff@noors.bd", password: "staff123" },
-        customer: { email: "customer@noors.bd", password: "customer123" },
+        super_admin: { email: "superadmin@shajgoj.bd", password: "admin123" },
+        admin: { email: "admin@shajgoj.bd", password: "admin123" },
+        staff: { email: "staff@shajgoj.bd", password: "staff123" },
+        customer: { email: "customer@shajgoj.bd", password: "customer123" },
       },
     };
   });

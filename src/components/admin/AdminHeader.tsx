@@ -202,7 +202,9 @@ export function AdminHeader({
             <div className="absolute right-0 mt-2 w-52 bg-card border border-border rounded-2xl p-1.5 shadow-xl z-50 animate-in fade-in zoom-in-95">
               <div className="px-3 py-2 border-b border-border">
                 <p className="text-xs font-bold text-foreground">{user?.name || "Admin User"}</p>
-                <p className="text-[11px] text-muted-foreground truncate">{user?.email || "admin@shajgoj.bd"}</p>
+                <p className="text-[11px] text-muted-foreground truncate">
+                  {user?.email || "admin@shajgoj.bd"}
+                </p>
               </div>
               <button
                 onClick={() => {

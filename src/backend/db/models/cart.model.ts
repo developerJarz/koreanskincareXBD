@@ -15,7 +15,7 @@ const cartItemSchema = new Schema<ICartItem>(
     price: { type: Number, required: true, min: 0 },
     addedAt: { type: Date, default: Date.now },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const cartSchema = new Schema<CartDocument>(
@@ -38,7 +38,7 @@ const cartSchema = new Schema<CartDocument>(
         return ret;
       },
     },
-  }
+  },
 );
 
 cartSchema.index({ user: 1 });

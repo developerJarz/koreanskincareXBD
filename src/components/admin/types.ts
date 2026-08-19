@@ -116,7 +116,8 @@ export type ActivityLog = {
 
 export type ExpenseItem = {
   id: string;
-  category: "marketing_ads" | "packaging" | "salaries" | "logistics_overhead" | "software_cloud" | "other";
+  category:
+    "marketing_ads" | "packaging" | "salaries" | "logistics_overhead" | "software_cloud" | "other";
   title: string;
   amount: number;
   date: string;

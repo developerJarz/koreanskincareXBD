@@ -33,7 +33,7 @@ const blogSchema = new Schema<BlogDocument>(
         return ret;
       },
     },
-  }
+  },
 );
 
 blogSchema.index({ slug: 1 }, { unique: true });

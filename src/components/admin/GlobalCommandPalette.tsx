@@ -60,7 +60,12 @@ export function GlobalCommandPalette({
 
   if (!isOpen) return null;
 
-  const quickNavItems: Array<{ tab: AdminTab; label: string; group: string; icon: React.ElementType }> = [
+  const quickNavItems: Array<{
+    tab: AdminTab;
+    label: string;
+    group: string;
+    icon: React.ElementType;
+  }> = [
     { tab: "overview", label: "Executive Dashboard", group: "Pages", icon: BarChart3 },
     { tab: "analytics", label: "Sales Analytics & Conversion BI", group: "Pages", icon: BarChart3 },
     { tab: "orders", label: "Orders Pipeline & POS Invoicing", group: "Pages", icon: ShoppingBag },
@@ -68,23 +73,39 @@ export function GlobalCommandPalette({
     { tab: "inventory", label: "Multi-Warehouse & Stock Levels", group: "Pages", icon: Boxes },
     { tab: "customers", label: "Customer CRM & RFM Segments", group: "Pages", icon: Users },
     { tab: "returns", label: "Returns & Refund Requests", group: "Pages", icon: RotateCcw },
-    { tab: "couriers_payments", label: "Bangladeshi Couriers & Gateways", group: "Pages", icon: Truck },
+    {
+      tab: "couriers_payments",
+      label: "Bangladeshi Couriers & Gateways",
+      group: "Pages",
+      icon: Truck,
+    },
     { tab: "marketing", label: "Campaigns (Eid, Ramadan) & SMS", group: "Pages", icon: Flame },
     { tab: "ai_studio", label: "AI Copywriter & Image Enhancer", group: "Pages", icon: Sparkles },
-    { tab: "finance", label: "Profit & Loss (P&L) & Report Center", group: "Pages", icon: DollarSign },
-    { tab: "security_rbac", label: "Role Permissions & Security Center", group: "Pages", icon: Shield },
+    {
+      tab: "finance",
+      label: "Profit & Loss (P&L) & Report Center",
+      group: "Pages",
+      icon: DollarSign,
+    },
+    {
+      tab: "security_rbac",
+      label: "Role Permissions & Security Center",
+      group: "Pages",
+      icon: Shield,
+    },
   ];
 
   const filteredNav = quickNavItems.filter((item) =>
-    item.label.toLowerCase().includes(query.toLowerCase())
+    item.label.toLowerCase().includes(query.toLowerCase()),
   );
 
   const matchedOrders = orders
     .filter(
       (o) =>
         (o.orderNumber && o.orderNumber.toLowerCase().includes(query.toLowerCase())) ||
-        (o.shippingAddress?.fullName && o.shippingAddress.fullName.toLowerCase().includes(query.toLowerCase())) ||
-        (o.shippingAddress?.phone && o.shippingAddress.phone.includes(query))
+        (o.shippingAddress?.fullName &&
+          o.shippingAddress.fullName.toLowerCase().includes(query.toLowerCase())) ||
+        (o.shippingAddress?.phone && o.shippingAddress.phone.includes(query)),
     )
     .slice(0, 4);
 
@@ -168,7 +189,8 @@ export function GlobalCommandPalette({
                     <div>
                       <div className="font-semibold text-primary">{ord.orderNumber}</div>
                       <div className="text-[11px] text-muted-foreground">
-                        {ord.shippingAddress?.fullName} · {ord.shippingAddress?.phone} · ৳{ord.total?.toLocaleString()}
+                        {ord.shippingAddress?.fullName} · {ord.shippingAddress?.phone} · ৳
+                        {ord.total?.toLocaleString()}
                       </div>
                     </div>
                     <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-secondary border border-border">
@@ -209,26 +231,33 @@ export function GlobalCommandPalette({
             </div>
           )}
 
-          {filteredNav.length === 0 && matchedOrders.length === 0 && matchedProducts.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              <Search className="w-8 h-8 mx-auto mb-2 opacity-30" />
-              <p>No results found for "{query}"</p>
-            </div>
-          )}
+          {filteredNav.length === 0 &&
+            matchedOrders.length === 0 &&
+            matchedProducts.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                <Search className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                <p>No results found for "{query}"</p>
+              </div>
+            )}
         </div>
 
         {/* Footer Shortcut Hints */}
         <div className="px-4 py-2.5 bg-secondary/40 border-t border-border flex items-center justify-between text-[11px] text-muted-foreground">
           <div className="flex gap-3">
             <span>
-              <kbd className="font-mono bg-card px-1.5 py-0.5 border border-border rounded">↑↓</kbd> to navigate
+              <kbd className="font-mono bg-card px-1.5 py-0.5 border border-border rounded">↑↓</kbd>{" "}
+              to navigate
             </span>
             <span>
-              <kbd className="font-mono bg-card px-1.5 py-0.5 border border-border rounded">Enter</kbd> to select
+              <kbd className="font-mono bg-card px-1.5 py-0.5 border border-border rounded">
+                Enter
+              </kbd>{" "}
+              to select
             </span>
           </div>
           <span>
-            <kbd className="font-mono bg-card px-1.5 py-0.5 border border-border rounded">Esc</kbd> to close
+            <kbd className="font-mono bg-card px-1.5 py-0.5 border border-border rounded">Esc</kbd>{" "}
+            to close
           </span>
         </div>
       </div>

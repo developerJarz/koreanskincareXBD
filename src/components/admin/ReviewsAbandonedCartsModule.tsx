@@ -18,7 +18,9 @@ import { toast } from "sonner";
 import type { AbandonedCart } from "./types";
 
 export function ReviewsAbandonedCartsModule() {
-  const [activeSubTab, setActiveSubTab] = useState<"reviews" | "abandoned" | "wishlist">("abandoned");
+  const [activeSubTab, setActiveSubTab] = useState<"reviews" | "abandoned" | "wishlist">(
+    "abandoned",
+  );
 
   const [reviews, setReviews] = useState([
     {
@@ -26,7 +28,8 @@ export function ReviewsAbandonedCartsModule() {
       customerName: "Mehzabin A.",
       productName: "Blush Mini Crossbody Bag",
       rating: 5,
-      comment: "Ordered for my sister's birthday and she was thrilled! Packaging felt like an international luxury house.",
+      comment:
+        "Ordered for my sister's birthday and she was thrilled! Packaging felt like an international luxury house.",
       status: "approved",
       date: "3 days ago",
       adminReply: "Thank you Mehzabin! We are delighted she loved the signature packaging. ✨",
@@ -36,7 +39,8 @@ export function ReviewsAbandonedCartsModule() {
       customerName: "Nusrat K.",
       productName: "Rosé Crystal Band Ring",
       rating: 5,
-      comment: "Superb finishing and fast COD delivery in Chattogram. The rider allowed me to verify before payment.",
+      comment:
+        "Superb finishing and fast COD delivery in Chattogram. The rider allowed me to verify before payment.",
       status: "approved",
       date: "1 week ago",
       adminReply: "",
@@ -84,10 +88,12 @@ export function ReviewsAbandonedCartsModule() {
       prev.map((c) =>
         c.id === cart.id
           ? { ...c, recoveryStatus: channel === "whatsapp" ? "whatsapp_sent" : "sms_sent" }
-          : c
-      )
+          : c,
+      ),
     );
-    toast.success(`10% OFF Recovery offer sent to ${cart.customerName} via ${channel.toUpperCase()}!`);
+    toast.success(
+      `10% OFF Recovery offer sent to ${cart.customerName} via ${channel.toUpperCase()}!`,
+    );
   };
 
   return (
@@ -109,7 +115,9 @@ export function ReviewsAbandonedCartsModule() {
           <button
             onClick={() => setActiveSubTab("abandoned")}
             className={`px-3 py-1.5 rounded-xl font-bold transition ${
-              activeSubTab === "abandoned" ? "bg-card text-primary shadow-xs" : "text-muted-foreground"
+              activeSubTab === "abandoned"
+                ? "bg-card text-primary shadow-xs"
+                : "text-muted-foreground"
             }`}
           >
             Abandoned Carts ({abandonedCarts.length})
@@ -117,7 +125,9 @@ export function ReviewsAbandonedCartsModule() {
           <button
             onClick={() => setActiveSubTab("reviews")}
             className={`px-3 py-1.5 rounded-xl font-bold transition ${
-              activeSubTab === "reviews" ? "bg-card text-primary shadow-xs" : "text-muted-foreground"
+              activeSubTab === "reviews"
+                ? "bg-card text-primary shadow-xs"
+                : "text-muted-foreground"
             }`}
           >
             Reviews ({reviews.length})
@@ -125,7 +135,9 @@ export function ReviewsAbandonedCartsModule() {
           <button
             onClick={() => setActiveSubTab("wishlist")}
             className={`px-3 py-1.5 rounded-xl font-bold transition ${
-              activeSubTab === "wishlist" ? "bg-card text-primary shadow-xs" : "text-muted-foreground"
+              activeSubTab === "wishlist"
+                ? "bg-card text-primary shadow-xs"
+                : "text-muted-foreground"
             }`}
           >
             Wishlist Leaderboard
@@ -152,13 +164,19 @@ export function ReviewsAbandonedCartsModule() {
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-foreground">{cart.customerName}</span>
-                    <span className="text-[11px] text-muted-foreground">({cart.customerPhone})</span>
-                    <span className="text-[10px] text-muted-foreground">· Abandoned {cart.abandonedAt}</span>
+                    <span className="text-[11px] text-muted-foreground">
+                      ({cart.customerPhone})
+                    </span>
+                    <span className="text-[10px] text-muted-foreground">
+                      · Abandoned {cart.abandonedAt}
+                    </span>
                   </div>
                   <p className="text-muted-foreground">
                     Items: {cart.items.map((it) => `${it.name} (x${it.quantity})`).join(", ")}
                   </p>
-                  <div className="text-primary font-bold">Cart Value: ৳{cart.total.toLocaleString()}</div>
+                  <div className="text-primary font-bold">
+                    Cart Value: ৳{cart.total.toLocaleString()}
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -192,11 +210,16 @@ export function ReviewsAbandonedCartsModule() {
           <h3 className="font-serif font-bold text-lg">Product Reviews & Ratings</h3>
           <div className="space-y-3">
             {reviews.map((rev) => (
-              <div key={rev.id} className="p-4 rounded-2xl bg-secondary/40 border border-border space-y-2">
+              <div
+                key={rev.id}
+                className="p-4 rounded-2xl bg-secondary/40 border border-border space-y-2"
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-foreground">{rev.customerName}</span>
-                    <span className="text-[10px] text-muted-foreground">on <strong>{rev.productName}</strong></span>
+                    <span className="text-[10px] text-muted-foreground">
+                      on <strong>{rev.productName}</strong>
+                    </span>
                     <div className="flex text-amber-500">
                       {Array.from({ length: rev.rating }).map((_, i) => (
                         <Star key={i} className="w-3 h-3 fill-amber-500" />
@@ -208,7 +231,8 @@ export function ReviewsAbandonedCartsModule() {
                 <p className="text-muted-foreground leading-relaxed italic">"{rev.comment}"</p>
                 {rev.adminReply && (
                   <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20 text-foreground text-[11px]">
-                    <strong className="text-primary">Official Shajgoj Reply:</strong> {rev.adminReply}
+                    <strong className="text-primary">Official Shajgoj Reply:</strong>{" "}
+                    {rev.adminReply}
                   </div>
                 )}
               </div>
@@ -241,7 +265,9 @@ export function ReviewsAbandonedCartsModule() {
                   </span>
                   <div>
                     <div className="font-bold text-foreground">{w.name}</div>
-                    <div className="text-[11px] text-muted-foreground">৳{w.price.toLocaleString()}</div>
+                    <div className="text-[11px] text-muted-foreground">
+                      ৳{w.price.toLocaleString()}
+                    </div>
                   </div>
                 </div>
                 <span className="font-bold text-rose-600 flex items-center gap-1">

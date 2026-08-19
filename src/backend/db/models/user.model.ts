@@ -44,7 +44,7 @@ const userSchema = new Schema<UserDocument>(
         return ret;
       },
     },
-  }
+  },
 );
 
 userSchema.index({ email: 1 }, { unique: true });

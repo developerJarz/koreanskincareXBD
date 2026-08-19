@@ -26,10 +26,7 @@ interface CustomerCrmModuleProps {
   onToggleUserStatus: (userId: string, currentStatus: boolean) => Promise<void>;
 }
 
-export function CustomerCrmModule({
-  users,
-  onToggleUserStatus,
-}: CustomerCrmModuleProps) {
+export function CustomerCrmModule({ users, onToggleUserStatus }: CustomerCrmModuleProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [segmentFilter, setSegmentFilter] = useState<string>("all");
   const [activeCustomer, setActiveCustomer] = useState<AdminUserRow | null>(null);
@@ -40,10 +37,17 @@ export function CustomerCrmModule({
   const getCustomerSegment = (user: AdminUserRow) => {
     const points = user.rewardPoints || 0;
     const balance = user.walletBalance || 0;
-    if (points > 1000 || balance > 5000) return { label: "VIP Champion", color: "bg-purple-500/15 text-purple-600 border-purple-300" };
-    if (points > 300) return { label: "Loyal Buyer", color: "bg-emerald-500/15 text-emerald-600 border-emerald-300" };
-    if (points > 100) return { label: "Growing Shopper", color: "bg-blue-500/15 text-blue-600 border-blue-300" };
-    if (!user.isActive) return { label: "At Risk / Inactive", color: "bg-rose-500/15 text-rose-600 border-rose-300" };
+    if (points > 1000 || balance > 5000)
+      return { label: "VIP Champion", color: "bg-purple-500/15 text-purple-600 border-purple-300" };
+    if (points > 300)
+      return {
+        label: "Loyal Buyer",
+        color: "bg-emerald-500/15 text-emerald-600 border-emerald-300",
+      };
+    if (points > 100)
+      return { label: "Growing Shopper", color: "bg-blue-500/15 text-blue-600 border-blue-300" };
+    if (!user.isActive)
+      return { label: "At Risk / Inactive", color: "bg-rose-500/15 text-rose-600 border-rose-300" };
     return { label: "New Customer", color: "bg-secondary text-muted-foreground border-border" };
   };
 
@@ -52,8 +56,9 @@ export function CustomerCrmModule({
       !searchQuery ||
       u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       u.email.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    if (segmentFilter === "vip") return matchesSearch && (u.rewardPoints > 1000 || u.walletBalance > 5000);
+
+    if (segmentFilter === "vip")
+      return matchesSearch && (u.rewardPoints > 1000 || u.walletBalance > 5000);
     if (segmentFilter === "loyal") return matchesSearch && u.rewardPoints > 300;
     if (segmentFilter === "inactive") return matchesSearch && !u.isActive;
     return matchesSearch;
@@ -82,7 +87,9 @@ export function CustomerCrmModule({
             <button
               onClick={() => setSegmentFilter("all")}
               className={`px-3 py-1.5 rounded-xl font-semibold transition ${
-                segmentFilter === "all" ? "bg-card text-foreground shadow-xs" : "text-muted-foreground"
+                segmentFilter === "all"
+                  ? "bg-card text-foreground shadow-xs"
+                  : "text-muted-foreground"
               }`}
             >
               All ({users.length})
@@ -90,7 +97,9 @@ export function CustomerCrmModule({
             <button
               onClick={() => setSegmentFilter("vip")}
               className={`px-3 py-1.5 rounded-xl font-semibold transition ${
-                segmentFilter === "vip" ? "bg-card text-purple-600 shadow-xs" : "text-muted-foreground"
+                segmentFilter === "vip"
+                  ? "bg-card text-purple-600 shadow-xs"
+                  : "text-muted-foreground"
               }`}
             >
               VIP
@@ -98,7 +107,9 @@ export function CustomerCrmModule({
             <button
               onClick={() => setSegmentFilter("loyal")}
               className={`px-3 py-1.5 rounded-xl font-semibold transition ${
-                segmentFilter === "loyal" ? "bg-card text-emerald-600 shadow-xs" : "text-muted-foreground"
+                segmentFilter === "loyal"
+                  ? "bg-card text-emerald-600 shadow-xs"
+                  : "text-muted-foreground"
               }`}
             >
               Loyal
@@ -106,7 +117,9 @@ export function CustomerCrmModule({
             <button
               onClick={() => setSegmentFilter("inactive")}
               className={`px-3 py-1.5 rounded-xl font-semibold transition ${
-                segmentFilter === "inactive" ? "bg-card text-rose-600 shadow-xs" : "text-muted-foreground"
+                segmentFilter === "inactive"
+                  ? "bg-card text-rose-600 shadow-xs"
+                  : "text-muted-foreground"
               }`}
             >
               At Risk
@@ -146,22 +159,32 @@ export function CustomerCrmModule({
                       <h4 className="font-bold text-xs text-foreground group-hover:text-primary transition-colors">
                         {user.name}
                       </h4>
-                      <p className="text-[11px] text-muted-foreground truncate max-w-[140px]">{user.email}</p>
+                      <p className="text-[11px] text-muted-foreground truncate max-w-[140px]">
+                        {user.email}
+                      </p>
                     </div>
                   </div>
-                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${segment.color}`}>
+                  <span
+                    className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${segment.color}`}
+                  >
                     {segment.label}
                   </span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 text-xs pt-1">
                   <div className="p-2.5 rounded-2xl bg-secondary/50 border border-border">
-                    <span className="text-[10px] uppercase font-bold text-muted-foreground">Reward Points</span>
+                    <span className="text-[10px] uppercase font-bold text-muted-foreground">
+                      Reward Points
+                    </span>
                     <p className="font-bold text-primary text-sm mt-0.5">{user.rewardPoints} pts</p>
                   </div>
                   <div className="p-2.5 rounded-2xl bg-secondary/50 border border-border">
-                    <span className="text-[10px] uppercase font-bold text-muted-foreground">Wallet Balance</span>
-                    <p className="font-bold text-emerald-600 text-sm mt-0.5">৳{user.walletBalance.toLocaleString()}</p>
+                    <span className="text-[10px] uppercase font-bold text-muted-foreground">
+                      Wallet Balance
+                    </span>
+                    <p className="font-bold text-emerald-600 text-sm mt-0.5">
+                      ৳{user.walletBalance.toLocaleString()}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -184,7 +207,9 @@ export function CustomerCrmModule({
                 <button
                   onClick={() => {
                     setSmsModalCustomer(user);
-                    setSmsText(`Hello ${user.name}, enjoy exclusive 15% OFF on our newest Eid collection at Shajgoj.bd! Use code: SHAJGOJVIP`);
+                    setSmsText(
+                      `Hello ${user.name}, enjoy exclusive 15% OFF on our newest Eid collection at Shajgoj.bd! Use code: SHAJGOJVIP`,
+                    );
                   }}
                   className="py-1.5 px-2.5 rounded-xl border border-border hover:bg-secondary text-[11px] font-semibold text-foreground transition"
                   title="Send Quick SMS"
@@ -230,35 +255,59 @@ export function CustomerCrmModule({
 
               {/* Status & Segment */}
               <div className="space-y-3">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Account Overview</h4>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  Account Overview
+                </h4>
                 <div className="grid grid-cols-2 gap-3 text-xs">
                   <div className="p-3 rounded-2xl bg-secondary/50 border border-border">
-                    <span className="text-[10px] text-muted-foreground uppercase font-bold">Role</span>
-                    <p className="font-bold capitalize mt-0.5">{activeCustomer.role.replace("_", " ")}</p>
+                    <span className="text-[10px] text-muted-foreground uppercase font-bold">
+                      Role
+                    </span>
+                    <p className="font-bold capitalize mt-0.5">
+                      {activeCustomer.role.replace("_", " ")}
+                    </p>
                   </div>
                   <div className="p-3 rounded-2xl bg-secondary/50 border border-border">
-                    <span className="text-[10px] text-muted-foreground uppercase font-bold">Status</span>
-                    <p className={`font-bold mt-0.5 ${activeCustomer.isActive ? "text-emerald-600" : "text-rose-600"}`}>
+                    <span className="text-[10px] text-muted-foreground uppercase font-bold">
+                      Status
+                    </span>
+                    <p
+                      className={`font-bold mt-0.5 ${activeCustomer.isActive ? "text-emerald-600" : "text-rose-600"}`}
+                    >
                       {activeCustomer.isActive ? "Active Account" : "Suspended"}
                     </p>
                   </div>
                   <div className="p-3 rounded-2xl bg-secondary/50 border border-border">
-                    <span className="text-[10px] text-muted-foreground uppercase font-bold">Reward Points</span>
-                    <p className="font-bold text-primary mt-0.5">{activeCustomer.rewardPoints} pts</p>
+                    <span className="text-[10px] text-muted-foreground uppercase font-bold">
+                      Reward Points
+                    </span>
+                    <p className="font-bold text-primary mt-0.5">
+                      {activeCustomer.rewardPoints} pts
+                    </p>
                   </div>
                   <div className="p-3 rounded-2xl bg-secondary/50 border border-border">
-                    <span className="text-[10px] text-muted-foreground uppercase font-bold">Wallet Balance</span>
-                    <p className="font-bold text-emerald-600 mt-0.5">৳{activeCustomer.walletBalance.toLocaleString()}</p>
+                    <span className="text-[10px] text-muted-foreground uppercase font-bold">
+                      Wallet Balance
+                    </span>
+                    <p className="font-bold text-emerald-600 mt-0.5">
+                      ৳{activeCustomer.walletBalance.toLocaleString()}
+                    </p>
                   </div>
                 </div>
               </div>
 
               {/* Delivery Address Details */}
               <div className="space-y-2 text-xs">
-                <h4 className="font-bold uppercase tracking-wider text-muted-foreground text-[10px]">Primary Delivery Hub</h4>
+                <h4 className="font-bold uppercase tracking-wider text-muted-foreground text-[10px]">
+                  Primary Delivery Hub
+                </h4>
                 <div className="p-3 rounded-2xl bg-secondary/40 border border-border space-y-1">
-                  <p className="font-semibold text-foreground">House 42, Road 11, Banani, Dhaka 1213</p>
-                  <p className="text-muted-foreground">District: Dhaka Metropolitan · Zone: Banani/Gulshan</p>
+                  <p className="font-semibold text-foreground">
+                    House 42, Road 11, Banani, Dhaka 1213
+                  </p>
+                  <p className="text-muted-foreground">
+                    District: Dhaka Metropolitan · Zone: Banani/Gulshan
+                  </p>
                   <p className="text-muted-foreground">Phone: +880 1711-223344</p>
                 </div>
               </div>
@@ -295,11 +344,17 @@ export function CustomerCrmModule({
           <div className="bg-card border border-border rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 animate-scale-up text-xs">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <h3 className="font-serif font-bold text-base">Send SMS Broadcast</h3>
-              <button onClick={() => setSmsModalCustomer(null)} className="p-1 rounded-xl hover:bg-secondary">
+              <button
+                onClick={() => setSmsModalCustomer(null)}
+                className="p-1 rounded-xl hover:bg-secondary"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <p className="text-muted-foreground">Recipient: <strong className="text-foreground">{smsModalCustomer.name}</strong> (+880 1711-223344)</p>
+            <p className="text-muted-foreground">
+              Recipient: <strong className="text-foreground">{smsModalCustomer.name}</strong> (+880
+              1711-223344)
+            </p>
             <textarea
               rows={4}
               value={smsText}
@@ -307,10 +362,16 @@ export function CustomerCrmModule({
               className="w-full p-3 rounded-2xl border border-border bg-background focus:outline-hidden"
             />
             <div className="flex justify-end gap-2">
-              <button onClick={() => setSmsModalCustomer(null)} className="px-4 py-2 rounded-xl border border-border font-medium">
+              <button
+                onClick={() => setSmsModalCustomer(null)}
+                className="px-4 py-2 rounded-xl border border-border font-medium"
+              >
                 Cancel
               </button>
-              <button onClick={handleSendQuickSms} className="px-4 py-2 rounded-xl bg-primary text-primary-foreground font-bold flex items-center gap-1.5">
+              <button
+                onClick={handleSendQuickSms}
+                className="px-4 py-2 rounded-xl bg-primary text-primary-foreground font-bold flex items-center gap-1.5"
+              >
                 <Send className="w-3.5 h-3.5" />
                 <span>Send SMS</span>
               </button>

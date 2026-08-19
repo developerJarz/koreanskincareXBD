@@ -20,10 +20,7 @@ import type { ActivityLog } from "./types";
 
 export function SecurityRbacModule() {
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(true);
-  const [ipBlacklist, setIpBlacklist] = useState<string[]>([
-    "103.231.160.45",
-    "182.160.118.90",
-  ]);
+  const [ipBlacklist, setIpBlacklist] = useState<string[]>(["103.231.160.45", "182.160.118.90"]);
   const [newIp, setNewIp] = useState("");
 
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([
@@ -80,11 +77,46 @@ export function SecurityRbacModule() {
   ]);
 
   const permissionsMatrix = [
-    { module: "Orders & POS Fulfillment", super_admin: true, admin: true, fulfillment: true, support: true, accountant: false },
-    { module: "Products & Stock Adjustments", super_admin: true, admin: true, fulfillment: true, support: false, accountant: false },
-    { module: "Couriers & Logistics API Keys", super_admin: true, admin: true, fulfillment: false, support: false, accountant: false },
-    { module: "Financial P&L & Expense Logs", super_admin: true, admin: false, fulfillment: false, support: false, accountant: true },
-    { module: "Security, RBAC & Audit Trails", super_admin: true, admin: false, fulfillment: false, support: false, accountant: false },
+    {
+      module: "Orders & POS Fulfillment",
+      super_admin: true,
+      admin: true,
+      fulfillment: true,
+      support: true,
+      accountant: false,
+    },
+    {
+      module: "Products & Stock Adjustments",
+      super_admin: true,
+      admin: true,
+      fulfillment: true,
+      support: false,
+      accountant: false,
+    },
+    {
+      module: "Couriers & Logistics API Keys",
+      super_admin: true,
+      admin: true,
+      fulfillment: false,
+      support: false,
+      accountant: false,
+    },
+    {
+      module: "Financial P&L & Expense Logs",
+      super_admin: true,
+      admin: false,
+      fulfillment: false,
+      support: false,
+      accountant: true,
+    },
+    {
+      module: "Security, RBAC & Audit Trails",
+      super_admin: true,
+      admin: false,
+      fulfillment: false,
+      support: false,
+      accountant: false,
+    },
   ];
 
   const handleAddBlacklistIp = (e: React.FormEvent) => {
@@ -260,10 +292,13 @@ export function SecurityRbacModule() {
               <div>
                 <div className="font-semibold text-foreground">{log.action}</div>
                 <div className="text-[10px] text-muted-foreground mt-0.5">
-                  Actor: <strong className="text-foreground">{log.user}</strong> ({log.role}) · IP: {log.ipAddress}
+                  Actor: <strong className="text-foreground">{log.user}</strong> ({log.role}) · IP:{" "}
+                  {log.ipAddress}
                 </div>
               </div>
-              <span className="text-[10px] font-mono text-muted-foreground shrink-0">{log.timestamp}</span>
+              <span className="text-[10px] font-mono text-muted-foreground shrink-0">
+                {log.timestamp}
+              </span>
             </div>
           ))}
         </div>

@@ -11,9 +11,7 @@ export const getCategories = createServerFn({ method: "GET" })
     const query: Record<string, unknown> = { isActive: true };
     if (data?.featured) query.isFeatured = true;
 
-    const categories = await Category.find(query)
-      .sort({ sortOrder: 1 })
-      .lean();
+    const categories = await Category.find(query).sort({ sortOrder: 1 }).lean();
 
     return JSON.parse(JSON.stringify(categories));
   });
@@ -40,16 +38,10 @@ export const createCategory = createServerFn({ method: "POST" })
 
 // ─── Admin: Update category ───
 export const updateCategory = createServerFn({ method: "POST" })
-  .validator(
-    (data: { id: string; updates: Record<string, unknown> }) => data
-  )
+  .validator((data: { id: string; updates: Record<string, unknown> }) => data)
   .handler(async ({ data }) => {
     await connectDB();
-    const category = await Category.findByIdAndUpdate(
-      data.id,
-      data.updates,
-      { new: true }
-    ).lean();
+    const category = await Category.findByIdAndUpdate(data.id, data.updates, { new: true }).lean();
     return JSON.parse(JSON.stringify(category));
   });
 

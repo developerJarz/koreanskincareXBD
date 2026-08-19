@@ -14,13 +14,7 @@ const couponSchema = new Schema<CouponDocument>(
     },
     type: {
       type: String,
-      enum: [
-        "percentage",
-        "fixed",
-        "free_shipping",
-        "first_order",
-        "buy_x_get_y",
-      ] as CouponType[],
+      enum: ["percentage", "fixed", "free_shipping", "first_order", "buy_x_get_y"] as CouponType[],
       required: true,
     },
     value: { type: Number, required: true, min: 0 },
@@ -48,12 +42,11 @@ const couponSchema = new Schema<CouponDocument>(
         return ret;
       },
     },
-  }
+  },
 );
 
 couponSchema.index({ code: 1 }, { unique: true });
 couponSchema.index({ isActive: 1, startsAt: 1, expiresAt: 1 });
 
 export const Coupon: Model<CouponDocument> =
-  mongoose.models.Coupon ||
-  mongoose.model<CouponDocument>("Coupon", couponSchema);
+  mongoose.models.Coupon || mongoose.model<CouponDocument>("Coupon", couponSchema);

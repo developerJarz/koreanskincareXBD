@@ -134,7 +134,9 @@ export function MediaLibraryModule() {
 
               <div>
                 <h4 className="font-semibold text-xs text-foreground truncate">{asset.name}</h4>
-                <p className="text-[10px] text-muted-foreground">{asset.folder} · {asset.size}</p>
+                <p className="text-[10px] text-muted-foreground">
+                  {asset.folder} · {asset.size}
+                </p>
               </div>
 
               <div className="flex gap-1.5 pt-1 border-t border-border">

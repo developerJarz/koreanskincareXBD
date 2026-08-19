@@ -116,7 +116,9 @@ export function ApiWebhooksHealthModule() {
       {/* System Health Diagnostics */}
       <div className="grid md:grid-cols-4 gap-4 text-xs">
         <div className="bg-card border border-border p-4 rounded-3xl shadow-xs space-y-1">
-          <span className="text-muted-foreground font-bold uppercase text-[10px]">MongoDB Atlas Status</span>
+          <span className="text-muted-foreground font-bold uppercase text-[10px]">
+            MongoDB Atlas Status
+          </span>
           <div className="flex items-center gap-2 text-foreground font-bold text-base mt-1">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
             <span>Connected (24ms)</span>
@@ -125,19 +127,25 @@ export function ApiWebhooksHealthModule() {
         </div>
 
         <div className="bg-card border border-border p-4 rounded-3xl shadow-xs space-y-1">
-          <span className="text-muted-foreground font-bold uppercase text-[10px]">Server Memory</span>
+          <span className="text-muted-foreground font-bold uppercase text-[10px]">
+            Server Memory
+          </span>
           <p className="font-serif font-bold text-2xl mt-1 text-foreground">184 MB / 1 GB</p>
           <span className="text-[10px] text-muted-foreground">Node.js Next 15 Serverless</span>
         </div>
 
         <div className="bg-card border border-border p-4 rounded-3xl shadow-xs space-y-1">
-          <span className="text-muted-foreground font-bold uppercase text-[10px]">API Health Uptime</span>
+          <span className="text-muted-foreground font-bold uppercase text-[10px]">
+            API Health Uptime
+          </span>
           <p className="font-serif font-bold text-2xl mt-1 text-emerald-600">99.98%</p>
           <span className="text-[10px] text-muted-foreground">Zero downtime past 30 days</span>
         </div>
 
         <div className="bg-card border border-border p-4 rounded-3xl shadow-xs space-y-1">
-          <span className="text-muted-foreground font-bold uppercase text-[10px]">Route Cache Hit Rate</span>
+          <span className="text-muted-foreground font-bold uppercase text-[10px]">
+            Route Cache Hit Rate
+          </span>
           <p className="font-serif font-bold text-2xl mt-1 text-primary">94.2%</p>
           <span className="text-[10px] text-emerald-600">Instant storefront rendering</span>
         </div>

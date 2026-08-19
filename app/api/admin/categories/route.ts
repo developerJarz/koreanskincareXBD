@@ -10,7 +10,10 @@ export async function GET() {
     const categories = await Category.find().sort({ sortOrder: 1, createdAt: -1 }).lean();
     return NextResponse.json(JSON.parse(JSON.stringify(categories)));
   } catch (err: any) {
-    return NextResponse.json({ error: err.message || "Failed to fetch categories" }, { status: 500 });
+    return NextResponse.json(
+      { error: err.message || "Failed to fetch categories" },
+      { status: 500 },
+    );
   }
 }
 
@@ -30,7 +33,10 @@ export async function POST(request: NextRequest) {
 
     const existing = await Category.findOne({ slug });
     if (existing) {
-      return NextResponse.json({ error: "A category with this slug already exists" }, { status: 400 });
+      return NextResponse.json(
+        { error: "A category with this slug already exists" },
+        { status: 400 },
+      );
     }
 
     const category = await Category.create({
@@ -47,7 +53,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(JSON.parse(JSON.stringify(category)), { status: 201 });
   } catch (err: any) {
     console.error("Create category error:", err);
-    return NextResponse.json({ error: err.message || "Failed to create category" }, { status: 500 });
+    return NextResponse.json(
+      { error: err.message || "Failed to create category" },
+      { status: 500 },
+    );
   }
 }
 
@@ -78,7 +87,10 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json(JSON.parse(JSON.stringify(category)));
   } catch (err: any) {
     console.error("Update category error:", err);
-    return NextResponse.json({ error: err.message || "Failed to update category" }, { status: 500 });
+    return NextResponse.json(
+      { error: err.message || "Failed to update category" },
+      { status: 500 },
+    );
   }
 }
 
@@ -93,6 +105,9 @@ export async function DELETE(request: NextRequest) {
     await Category.findByIdAndDelete(id);
     return NextResponse.json({ message: "Category deleted successfully" });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message || "Failed to delete category" }, { status: 500 });
+    return NextResponse.json(
+      { error: err.message || "Failed to delete category" },
+      { status: 500 },
+    );
   }
 }

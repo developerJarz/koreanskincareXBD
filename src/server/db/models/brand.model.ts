@@ -22,11 +22,10 @@ const brandSchema = new Schema<BrandDocument>(
         return ret;
       },
     },
-  }
+  },
 );
 
 brandSchema.index({ slug: 1 }, { unique: true });
 
 export const Brand: Model<BrandDocument> =
-  mongoose.models.Brand ||
-  mongoose.model<BrandDocument>("Brand", brandSchema);
+  mongoose.models.Brand || mongoose.model<BrandDocument>("Brand", brandSchema);

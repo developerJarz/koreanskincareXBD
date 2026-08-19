@@ -9,7 +9,8 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Admin Dashboard — Shajgoj.bd",
-  description: "Enterprise store operations, sales analytics, multi-warehouse & catalog management.",
+  description:
+    "Enterprise store operations, sales analytics, multi-warehouse & catalog management.",
 };
 
 const allowedRoles: UserRole[] = ["super_admin", "admin", "staff", "customer"];

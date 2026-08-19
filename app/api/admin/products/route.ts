@@ -7,7 +7,10 @@ import slugify from "slugify";
 export async function GET(request: NextRequest) {
   try {
     await connectDB();
-    const products = await Product.find().sort({ createdAt: -1 }).populate("category", "name slug").lean();
+    const products = await Product.find()
+      .sort({ createdAt: -1 })
+      .populate("category", "name slug")
+      .lean();
     return NextResponse.json(JSON.parse(JSON.stringify(products)));
   } catch (err: any) {
     return NextResponse.json({ error: err.message || "Failed to fetch products" }, { status: 500 });
@@ -48,7 +51,9 @@ export async function POST(request: NextRequest) {
       price: Number(data.price),
       compareAtPrice: data.compareAtPrice ? Number(data.compareAtPrice) : undefined,
       stock: Number(data.stock ?? 10),
-      images: data.images?.length ? data.images : ["https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=800"],
+      images: data.images?.length
+        ? data.images
+        : ["https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=800"],
       status: data.status || "active",
       isFeatured: Boolean(data.isFeatured),
       isNewArrival: Boolean(data.isNewArrival),

@@ -35,12 +35,8 @@ export interface PaginatedResult<T> {
 // ─── Get products with filtering, sorting, pagination ───
 export const getProducts = createServerFn({ method: "GET" })
   .validator(
-    (data: {
-      filters?: ProductFilters;
-      sort?: ProductSort;
-      page?: number;
-      pageSize?: number;
-    }) => data
+    (data: { filters?: ProductFilters; sort?: ProductSort; page?: number; pageSize?: number }) =>
+      data,
   )
   .handler(async ({ data }) => {
     await connectDB();
@@ -59,17 +55,14 @@ export const getProducts = createServerFn({ method: "GET" })
     if (filters.brand) query.brand = filters.brand;
     if (filters.minPrice || filters.maxPrice) {
       query.price = {};
-      if (filters.minPrice)
-        (query.price as Record<string, number>).$gte = filters.minPrice;
-      if (filters.maxPrice)
-        (query.price as Record<string, number>).$lte = filters.maxPrice;
+      if (filters.minPrice) (query.price as Record<string, number>).$gte = filters.minPrice;
+      if (filters.maxPrice) (query.price as Record<string, number>).$lte = filters.maxPrice;
     }
     if (filters.colors?.length) query.colors = { $in: filters.colors };
     if (filters.sizes?.length) query.sizes = { $in: filters.sizes };
     if (filters.inStock) query.stock = { $gt: 0 };
     if (filters.minRating) query.avgRating = { $gte: filters.minRating };
-    if (filters.hasDiscount)
-      query.compareAtPrice = { $exists: true, $ne: null };
+    if (filters.hasDiscount) query.compareAtPrice = { $exists: true, $ne: null };
     if (filters.tags?.length) query.tags = { $in: filters.tags };
     if (filters.isFeatured) query.isFeatured = true;
     if (filters.isBestseller) query.isBestseller = true;
@@ -115,10 +108,7 @@ export const getProductBySlug = createServerFn({ method: "GET" })
       .populate("category", "name slug")
       .populate("brand", "name slug logo")
       .populate("relatedProducts", "name slug price compareAtPrice images")
-      .populate(
-        "frequentlyBoughtWith",
-        "name slug price compareAtPrice images"
-      )
+      .populate("frequentlyBoughtWith", "name slug price compareAtPrice images")
       .lean();
 
     if (!product) return null;
@@ -209,9 +199,7 @@ export const createProduct = createServerFn({ method: "POST" })
 
 // ─── Admin: Update product ───
 export const updateProduct = createServerFn({ method: "POST" })
-  .validator(
-    (data: { id: string; updates: Record<string, unknown> }) => data
-  )
+  .validator((data: { id: string; updates: Record<string, unknown> }) => data)
   .handler(async ({ data }) => {
     await connectDB();
     const product = await Product.findByIdAndUpdate(data.id, data.updates, {

@@ -18,32 +18,36 @@ import {
 import { toast } from "sonner";
 
 export function AiStudioModule() {
-  const [activeAiTab, setActiveAiTab] = useState<"copy" | "seo" | "ads" | "insights" | "image">("copy");
+  const [activeAiTab, setActiveAiTab] = useState<"copy" | "seo" | "ads" | "insights" | "image">(
+    "copy",
+  );
 
   // Copywriter State
   const [productName, setProductName] = useState("Emerald Velvet Handbag");
   const [productTone, setProductTone] = useState("Luxury & Elegant");
   const [generatedCopy, setGeneratedCopy] = useState(
-    "Crafted for the modern woman of Dhaka, the Emerald Velvet Handbag marries timeless vintage allure with everyday poise. Hand-finished with gold-toned metal accents, waterproof lining, and a spacious compartment for daily essentials. Whether for festive Eid evenings or corporate boardrooms, make an indelible statement."
+    "Crafted for the modern woman of Dhaka, the Emerald Velvet Handbag marries timeless vintage allure with everyday poise. Hand-finished with gold-toned metal accents, waterproof lining, and a spacious compartment for daily essentials. Whether for festive Eid evenings or corporate boardrooms, make an indelible statement.",
   );
   const [isGeneratingCopy, setIsGeneratingCopy] = useState(false);
 
   // SEO Optimizer State
   const [seoTargetKeyword, setSeoTargetKeyword] = useState("luxury bags bangladesh");
   const [generatedMetaTitle, setGeneratedMetaTitle] = useState(
-    "Buy Luxury Emerald Handbag Online in Bangladesh | Shajgoj.bd"
+    "Buy Luxury Emerald Handbag Online in Bangladesh | Shajgoj.bd",
   );
   const [generatedMetaDesc, setGeneratedMetaDesc] = useState(
-    "Discover the Emerald Velvet Handbag at Shajgoj.bd. Handcrafted with premium gold hardware and luxury velvet finish. Fast 24-hr Cash on Delivery all over Bangladesh."
+    "Discover the Emerald Velvet Handbag at Shajgoj.bd. Handcrafted with premium gold hardware and luxury velvet finish. Fast 24-hr Cash on Delivery all over Bangladesh.",
   );
 
   // Ad Copy State
   const [generatedAdCopy, setGeneratedAdCopy] = useState(
-    `✨ Discover Timeless Luxury at Shajgoj.bd ✨\n\nElevate your signature look with our handcrafted Emerald Velvet Collection. Hand-inspected perfection with 7-day exchange guarantee and Cash on Delivery across all 64 districts in Bangladesh!\n\n🛍️ Shop Now at shajgoj.bd\n🎁 Special Offer: Use code SHAJGOJ10 for 10% OFF!\n\n#ShajgojBD #LuxuryFashionBD #DhakaFashion #BangladeshAccessories #EidCollection2026`
+    `✨ Discover Timeless Luxury at Shajgoj.bd ✨\n\nElevate your signature look with our handcrafted Emerald Velvet Collection. Hand-inspected perfection with 7-day exchange guarantee and Cash on Delivery across all 64 districts in Bangladesh!\n\n🛍️ Shop Now at shajgoj.bd\n🎁 Special Offer: Use code SHAJGOJ10 for 10% OFF!\n\n#ShajgojBD #LuxuryFashionBD #DhakaFashion #BangladeshAccessories #EidCollection2026`,
   );
 
   // Image Studio State
-  const [bgStyle, setBgStyle] = useState<"studio_white" | "luxury_marble" | "warm_sand" | "rose_glow">("studio_white");
+  const [bgStyle, setBgStyle] = useState<
+    "studio_white" | "luxury_marble" | "warm_sand" | "rose_glow"
+  >("studio_white");
   const [isProcessingImg, setIsProcessingImg] = useState(false);
 
   const handleGenerateCopy = () => {
@@ -51,7 +55,7 @@ export function AiStudioModule() {
     setTimeout(() => {
       setIsGeneratingCopy(false);
       setGeneratedCopy(
-        `Exquisitely curated for contemporary Bangladeshi lifestyles, the ${productName} blends minimalist luxury with uncompromising durability. Featuring anti-tarnish luxury coating, lightweight ergonomic design, and delivered in our signature Shajgoj luxury pouch. Perfect for both traditional festive attire and modern everyday wear.`
+        `Exquisitely curated for contemporary Bangladeshi lifestyles, the ${productName} blends minimalist luxury with uncompromising durability. Featuring anti-tarnish luxury coating, lightweight ergonomic design, and delivered in our signature Shajgoj luxury pouch. Perfect for both traditional festive attire and modern everyday wear.`,
       );
       toast.success("AI Product Description generated!");
     }, 900);
@@ -146,7 +150,9 @@ export function AiStudioModule() {
           <div className="bg-card border border-border p-6 rounded-3xl shadow-xs space-y-3 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between pb-2 border-b border-border">
-                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Generated Description</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  Generated Description
+                </span>
                 <button
                   onClick={() => handleCopyText(generatedCopy)}
                   className="text-xs text-primary hover:underline flex items-center gap-1 font-semibold"
@@ -159,7 +165,9 @@ export function AiStudioModule() {
                 {generatedCopy}
               </p>
             </div>
-            <p className="text-[11px] text-muted-foreground">Tailored for high conversion on Bangladeshi social commerce & storefronts</p>
+            <p className="text-[11px] text-muted-foreground">
+              Tailored for high conversion on Bangladeshi social commerce & storefronts
+            </p>
           </div>
         </div>
       )}
@@ -169,7 +177,9 @@ export function AiStudioModule() {
         <div className="bg-card border border-border p-6 rounded-3xl shadow-xs space-y-5 text-xs">
           <div className="flex items-center justify-between">
             <h3 className="font-serif font-bold text-lg">AI SEO Title & Meta Generator</h3>
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary">Google Serps 2026 Ready</span>
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary">
+              Google Serps 2026 Ready
+            </span>
           </div>
 
           <div className="space-y-4">
@@ -185,11 +195,15 @@ export function AiStudioModule() {
 
             {/* Google Search Snippet Preview */}
             <div className="p-4 rounded-2xl bg-secondary/40 border border-border space-y-1">
-              <span className="text-[10px] text-muted-foreground">Google Search Result Preview:</span>
+              <span className="text-[10px] text-muted-foreground">
+                Google Search Result Preview:
+              </span>
               <h4 className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer">
                 {generatedMetaTitle}
               </h4>
-              <p className="text-[11px] text-emerald-700 dark:text-emerald-400">https://shajgoj.bd › product › emerald-handbag</p>
+              <p className="text-[11px] text-emerald-700 dark:text-emerald-400">
+                https://shajgoj.bd › product › emerald-handbag
+              </p>
               <p className="text-xs text-muted-foreground leading-relaxed">{generatedMetaDesc}</p>
             </div>
           </div>
@@ -228,7 +242,8 @@ export function AiStudioModule() {
             </div>
             <h4 className="font-bold text-xs text-foreground">High Reorder Velocity</h4>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              <strong>Rosé Crystal Band Ring</strong> is trending +42% week-on-week. Recommended to reorder 50 units before Dhaka central stock exhausts in 4 days.
+              <strong>Rosé Crystal Band Ring</strong> is trending +42% week-on-week. Recommended to
+              reorder 50 units before Dhaka central stock exhausts in 4 days.
             </p>
           </div>
 
@@ -238,7 +253,9 @@ export function AiStudioModule() {
             </div>
             <h4 className="font-bold text-xs text-foreground">Bundle Pricing Opportunity</h4>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              64% of buyers who purchase <em>Blush Mini Crossbody</em> also view <em>Pearl Drop Studs</em>. Creating an "Eid Glamour Bundle" at ৳4,200 can boost AOV by ৳710.
+              64% of buyers who purchase <em>Blush Mini Crossbody</em> also view{" "}
+              <em>Pearl Drop Studs</em>. Creating an "Eid Glamour Bundle" at ৳4,200 can boost AOV by
+              ৳710.
             </p>
           </div>
 
@@ -246,9 +263,13 @@ export function AiStudioModule() {
             <div className="p-2 rounded-xl bg-amber-500/10 text-amber-600 w-fit">
               <Bot className="w-4 h-4" />
             </div>
-            <h4 className="font-bold text-xs text-foreground">Outside Dhaka Courier Optimization</h4>
+            <h4 className="font-bold text-xs text-foreground">
+              Outside Dhaka Courier Optimization
+            </h4>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Chattogram and Sylhet orders show 98.4% COD delivery success with Steadfast Courier. Consider offering <strong>Free Shipping over ৳2,500</strong> to scale outside Dhaka sales.
+              Chattogram and Sylhet orders show 98.4% COD delivery success with Steadfast Courier.
+              Consider offering <strong>Free Shipping over ৳2,500</strong> to scale outside Dhaka
+              sales.
             </p>
           </div>
         </div>
@@ -260,17 +281,35 @@ export function AiStudioModule() {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="font-serif font-bold text-lg">AI Product Image Background Studio</h3>
-              <p className="text-muted-foreground">Simulate studio-grade background replacement for catalog photos</p>
+              <p className="text-muted-foreground">
+                Simulate studio-grade background replacement for catalog photos
+              </p>
             </div>
             <ImageIcon className="w-5 h-5 text-primary" />
           </div>
 
           <div className="grid md:grid-cols-4 gap-3">
             {[
-              { id: "studio_white", label: "Studio Pure White", bg: "bg-white border-neutral-300 text-neutral-800" },
-              { id: "luxury_marble", label: "Luxury Italian Marble", bg: "bg-neutral-100 border-neutral-300 text-neutral-800" },
-              { id: "warm_sand", label: "Warm Sand Aesthetic", bg: "bg-amber-50 border-amber-200 text-amber-900" },
-              { id: "rose_glow", label: "Signature Rose Glow", bg: "bg-rose-50 border-rose-200 text-rose-900" },
+              {
+                id: "studio_white",
+                label: "Studio Pure White",
+                bg: "bg-white border-neutral-300 text-neutral-800",
+              },
+              {
+                id: "luxury_marble",
+                label: "Luxury Italian Marble",
+                bg: "bg-neutral-100 border-neutral-300 text-neutral-800",
+              },
+              {
+                id: "warm_sand",
+                label: "Warm Sand Aesthetic",
+                bg: "bg-amber-50 border-amber-200 text-amber-900",
+              },
+              {
+                id: "rose_glow",
+                label: "Signature Rose Glow",
+                bg: "bg-rose-50 border-rose-200 text-rose-900",
+              },
             ].map((st) => (
               <button
                 key={st.id}
@@ -291,7 +330,8 @@ export function AiStudioModule() {
             <ImageIcon className="w-10 h-10 text-primary/40" />
             <p className="font-bold text-sm">Cloudinary AI Background Engine Ready</p>
             <p className="text-muted-foreground max-w-sm">
-              Upload any product photograph taken with a smartphone. The AI automatically removes shadows and places products on premium studio backdrops.
+              Upload any product photograph taken with a smartphone. The AI automatically removes
+              shadows and places products on premium studio backdrops.
             </p>
           </div>
         </div>

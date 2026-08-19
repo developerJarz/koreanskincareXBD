@@ -39,7 +39,9 @@ export function OrderManagementModule({
   const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([]);
   const [activeInvoiceOrder, setActiveInvoiceOrder] = useState<any | null>(null);
   const [courierModalOrder, setCourierModalOrder] = useState<any | null>(null);
-  const [selectedCourier, setSelectedCourier] = useState<"steadfast" | "pathao" | "redx" | "paperfly" | "ecourier">("steadfast");
+  const [selectedCourier, setSelectedCourier] = useState<
+    "steadfast" | "pathao" | "redx" | "paperfly" | "ecourier"
+  >("steadfast");
   const [courierNote, setCourierNote] = useState("");
   const [isBookingCourier, setIsBookingCourier] = useState(false);
 
@@ -65,7 +67,7 @@ export function OrderManagementModule({
 
   const handleToggleSelect = (id: string) => {
     setSelectedOrderIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
     );
   };
 
@@ -73,7 +75,7 @@ export function OrderManagementModule({
     try {
       await onUpdateOrderStatus(orderId, status);
       setOrders((prev) =>
-        prev.map((o) => (o._id === orderId || o.id === orderId ? { ...o, status } : o))
+        prev.map((o) => (o._id === orderId || o.id === orderId ? { ...o, status } : o)),
       );
       toast.success(`Order status updated to "${status.toUpperCase()}"`);
     } catch (err) {
@@ -89,9 +91,7 @@ export function OrderManagementModule({
         await onUpdateOrderStatus(id, status);
       }
       setOrders((prev) =>
-        prev.map((o) =>
-          selectedOrderIds.includes(o._id || o.id) ? { ...o, status } : o
-        )
+        prev.map((o) => (selectedOrderIds.includes(o._id || o.id) ? { ...o, status } : o)),
       );
       setSelectedOrderIds([]);
       toast.dismiss();
@@ -109,8 +109,10 @@ export function OrderManagementModule({
     setTimeout(() => {
       setIsBookingCourier(false);
       const trackingCode = `${selectedCourier.toUpperCase().slice(0, 3)}-${Math.floor(100000 + Math.random() * 900000)}`;
-      toast.success(`Consignment created with ${selectedCourier.toUpperCase()}! Tracking: ${trackingCode}`);
-      
+      toast.success(
+        `Consignment created with ${selectedCourier.toUpperCase()}! Tracking: ${trackingCode}`,
+      );
+
       // Auto update status to shipped
       handleStatusChange(courierModalOrder._id || courierModalOrder.id, "shipped");
       setCourierModalOrder(null);
@@ -123,13 +125,17 @@ export function OrderManagementModule({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card border border-border p-4 rounded-3xl">
         <div>
           <h2 className="font-serif text-2xl font-bold">Order Workflow & Logistics</h2>
-          <p className="text-xs text-muted-foreground">Manage orders, issue POS invoices & dispatch Bangladeshi couriers</p>
+          <p className="text-xs text-muted-foreground">
+            Manage orders, issue POS invoices & dispatch Bangladeshi couriers
+          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           {selectedOrderIds.length > 0 && (
             <div className="flex items-center gap-2 bg-primary/10 border border-primary/20 px-3 py-1.5 rounded-2xl animate-fade-in">
-              <span className="text-xs font-bold text-primary">{selectedOrderIds.length} selected</span>
+              <span className="text-xs font-bold text-primary">
+                {selectedOrderIds.length} selected
+              </span>
               <button
                 onClick={() => handleBulkStatusChange("confirmed")}
                 className="px-2 py-1 rounded-xl text-[11px] font-semibold bg-primary text-primary-foreground hover:opacity-90 transition"
@@ -192,7 +198,10 @@ export function OrderManagementModule({
                   <input
                     type="checkbox"
                     onChange={handleSelectAll}
-                    checked={selectedOrderIds.length > 0 && selectedOrderIds.length === filteredOrders.length}
+                    checked={
+                      selectedOrderIds.length > 0 &&
+                      selectedOrderIds.length === filteredOrders.length
+                    }
                     className="rounded border-border"
                   />
                 </th>
@@ -209,10 +218,14 @@ export function OrderManagementModule({
               {filteredOrders.map((ord) => {
                 const isSelected = selectedOrderIds.includes(ord._id || ord.id);
                 const statusColor =
-                  ORDER_STATUS_CONFIG[ord.status as keyof typeof ORDER_STATUS_CONFIG]?.color || "#6b7280";
+                  ORDER_STATUS_CONFIG[ord.status as keyof typeof ORDER_STATUS_CONFIG]?.color ||
+                  "#6b7280";
 
                 return (
-                  <tr key={ord._id || ord.orderNumber} className={`hover:bg-secondary/30 transition ${isSelected ? "bg-primary/5" : ""}`}>
+                  <tr
+                    key={ord._id || ord.orderNumber}
+                    className={`hover:bg-secondary/30 transition ${isSelected ? "bg-primary/5" : ""}`}
+                  >
                     <td className="p-4">
                       <input
                         type="checkbox"
@@ -233,20 +246,27 @@ export function OrderManagementModule({
                       </div>
                     </td>
                     <td className="p-4">
-                      <div className="font-semibold text-foreground">{ord.shippingAddress?.fullName || "Nusrat Jahan"}</div>
+                      <div className="font-semibold text-foreground">
+                        {ord.shippingAddress?.fullName || "Nusrat Jahan"}
+                      </div>
                       <div className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
                         <Phone className="w-3 h-3" />
                         <span>{ord.shippingAddress?.phone || "+880 1711-223344"}</span>
                       </div>
                       <div className="text-[11px] text-muted-foreground flex items-center gap-1">
                         <MapPin className="w-3 h-3" />
-                        <span>{ord.shippingAddress?.city || "Dhaka"}, {ord.shippingAddress?.division || "Dhaka"}</span>
+                        <span>
+                          {ord.shippingAddress?.city || "Dhaka"},{" "}
+                          {ord.shippingAddress?.division || "Dhaka"}
+                        </span>
                       </div>
                     </td>
                     <td className="p-4">
                       <span className="font-semibold">{ord.items?.length || 1} items</span>
                       <div className="text-[10px] text-muted-foreground truncate max-w-[150px]">
-                        {ord.items?.[0]?.product?.name || ord.items?.[0]?.name || "Blush Crossbody & Ring"}
+                        {ord.items?.[0]?.product?.name ||
+                          ord.items?.[0]?.name ||
+                          "Blush Crossbody & Ring"}
                       </div>
                     </td>
                     <td className="p-4 font-bold text-foreground">
@@ -319,9 +339,16 @@ export function OrderManagementModule({
 
             <div className="space-y-3 text-xs">
               <div className="p-3 rounded-2xl bg-secondary/50 border border-border">
-                <p className="font-bold text-foreground">{courierModalOrder.shippingAddress?.fullName || "Nusrat Jahan"}</p>
-                <p className="text-muted-foreground">{courierModalOrder.shippingAddress?.phone || "+880 1711-223344"}</p>
-                <p className="text-muted-foreground">{courierModalOrder.shippingAddress?.address || "House 12, Road 4, Dhanmondi, Dhaka"}</p>
+                <p className="font-bold text-foreground">
+                  {courierModalOrder.shippingAddress?.fullName || "Nusrat Jahan"}
+                </p>
+                <p className="text-muted-foreground">
+                  {courierModalOrder.shippingAddress?.phone || "+880 1711-223344"}
+                </p>
+                <p className="text-muted-foreground">
+                  {courierModalOrder.shippingAddress?.address ||
+                    "House 12, Road 4, Dhanmondi, Dhaka"}
+                </p>
                 <div className="mt-2 text-primary font-bold">
                   COD Amount to Collect: ৳{(courierModalOrder.total || 3490).toLocaleString()}
                 </div>
@@ -330,25 +357,29 @@ export function OrderManagementModule({
               <div>
                 <label className="block text-xs font-semibold mb-1">Select Courier Partner</label>
                 <div className="grid grid-cols-3 gap-2">
-                  {(["steadfast", "pathao", "redx", "paperfly", "ecourier"] as const).map((courier) => (
-                    <button
-                      key={courier}
-                      type="button"
-                      onClick={() => setSelectedCourier(courier)}
-                      className={`p-2.5 rounded-xl border text-center font-bold capitalize transition ${
-                        selectedCourier === courier
-                          ? "bg-primary text-primary-foreground border-primary"
-                          : "bg-background border-border text-foreground hover:bg-secondary"
-                      }`}
-                    >
-                      {courier}
-                    </button>
-                  ))}
+                  {(["steadfast", "pathao", "redx", "paperfly", "ecourier"] as const).map(
+                    (courier) => (
+                      <button
+                        key={courier}
+                        type="button"
+                        onClick={() => setSelectedCourier(courier)}
+                        className={`p-2.5 rounded-xl border text-center font-bold capitalize transition ${
+                          selectedCourier === courier
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-background border-border text-foreground hover:bg-secondary"
+                        }`}
+                      >
+                        {courier}
+                      </button>
+                    ),
+                  )}
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold mb-1">Delivery Instruction / Rider Note</label>
+                <label className="block text-xs font-semibold mb-1">
+                  Delivery Instruction / Rider Note
+                </label>
                 <input
                   type="text"
                   placeholder="e.g. Call before delivery, allow open parcel check"
@@ -401,14 +432,20 @@ export function OrderManagementModule({
                   Shajgoj<span className="text-rose-600">.bd</span>
                 </h1>
                 <p className="text-xs text-neutral-500 mt-1">Official Tax Invoice & Packing Slip</p>
-                <p className="text-[11px] text-neutral-500">BIN / Tax ID: 004928192-0101 · Dhaka, Bangladesh</p>
+                <p className="text-[11px] text-neutral-500">
+                  BIN / Tax ID: 004928192-0101 · Dhaka, Bangladesh
+                </p>
               </div>
               <div className="text-right">
                 <div className="font-mono font-bold text-sm">
                   {activeInvoiceOrder.orderNumber || "ORD-2026-8801"}
                 </div>
                 <p className="text-xs text-neutral-500">
-                  {new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
+                  {new Date().toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
                 </p>
                 <span className="inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-neutral-100 text-neutral-800 border border-neutral-300">
                   {activeInvoiceOrder.paymentMethod || "Cash On Delivery"}
@@ -419,20 +456,29 @@ export function OrderManagementModule({
             {/* Bill To & Ship To */}
             <div className="grid grid-cols-2 gap-4 text-xs">
               <div>
-                <span className="font-bold uppercase text-[10px] text-neutral-400">Customer Details:</span>
+                <span className="font-bold uppercase text-[10px] text-neutral-400">
+                  Customer Details:
+                </span>
                 <p className="font-bold text-neutral-900 mt-1">
                   {activeInvoiceOrder.shippingAddress?.fullName || "Nusrat Jahan"}
                 </p>
-                <p className="text-neutral-600">{activeInvoiceOrder.shippingAddress?.phone || "+880 1711-223344"}</p>
-                <p className="text-neutral-600">{activeInvoiceOrder.shippingAddress?.email || "customer@shajgoj.bd"}</p>
+                <p className="text-neutral-600">
+                  {activeInvoiceOrder.shippingAddress?.phone || "+880 1711-223344"}
+                </p>
+                <p className="text-neutral-600">
+                  {activeInvoiceOrder.shippingAddress?.email || "customer@shajgoj.bd"}
+                </p>
               </div>
               <div className="text-right">
-                <span className="font-bold uppercase text-[10px] text-neutral-400">Delivery Address:</span>
+                <span className="font-bold uppercase text-[10px] text-neutral-400">
+                  Delivery Address:
+                </span>
                 <p className="text-neutral-700 mt-1">
                   {activeInvoiceOrder.shippingAddress?.address || "House 42, Road 11, Banani"}
                 </p>
                 <p className="text-neutral-700">
-                  {activeInvoiceOrder.shippingAddress?.city || "Dhaka"} - {activeInvoiceOrder.shippingAddress?.postalCode || "1213"}, Bangladesh
+                  {activeInvoiceOrder.shippingAddress?.city || "Dhaka"} -{" "}
+                  {activeInvoiceOrder.shippingAddress?.postalCode || "1213"}, Bangladesh
                 </p>
               </div>
             </div>
@@ -448,15 +494,25 @@ export function OrderManagementModule({
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-200">
-                {(activeInvoiceOrder.items || [{ name: "Blush Mini Crossbody Bag", quantity: 1, price: 3490 }]).map((it: any, i: number) => (
+                {(
+                  activeInvoiceOrder.items || [
+                    { name: "Blush Mini Crossbody Bag", quantity: 1, price: 3490 },
+                  ]
+                ).map((it: any, i: number) => (
                   <tr key={i}>
                     <td className="py-3 px-3">
-                      <div className="font-semibold text-neutral-900">{it.product?.name || it.name || "Curated Accessory"}</div>
-                      <div className="text-[10px] text-neutral-500">SKU: SHJ-ACC-{100 + i} · Signature Pouch Packaging</div>
+                      <div className="font-semibold text-neutral-900">
+                        {it.product?.name || it.name || "Curated Accessory"}
+                      </div>
+                      <div className="text-[10px] text-neutral-500">
+                        SKU: SHJ-ACC-{100 + i} · Signature Pouch Packaging
+                      </div>
                     </td>
                     <td className="py-3 px-3 text-center font-medium">{it.quantity || 1}</td>
                     <td className="py-3 px-3 text-right">৳{(it.price || 3490).toLocaleString()}</td>
-                    <td className="py-3 px-3 text-right font-bold">৳{((it.price || 3490) * (it.quantity || 1)).toLocaleString()}</td>
+                    <td className="py-3 px-3 text-right font-bold">
+                      ৳{((it.price || 3490) * (it.quantity || 1)).toLocaleString()}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -479,7 +535,9 @@ export function OrderManagementModule({
                 </div>
                 <div className="flex justify-between text-neutral-900 font-bold text-sm border-t border-neutral-300 pt-1 mt-1">
                   <span>Grand Total:</span>
-                  <span className="text-rose-600">৳{(activeInvoiceOrder.total || 3560).toLocaleString()}</span>
+                  <span className="text-rose-600">
+                    ৳{(activeInvoiceOrder.total || 3560).toLocaleString()}
+                  </span>
                 </div>
               </div>
             </div>

@@ -1,21 +1,13 @@
 import mongoose, { Schema, type Document, type Model } from "mongoose";
 import type { IAnalyticsEvent } from "@/types";
 
-export interface AnalyticsDocument
-  extends Omit<IAnalyticsEvent, "_id">,
-    Document {}
+export interface AnalyticsDocument extends Omit<IAnalyticsEvent, "_id">, Document {}
 
 const analyticsSchema = new Schema<AnalyticsDocument>(
   {
     type: {
       type: String,
-      enum: [
-        "page_view",
-        "product_view",
-        "add_to_cart",
-        "purchase",
-        "search",
-      ],
+      enum: ["page_view", "product_view", "add_to_cart", "purchase", "search"],
       required: true,
     },
     user: { type: Schema.Types.ObjectId as any, ref: "User" },
@@ -31,11 +23,10 @@ const analyticsSchema = new Schema<AnalyticsDocument>(
         return ret;
       },
     },
-  }
+  },
 );
 
 analyticsSchema.index({ type: 1, createdAt: -1 });
 
 export const Analytics: Model<AnalyticsDocument> =
-  mongoose.models.Analytics ||
-  mongoose.model<AnalyticsDocument>("Analytics", analyticsSchema);
+  mongoose.models.Analytics || mongoose.model<AnalyticsDocument>("Analytics", analyticsSchema);

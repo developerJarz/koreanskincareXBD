@@ -118,7 +118,7 @@ async function handleSeed(request: NextRequest) {
         isActive: true,
         isFeatured: true,
         productCount: parseInt(c.count) || 20,
-      }))
+      })),
     );
 
     const categoryMap = new Map(categoryDocs.map((c) => [c.slug, c._id]));
@@ -134,7 +134,7 @@ async function handleSeed(request: NextRequest) {
         category: categoryMap.get(p.category) || defaultCatId,
         price: p.price,
         compareAtPrice: p.was || undefined,
-        stock: 35 + (index * 5) % 40,
+        stock: 35 + ((index * 5) % 40),
         lowStockThreshold: 5,
         trackInventory: true,
         colors: ["Default", "Rose Gold", "Noir Black", "Champagne Gold"],
@@ -148,7 +148,7 @@ async function handleSeed(request: NextRequest) {
         avgRating: 4.9,
         totalReviews: 24 + index * 4,
         totalSold: 45 + index * 12,
-      }))
+      })),
     );
 
     // 4. Seed Promo Coupons
@@ -218,7 +218,8 @@ async function handleSeed(request: NextRequest) {
 
     // 6. Seed Realistic Sample Orders for Analytics & Testing
     await Order.deleteMany({});
-    const customerUser = seededUsers.find((u) => u.email === "customer@shajgoj.bd") || seededUsers[3];
+    const customerUser =
+      seededUsers.find((u) => u.email === "customer@shajgoj.bd") || seededUsers[3];
     await Order.insertMany([
       {
         orderNumber: "ORD-2026-8801",

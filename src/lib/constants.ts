@@ -63,14 +63,7 @@ export const BD_DISTRICTS: Record<string, string[]> = {
     "Narail",
     "Satkhira",
   ],
-  Barishal: [
-    "Barishal",
-    "Barguna",
-    "Bhola",
-    "Jhalokathi",
-    "Patuakhali",
-    "Pirojpur",
-  ],
+  Barishal: ["Barishal", "Barguna", "Bhola", "Jhalokathi", "Patuakhali", "Pirojpur"],
   Sylhet: ["Sylhet", "Habiganj", "Moulvibazar", "Sunamganj"],
   Rangpur: [
     "Rangpur",
@@ -147,15 +140,7 @@ export const COMMON_COLORS = [
   { name: "Champagne", hex: "#F7E7CE" },
 ] as const;
 
-export const COMMON_SIZES = [
-  "One Size",
-  "XS",
-  "S",
-  "M",
-  "L",
-  "XL",
-  "XXL",
-] as const;
+export const COMMON_SIZES = ["One Size", "XS", "S", "M", "L", "XL", "XXL"] as const;
 
 export const COMMON_MATERIALS = [
   "Sterling Silver",

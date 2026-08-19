@@ -1,4 +1,4 @@
-  import mongoose, { Schema, type Document, type Model } from "mongoose";
+import mongoose, { Schema, type Document, type Model } from "mongoose";
 import type { IUser, UserRole } from "@/types";
 
 export interface UserDocument extends Omit<IUser, "_id">, Document {}
@@ -44,7 +44,7 @@ const userSchema = new Schema<UserDocument>(
         return ret;
       },
     },
-  }
+  },
 );
 
 // Indexes

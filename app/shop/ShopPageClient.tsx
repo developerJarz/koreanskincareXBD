@@ -23,10 +23,7 @@ export default function ShopPageClient({ initialCategory }: { initialCategory: s
 
   const flashSale = useMemo(
     () =>
-      PRODUCTS.filter((product) => product.tag === "Sale" || product.tag === "Limited").slice(
-        0,
-        3,
-      ),
+      PRODUCTS.filter((product) => product.tag === "Sale" || product.tag === "Limited").slice(0, 3),
     [],
   );
 
@@ -77,7 +74,9 @@ export default function ShopPageClient({ initialCategory }: { initialCategory: s
           </div>
 
           <div>
-            <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Categories</p>
+            <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">
+              Categories
+            </p>
             <div className="grid gap-2">
               <button
                 onClick={() => {
@@ -131,7 +130,9 @@ export default function ShopPageClient({ initialCategory }: { initialCategory: s
                   className="block rounded-xl border border-border bg-background px-3 py-2 text-sm hover:border-primary transition"
                 >
                   <div className="font-medium">{product.name}</div>
-                  <div className="text-xs text-muted-foreground">৳{product.price.toLocaleString()}</div>
+                  <div className="text-xs text-muted-foreground">
+                    ৳{product.price.toLocaleString()}
+                  </div>
                 </Link>
               ))}
             </div>

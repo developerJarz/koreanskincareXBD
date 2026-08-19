@@ -43,10 +43,10 @@ export default function OrderConfirmationPage({
     paymentMethod === "COD"
       ? "Cash on Delivery"
       : paymentMethod === "bKash"
-      ? "bKash"
-      : paymentMethod === "Nagad"
-      ? "Nagad"
-      : paymentMethod;
+        ? "bKash"
+        : paymentMethod === "Nagad"
+          ? "Nagad"
+          : paymentMethod;
 
   if (loading) {
     return (
@@ -68,7 +68,8 @@ export default function OrderConfirmationPage({
         </p>
         <h1 className="font-serif text-4xl lg:text-5xl">Thank You for Your Order!</h1>
         <p className="text-muted-foreground text-sm max-w-md mx-auto">
-          Your order <span className="font-mono text-foreground font-bold">{orderNumber}</span> has been confirmed and is currently being packed at our Banani, Dhaka studio.
+          Your order <span className="font-mono text-foreground font-bold">{orderNumber}</span> has
+          been confirmed and is currently being packed at our Banani, Dhaka studio.
         </p>
       </div>
 
@@ -89,17 +90,25 @@ export default function OrderConfirmationPage({
         {/* Order Items */}
         {order?.items && order.items.length > 0 && (
           <div className="space-y-3 pb-4 border-b border-border">
-            <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Items Ordered</p>
+            <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
+              Items Ordered
+            </p>
             {order.items.map((item: any, i: number) => (
               <div key={i} className="flex items-center gap-3 text-sm">
                 {item.productImage && (
-                  <img src={item.productImage} alt={item.productName} className="w-12 h-14 object-cover rounded-lg shrink-0" />
+                  <img
+                    src={item.productImage}
+                    alt={item.productName}
+                    className="w-12 h-14 object-cover rounded-lg shrink-0"
+                  />
                 )}
                 <div className="flex-1 min-w-0">
                   <p className="font-medium truncate">{item.productName}</p>
                   <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
                 </div>
-                <span className="font-sans font-bold text-foreground">৳{item.total?.toLocaleString()}</span>
+                <span className="font-sans font-bold text-foreground">
+                  ৳{item.total?.toLocaleString()}
+                </span>
               </div>
             ))}
           </div>
@@ -108,19 +117,27 @@ export default function OrderConfirmationPage({
         {/* Timeline */}
         <div className="grid grid-cols-4 gap-2 text-center text-xs py-4">
           <div className="space-y-1 text-primary">
-            <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center mx-auto font-bold">1</div>
+            <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center mx-auto font-bold">
+              1
+            </div>
             <p className="font-medium">Confirmed</p>
           </div>
           <div className="space-y-1 text-muted-foreground">
-            <div className="w-8 h-8 rounded-full bg-secondary text-muted-foreground flex items-center justify-center mx-auto">2</div>
+            <div className="w-8 h-8 rounded-full bg-secondary text-muted-foreground flex items-center justify-center mx-auto">
+              2
+            </div>
             <p>Processing</p>
           </div>
           <div className="space-y-1 text-muted-foreground">
-            <div className="w-8 h-8 rounded-full bg-secondary text-muted-foreground flex items-center justify-center mx-auto">3</div>
+            <div className="w-8 h-8 rounded-full bg-secondary text-muted-foreground flex items-center justify-center mx-auto">
+              3
+            </div>
             <p>Shipped</p>
           </div>
           <div className="space-y-1 text-muted-foreground">
-            <div className="w-8 h-8 rounded-full bg-secondary text-muted-foreground flex items-center justify-center mx-auto">4</div>
+            <div className="w-8 h-8 rounded-full bg-secondary text-muted-foreground flex items-center justify-center mx-auto">
+              4
+            </div>
             <p>Delivered</p>
           </div>
         </div>
@@ -132,14 +149,18 @@ export default function OrderConfirmationPage({
             </p>
             {order?.shippingAddress ? (
               <p className="text-muted-foreground leading-relaxed">
-                {order.shippingAddress.fullName}<br />
-                {order.shippingAddress.streetAddress}, {order.shippingAddress.area}<br />
-                {order.shippingAddress.district}, {order.shippingAddress.division}<br />
+                {order.shippingAddress.fullName}
+                <br />
+                {order.shippingAddress.streetAddress}, {order.shippingAddress.area}
+                <br />
+                {order.shippingAddress.district}, {order.shippingAddress.division}
+                <br />
                 Phone: {order.shippingAddress.phone}
               </p>
             ) : (
               <p className="text-muted-foreground leading-relaxed">
-                Express Delivery via SteadFast Courier<br />
+                Express Delivery via SteadFast Courier
+                <br />
                 Estimated delivery: <strong className="text-foreground">1-3 Business Days</strong>
               </p>
             )}
@@ -150,11 +171,17 @@ export default function OrderConfirmationPage({
               <Truck className="w-3.5 h-3.5 text-primary" /> Payment Status
             </p>
             <p className="text-muted-foreground leading-relaxed">
-              Payment Method: <strong className="text-foreground">{paymentLabel}</strong><br />
+              Payment Method: <strong className="text-foreground">{paymentLabel}</strong>
+              <br />
               {order?.total && (
-                <>Total: <strong className="text-foreground">৳{order.total.toLocaleString()}</strong><br /></>
+                <>
+                  Total:{" "}
+                  <strong className="text-foreground">৳{order.total.toLocaleString()}</strong>
+                  <br />
+                </>
               )}
-              Status: <span className="text-amber-600 font-medium">
+              Status:{" "}
+              <span className="text-amber-600 font-medium">
                 {paymentMethod === "COD" ? "Pending Delivery" : "Pending Payment"}
               </span>
             </p>

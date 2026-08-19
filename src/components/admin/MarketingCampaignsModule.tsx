@@ -34,7 +34,7 @@ export function MarketingCampaignsModule({
   const [newCouponDiscount, setNewCouponDiscount] = useState(15);
   const [newCouponMinSpend, setNewCouponMinSpend] = useState(2000);
   const [smsCampaignText, setSmsCampaignText] = useState(
-    "Shajgoj.bd Eid-ul-Fitr Grand Sale! Enjoy 20% OFF on premium jewelry & luxury bags. Use code: SHAJGOJVIP. Shop at shajgoj.bd"
+    "Shajgoj.bd Eid-ul-Fitr Grand Sale! Enjoy 20% OFF on premium jewelry & luxury bags. Use code: SHAJGOJVIP. Shop at shajgoj.bd",
   );
   const [smsAudience, setSmsAudience] = useState("vip");
 
@@ -86,7 +86,9 @@ export function MarketingCampaignsModule({
     toast.loading("Sending SMS blast via Greenweb SMS BD gateway...");
     setTimeout(() => {
       toast.dismiss();
-      toast.success(`SMS broadcast successfully sent to 1,420 ${smsAudience.toUpperCase()} recipients!`);
+      toast.success(
+        `SMS broadcast successfully sent to 1,420 ${smsAudience.toUpperCase()} recipients!`,
+      );
     }, 1200);
   };
 
@@ -97,7 +99,9 @@ export function MarketingCampaignsModule({
         <div>
           <div className="flex items-center gap-2">
             <Flame className="w-5 h-5 text-amber-500" />
-            <h2 className="font-serif text-2xl font-bold">Bangladeshi Campaigns & Marketing Suite</h2>
+            <h2 className="font-serif text-2xl font-bold">
+              Bangladeshi Campaigns & Marketing Suite
+            </h2>
           </div>
           <p className="text-xs text-muted-foreground">
             Eid, Ramadan, Pohela Boishakh festive tools, coupon codes & Greenweb SMS broadcasts
@@ -120,7 +124,9 @@ export function MarketingCampaignsModule({
               toast.success("Eid Mubarak Campaign mode activated across the platform!");
             }}
             className={`w-full py-2 rounded-2xl text-xs font-bold transition shadow-sm ${
-              seasonalTheme === "eid" ? "bg-white text-amber-900" : "bg-amber-500 text-white hover:bg-amber-400"
+              seasonalTheme === "eid"
+                ? "bg-white text-amber-900"
+                : "bg-amber-500 text-white hover:bg-amber-400"
             }`}
           >
             {seasonalTheme === "eid" ? "✓ Active Mode" : "Activate Eid Mode"}
@@ -140,7 +146,9 @@ export function MarketingCampaignsModule({
               toast.success("Ramadan Kareem Campaign mode activated!");
             }}
             className={`w-full py-2 rounded-2xl text-xs font-bold transition shadow-sm ${
-              seasonalTheme === "ramadan" ? "bg-white text-emerald-900" : "bg-emerald-500 text-white hover:bg-emerald-400"
+              seasonalTheme === "ramadan"
+                ? "bg-white text-emerald-900"
+                : "bg-emerald-500 text-white hover:bg-emerald-400"
             }`}
           >
             {seasonalTheme === "ramadan" ? "✓ Active Mode" : "Activate Ramadan Mode"}
@@ -160,7 +168,9 @@ export function MarketingCampaignsModule({
               toast.success("Pohela Boishakh Campaign mode activated!");
             }}
             className={`w-full py-2 rounded-2xl text-xs font-bold transition shadow-sm ${
-              seasonalTheme === "boishakh" ? "bg-white text-rose-900" : "bg-rose-500 text-white hover:bg-rose-400"
+              seasonalTheme === "boishakh"
+                ? "bg-white text-rose-900"
+                : "bg-rose-500 text-white hover:bg-rose-400"
             }`}
           >
             {seasonalTheme === "boishakh" ? "✓ Active Mode" : "Activate Boishakh Mode"}
@@ -177,8 +187,13 @@ export function MarketingCampaignsModule({
             <Tag className="w-4 h-4 text-primary" />
           </div>
 
-          <form onSubmit={handleCreateCoupon} className="p-4 rounded-2xl bg-secondary/40 border border-border space-y-3">
-            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Create New Promo Code</p>
+          <form
+            onSubmit={handleCreateCoupon}
+            className="p-4 rounded-2xl bg-secondary/40 border border-border space-y-3"
+          >
+            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              Create New Promo Code
+            </p>
             <div className="grid grid-cols-3 gap-2">
               <input
                 type="text"
@@ -215,7 +230,9 @@ export function MarketingCampaignsModule({
                   </div>
                   <div>
                     <div className="font-bold">{c.value}% OFF</div>
-                    <div className="text-[10px] text-muted-foreground">Min spend: ৳{c.minOrderAmount || 1000}</div>
+                    <div className="text-[10px] text-muted-foreground">
+                      Min spend: ৳{c.minOrderAmount || 1000}
+                    </div>
                   </div>
                 </div>
                 <span className="text-[10px] text-muted-foreground font-semibold">
@@ -249,7 +266,9 @@ export function MarketingCampaignsModule({
             </div>
 
             <div>
-              <label className="block font-semibold mb-1">SMS Content (Max 160 chars / 1 SMS)</label>
+              <label className="block font-semibold mb-1">
+                SMS Content (Max 160 chars / 1 SMS)
+              </label>
               <textarea
                 rows={4}
                 value={smsCampaignText}

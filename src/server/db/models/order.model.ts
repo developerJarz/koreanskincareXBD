@@ -17,7 +17,7 @@ const orderItemSchema = new Schema<IOrderItem>(
     quantity: { type: Number, required: true, min: 1 },
     total: { type: Number, required: true, min: 0 },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const addressSubSchema = {
@@ -59,13 +59,7 @@ const orderSchema = new Schema<OrderDocument>(
     },
     paymentStatus: {
       type: String,
-      enum: [
-        "pending",
-        "paid",
-        "failed",
-        "refunded",
-        "partially_refunded",
-      ] as PaymentStatus[],
+      enum: ["pending", "paid", "failed", "refunded", "partially_refunded"] as PaymentStatus[],
       default: "pending",
     },
     paymentMethod: { type: String, required: true },
@@ -93,7 +87,7 @@ const orderSchema = new Schema<OrderDocument>(
         return ret;
       },
     },
-  }
+  },
 );
 
 orderSchema.index({ orderNumber: 1 }, { unique: true });
@@ -117,5 +111,4 @@ orderSchema.pre("validate", async function () {
 });
 
 export const Order: Model<OrderDocument> =
-  mongoose.models.Order ||
-  mongoose.model<OrderDocument>("Order", orderSchema);
+  mongoose.models.Order || mongoose.model<OrderDocument>("Order", orderSchema);

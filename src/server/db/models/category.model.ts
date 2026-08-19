@@ -28,7 +28,7 @@ const categorySchema = new Schema<CategoryDocument>(
         return ret;
       },
     },
-  }
+  },
 );
 
 categorySchema.index({ slug: 1 }, { unique: true });
@@ -37,5 +37,4 @@ categorySchema.index({ sortOrder: 1 });
 categorySchema.index({ isActive: 1, isFeatured: 1 });
 
 export const Category: Model<CategoryDocument> =
-  mongoose.models.Category ||
-  mongoose.model<CategoryDocument>("Category", categorySchema);
+  mongoose.models.Category || mongoose.model<CategoryDocument>("Category", categorySchema);

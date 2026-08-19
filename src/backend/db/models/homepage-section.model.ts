@@ -1,9 +1,7 @@
 import mongoose, { Schema, type Document, type Model } from "mongoose";
 import type { IHomepageSection, HomepageSectionType } from "@/types";
 
-export interface HomepageSectionDocument
-  extends Omit<IHomepageSection, "_id">,
-    Document {}
+export interface HomepageSectionDocument extends Omit<IHomepageSection, "_id">, Document {}
 
 const homepageSectionSchema = new Schema<HomepageSectionDocument>(
   {
@@ -38,14 +36,11 @@ const homepageSectionSchema = new Schema<HomepageSectionDocument>(
         return ret;
       },
     },
-  }
+  },
 );
 
 homepageSectionSchema.index({ sortOrder: 1 });
 
 export const HomepageSection: Model<HomepageSectionDocument> =
   mongoose.models.HomepageSection ||
-  mongoose.model<HomepageSectionDocument>(
-    "HomepageSection",
-    homepageSectionSchema
-  );
+  mongoose.model<HomepageSectionDocument>("HomepageSection", homepageSectionSchema);

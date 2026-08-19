@@ -1,14 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  ChevronRight,
-  Leaf,
-  Gem,
-  Users,
-  Heart,
-  ArrowRight,
-} from "lucide-react";
+import { ChevronRight, Leaf, Gem, Users, Heart, ArrowRight } from "lucide-react";
 import { use } from "react";
 
 import hero from "@/assets/hero.jpg";
@@ -79,7 +72,9 @@ function AboutPage() {
       <section className="bg-secondary/40 border-y border-border">
         <div className="container-x py-16 lg:py-24">
           <div className="text-center mb-14">
-            <p className="text-xs tracking-[0.2em] uppercase text-primary font-semibold">What we stand for</p>
+            <p className="text-xs tracking-[0.2em] uppercase text-primary font-semibold">
+              What we stand for
+            </p>
             <h2 className="font-serif text-4xl lg:text-5xl mt-2">Four quiet promises</h2>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -116,7 +111,9 @@ function AboutPage() {
       </section>
 
       <section className="container-x py-16 lg:py-24 text-center max-w-2xl mx-auto">
-        <p className="text-xs tracking-[0.2em] uppercase text-primary font-semibold">By the numbers</p>
+        <p className="text-xs tracking-[0.2em] uppercase text-primary font-semibold">
+          By the numbers
+        </p>
         <h2 className="font-serif text-4xl mt-2">A quiet rise</h2>
         <div className="mt-10 grid grid-cols-3 gap-6">
           {[
@@ -209,7 +206,10 @@ function TrackOrderPage() {
       </form>
       <div className="mt-8 grid sm:grid-cols-3 gap-4 text-sm">
         {COURIER_PARTNERS.map((partner) => (
-          <div key={partner.name} className="bg-card border border-border rounded-2xl p-4 shadow-sm">
+          <div
+            key={partner.name}
+            className="bg-card border border-border rounded-2xl p-4 shadow-sm"
+          >
             <p className="font-medium">{partner.name}</p>
             <p className="text-muted-foreground text-xs mt-1">{partner.tracking}</p>
           </div>

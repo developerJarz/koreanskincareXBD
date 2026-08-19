@@ -28,12 +28,11 @@ const paymentSchema = new Schema<PaymentDocument>(
         return ret;
       },
     },
-  }
+  },
 );
 
 paymentSchema.index({ order: 1 });
 paymentSchema.index({ transactionId: 1 });
 
 export const Payment: Model<PaymentDocument> =
-  mongoose.models.Payment ||
-  mongoose.model<PaymentDocument>("Payment", paymentSchema);
+  mongoose.models.Payment || mongoose.model<PaymentDocument>("Payment", paymentSchema);

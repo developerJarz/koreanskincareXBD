@@ -234,29 +234,44 @@ export default function HomePage() {
         <div className="grid gap-8 lg:grid-cols-[320px_minmax(0,1fr)] items-start rounded-3xl border border-border bg-card p-6 md:p-8">
           <div className="space-y-4 lg:sticky lg:top-24">
             <p className="text-xs tracking-[0.2em] uppercase text-primary">Flash sale</p>
-            <h2 className="font-serif text-4xl lg:text-5xl leading-tight">Fresh markdowns, moving fast.</h2>
+            <h2 className="font-serif text-4xl lg:text-5xl leading-tight">
+              Fresh markdowns, moving fast.
+            </h2>
             <p className="text-sm text-muted-foreground max-w-sm">
               A rotating edit of sale and limited pieces so the homepage stays current without
               feeling overbuilt.
             </p>
-            <Link href="/shop" className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline">
+            <Link
+              href="/shop"
+              className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+            >
               Browse the sale <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
             {flashSale.map((product) => (
-              <div key={product.slug} className="rounded-3xl border border-border overflow-hidden bg-background">
+              <div
+                key={product.slug}
+                className="rounded-3xl border border-border overflow-hidden bg-background"
+              >
                 <img
                   src={getImageSrc(product.img)}
                   alt={product.name}
                   className="w-full aspect-[4/5] object-cover"
                 />
                 <div className="p-4">
-                  <p className="text-xs uppercase tracking-widest text-muted-foreground">{product.tag}</p>
+                  <p className="text-xs uppercase tracking-widest text-muted-foreground">
+                    {product.tag}
+                  </p>
                   <p className="mt-1 font-medium">{product.name}</p>
-                  <p className="mt-2 font-sans font-bold text-lg text-foreground">৳{product.price.toLocaleString()}</p>
-                  <Link href={`/product/${encodeURIComponent(product.slug)}`} className="mt-3 inline-flex items-center gap-1 text-sm text-primary">
+                  <p className="mt-2 font-sans font-bold text-lg text-foreground">
+                    ৳{product.price.toLocaleString()}
+                  </p>
+                  <Link
+                    href={`/product/${encodeURIComponent(product.slug)}`}
+                    className="mt-3 inline-flex items-center gap-1 text-sm text-primary"
+                  >
                     View item <ChevronRight className="w-4 h-4" />
                   </Link>
                 </div>

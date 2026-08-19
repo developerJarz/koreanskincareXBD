@@ -30,11 +30,10 @@ const bannerSchema = new Schema<BannerDocument>(
         return ret;
       },
     },
-  }
+  },
 );
 
 bannerSchema.index({ position: 1, isActive: 1 });
 
 export const Banner: Model<BannerDocument> =
-  mongoose.models.Banner ||
-  mongoose.model<BannerDocument>("Banner", bannerSchema);
+  mongoose.models.Banner || mongoose.model<BannerDocument>("Banner", bannerSchema);

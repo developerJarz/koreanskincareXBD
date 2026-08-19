@@ -8,7 +8,7 @@ const wishlistItemSchema = new Schema<IWishlistItem>(
     product: { type: Schema.Types.ObjectId, ref: "Product", required: true },
     addedAt: { type: Date, default: Date.now },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const wishlistSchema = new Schema<WishlistDocument>(
@@ -30,11 +30,10 @@ const wishlistSchema = new Schema<WishlistDocument>(
         return ret;
       },
     },
-  }
+  },
 );
 
 wishlistSchema.index({ user: 1 }, { unique: true });
 
 export const Wishlist: Model<WishlistDocument> =
-  mongoose.models.Wishlist ||
-  mongoose.model<WishlistDocument>("Wishlist", wishlistSchema);
+  mongoose.models.Wishlist || mongoose.model<WishlistDocument>("Wishlist", wishlistSchema);

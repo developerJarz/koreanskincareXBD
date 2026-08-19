@@ -192,7 +192,9 @@ export function AdminSidebar({
                     }`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-primary-foreground" : "text-muted-foreground"}`} />
+                      <Icon
+                        className={`w-4 h-4 shrink-0 ${isActive ? "text-primary-foreground" : "text-muted-foreground"}`}
+                      />
                       <span className="truncate">{item.label}</span>
                     </div>
 
@@ -232,7 +234,9 @@ export function AdminSidebar({
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </span>
-              <span className="text-[11px] font-medium text-muted-foreground">Store Live & Synced</span>
+              <span className="text-[11px] font-medium text-muted-foreground">
+                Store Live & Synced
+              </span>
             </div>
             <span className="text-[10px] font-bold text-primary">v2.4 Pro</span>
           </div>

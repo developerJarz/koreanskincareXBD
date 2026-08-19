@@ -120,8 +120,13 @@ export default function CheckoutPage() {
     return (
       <div className="container-x py-24 text-center space-y-4">
         <h1 className="font-serif text-3xl">Your cart is empty</h1>
-        <p className="text-sm text-muted-foreground">Add items to cart before proceeding to checkout.</p>
-        <Link href="/shop" className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-full text-sm font-medium">
+        <p className="text-sm text-muted-foreground">
+          Add items to cart before proceeding to checkout.
+        </p>
+        <Link
+          href="/shop"
+          className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-full text-sm font-medium"
+        >
           Return to Shop
         </Link>
       </div>
@@ -131,7 +136,9 @@ export default function CheckoutPage() {
   return (
     <section className="container-x py-10 lg:py-16">
       <div className="text-center mb-10">
-        <p className="text-xs uppercase tracking-[0.2em] text-primary font-semibold">Order Checkout</p>
+        <p className="text-xs uppercase tracking-[0.2em] text-primary font-semibold">
+          Order Checkout
+        </p>
         <h1 className="font-serif text-4xl lg:text-5xl mt-2">Delivery & Payment</h1>
       </div>
 
@@ -148,7 +155,9 @@ export default function CheckoutPage() {
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs text-muted-foreground block mb-1 font-medium">Full Name *</label>
+                <label className="text-xs text-muted-foreground block mb-1 font-medium">
+                  Full Name *
+                </label>
                 <input
                   type="text"
                   required
@@ -160,7 +169,9 @@ export default function CheckoutPage() {
               </div>
 
               <div>
-                <label className="text-xs text-muted-foreground block mb-1 font-medium">Phone Number *</label>
+                <label className="text-xs text-muted-foreground block mb-1 font-medium">
+                  Phone Number *
+                </label>
                 <input
                   type="tel"
                   required
@@ -173,7 +184,9 @@ export default function CheckoutPage() {
             </div>
 
             <div>
-              <label className="text-xs text-muted-foreground block mb-1 font-medium">Email Address *</label>
+              <label className="text-xs text-muted-foreground block mb-1 font-medium">
+                Email Address *
+              </label>
               <input
                 type="email"
                 required
@@ -196,7 +209,9 @@ export default function CheckoutPage() {
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs text-muted-foreground block mb-1 font-medium">Division *</label>
+                <label className="text-xs text-muted-foreground block mb-1 font-medium">
+                  Division *
+                </label>
                 <select
                   value={division}
                   onChange={(e) => handleDivisionChange(e.target.value)}
@@ -211,7 +226,9 @@ export default function CheckoutPage() {
               </div>
 
               <div>
-                <label className="text-xs text-muted-foreground block mb-1 font-medium">District *</label>
+                <label className="text-xs text-muted-foreground block mb-1 font-medium">
+                  District *
+                </label>
                 <select
                   value={district}
                   onChange={(e) => setDistrict(e.target.value)}
@@ -228,7 +245,9 @@ export default function CheckoutPage() {
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs text-muted-foreground block mb-1 font-medium">Area / Thana *</label>
+                <label className="text-xs text-muted-foreground block mb-1 font-medium">
+                  Area / Thana *
+                </label>
                 <input
                   type="text"
                   required
@@ -240,7 +259,9 @@ export default function CheckoutPage() {
               </div>
 
               <div>
-                <label className="text-xs text-muted-foreground block mb-1 font-medium">House / Street Address *</label>
+                <label className="text-xs text-muted-foreground block mb-1 font-medium">
+                  House / Street Address *
+                </label>
                 <input
                   type="text"
                   required
@@ -253,7 +274,9 @@ export default function CheckoutPage() {
             </div>
 
             <div>
-              <label className="text-xs text-muted-foreground block mb-1 font-medium">Delivery Notes (Optional)</label>
+              <label className="text-xs text-muted-foreground block mb-1 font-medium">
+                Delivery Notes (Optional)
+              </label>
               <textarea
                 rows={2}
                 value={deliveryNotes}
@@ -310,8 +333,15 @@ export default function CheckoutPage() {
 
           <div className="max-h-60 overflow-y-auto space-y-3 pr-1 border-b border-border pb-4">
             {items.map((item) => (
-              <div key={`${item.productId}-${item.variant?.sku ?? ""}`} className="flex gap-3 text-xs">
-                <img src={item.image} alt={item.name} className="w-12 h-14 object-cover rounded-lg shrink-0" />
+              <div
+                key={`${item.productId}-${item.variant?.sku ?? ""}`}
+                className="flex gap-3 text-xs"
+              >
+                <img
+                  src={item.image}
+                  alt={item.name}
+                  className="w-12 h-14 object-cover rounded-lg shrink-0"
+                />
                 <div className="flex-1 min-w-0">
                   <p className="font-medium truncate">{item.name}</p>
                   <p className="text-muted-foreground mt-0.5">Qty: {item.quantity}</p>
@@ -326,7 +356,9 @@ export default function CheckoutPage() {
           <div className="space-y-2.5 text-sm">
             <div className="flex justify-between text-muted-foreground">
               <span>Subtotal</span>
-              <span className="font-sans font-bold text-foreground">৳{subtotal.toLocaleString()}</span>
+              <span className="font-sans font-bold text-foreground">
+                ৳{subtotal.toLocaleString()}
+              </span>
             </div>
 
             {couponDiscount > 0 && (

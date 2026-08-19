@@ -15,9 +15,7 @@ export interface AuthUser {
 
 // ─── Register ───
 export const registerUser = createServerFn({ method: "POST" })
-  .validator(
-    (data: { name: string; email: string; password: string }) => data
-  )
+  .validator((data: { name: string; email: string; password: string }) => data)
   .handler(async ({ data }) => {
     await connectDB();
 
@@ -103,14 +101,7 @@ export const getUserById = createServerFn({ method: "GET" })
 
 // ─── Update profile ───
 export const updateProfile = createServerFn({ method: "POST" })
-  .validator(
-    (data: {
-      userId: string;
-      name?: string;
-      phone?: string;
-      avatar?: string;
-    }) => data
-  )
+  .validator((data: { userId: string; name?: string; phone?: string; avatar?: string }) => data)
   .handler(async ({ data }) => {
     await connectDB();
     const updates: Record<string, unknown> = {};
@@ -136,13 +127,7 @@ export const updateProfile = createServerFn({ method: "POST" })
 
 // ─── Change password ───
 export const changePassword = createServerFn({ method: "POST" })
-  .validator(
-    (data: {
-      userId: string;
-      currentPassword: string;
-      newPassword: string;
-    }) => data
-  )
+  .validator((data: { userId: string; currentPassword: string; newPassword: string }) => data)
   .handler(async ({ data }) => {
     await connectDB();
     const user = await User.findById(data.userId).select("+password");
@@ -150,10 +135,7 @@ export const changePassword = createServerFn({ method: "POST" })
       throw new Error("User not found");
     }
 
-    const isValid = await bcryptjs.compare(
-      data.currentPassword,
-      user.password
-    );
+    const isValid = await bcryptjs.compare(data.currentPassword, user.password);
     if (!isValid) {
       throw new Error("Current password is incorrect");
     }
@@ -166,14 +148,7 @@ export const changePassword = createServerFn({ method: "POST" })
 
 // ─── Admin: Get all users ───
 export const getAllUsers = createServerFn({ method: "GET" })
-  .validator(
-    (data: {
-      role?: UserRole;
-      page?: number;
-      pageSize?: number;
-      search?: string;
-    }) => data
-  )
+  .validator((data: { role?: UserRole; page?: number; pageSize?: number; search?: string }) => data)
   .handler(async ({ data }) => {
     await connectDB();
     const { role, page = 1, pageSize = 20, search } = data;

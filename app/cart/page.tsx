@@ -58,7 +58,9 @@ export default function CartPage() {
     <>
       <section className="border-b border-border bg-secondary/30">
         <div className="container-x py-12 text-center">
-          <p className="text-xs uppercase tracking-[0.2em] text-primary font-semibold">Your Selection</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-primary font-semibold">
+            Your Selection
+          </p>
           <h1 className="font-serif text-4xl lg:text-5xl mt-2">Shopping Bag</h1>
         </div>
       </section>
@@ -114,7 +116,9 @@ export default function CartPage() {
                           <p className="text-xs uppercase tracking-widest text-primary font-medium">
                             {item.category}
                           </p>
-                          <h3 className="font-serif text-lg font-medium mt-0.5 truncate">{item.name}</h3>
+                          <h3 className="font-serif text-lg font-medium mt-0.5 truncate">
+                            {item.name}
+                          </h3>
                           {item.variant && (
                             <p className="text-xs text-muted-foreground mt-0.5">
                               {item.variant.color && `Color: ${item.variant.color}`}
@@ -139,7 +143,9 @@ export default function CartPage() {
                           >
                             <Minus className="w-3.5 h-3.5" />
                           </button>
-                          <span className="w-6 text-center text-xs font-semibold">{item.quantity}</span>
+                          <span className="w-6 text-center text-xs font-semibold">
+                            {item.quantity}
+                          </span>
                           <button
                             onClick={() =>
                               updateQuantity(item.productId, item.quantity + 1, item.variant?.sku)
@@ -213,7 +219,9 @@ export default function CartPage() {
               <div className="space-y-3 text-sm border-t border-border pt-4">
                 <div className="flex justify-between text-muted-foreground">
                   <span>Subtotal</span>
-                  <span className="font-sans font-bold text-foreground">৳{subtotal.toLocaleString()}</span>
+                  <span className="font-sans font-bold text-foreground">
+                    ৳{subtotal.toLocaleString()}
+                  </span>
                 </div>
 
                 {couponDiscount > 0 && (
@@ -232,7 +240,9 @@ export default function CartPage() {
 
                 <div className="flex justify-between text-lg font-bold border-t border-border pt-3">
                   <span>Total</span>
-                  <span className="font-sans font-bold text-primary">৳{total.toLocaleString()}</span>
+                  <span className="font-sans font-bold text-primary">
+                    ৳{total.toLocaleString()}
+                  </span>
                 </div>
               </div>
 

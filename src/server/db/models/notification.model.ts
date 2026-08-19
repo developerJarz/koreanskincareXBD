@@ -1,9 +1,7 @@
 import mongoose, { Schema, type Document, type Model } from "mongoose";
 import type { INotification, NotificationType } from "@/types";
 
-export interface NotificationDocument
-  extends Omit<INotification, "_id">,
-    Document {}
+export interface NotificationDocument extends Omit<INotification, "_id">, Document {}
 
 const notificationSchema = new Schema<NotificationDocument>(
   {
@@ -34,7 +32,7 @@ const notificationSchema = new Schema<NotificationDocument>(
         return ret;
       },
     },
-  }
+  },
 );
 
 notificationSchema.index({ user: 1, isRead: 1, createdAt: -1 });

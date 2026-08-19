@@ -3,9 +3,7 @@ import { connectDB } from "@/server/db/connection";
 import { Coupon } from "@/server/db/models";
 
 export const validateCoupon = createServerFn({ method: "POST" })
-  .validator(
-    (data: { code: string; subtotal: number; userId?: string }) => data
-  )
+  .validator((data: { code: string; subtotal: number; userId?: string }) => data)
   .handler(async ({ data }) => {
     await connectDB();
 
@@ -29,9 +27,7 @@ export const validateCoupon = createServerFn({ method: "POST" })
       throw new Error("This coupon has reached its usage limit");
     }
     if (coupon.minOrderAmount && data.subtotal < coupon.minOrderAmount) {
-      throw new Error(
-        `Minimum order amount is ৳${coupon.minOrderAmount.toLocaleString()}`
-      );
+      throw new Error(`Minimum order amount is ৳${coupon.minOrderAmount.toLocaleString()}`);
     }
 
     let discount = 0;

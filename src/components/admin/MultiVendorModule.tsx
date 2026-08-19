@@ -72,15 +72,14 @@ export function MultiVendorModule() {
   const [activeVendorModal, setActiveVendorModal] = useState<Vendor | null>(null);
   const [payoutAmount, setPayoutAmount] = useState<number>(10000);
 
-  const filteredVendors = vendors.filter((v) =>
-    v.shopName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    v.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredVendors = vendors.filter(
+    (v) =>
+      v.shopName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      v.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const handleApproveVendor = (id: string) => {
-    setVendors((prev) =>
-      prev.map((v) => (v.id === id ? { ...v, status: "active" } : v))
-    );
+    setVendors((prev) => prev.map((v) => (v.id === id ? { ...v, status: "active" } : v)));
     toast.success("Vendor approved and store activated!");
   };
 
@@ -93,13 +92,13 @@ export function MultiVendorModule() {
 
     setVendors((prev) =>
       prev.map((v) =>
-        v.id === activeVendorModal.id
-          ? { ...v, walletBalance: v.walletBalance - payoutAmount }
-          : v
-      )
+        v.id === activeVendorModal.id ? { ...v, walletBalance: v.walletBalance - payoutAmount } : v,
+      ),
     );
 
-    toast.success(`bKash/Bank Payout of ৳${payoutAmount.toLocaleString()} processed for ${activeVendorModal.shopName}!`);
+    toast.success(
+      `bKash/Bank Payout of ৳${payoutAmount.toLocaleString()} processed for ${activeVendorModal.shopName}!`,
+    );
     setActiveVendorModal(null);
   };
 
@@ -119,7 +118,9 @@ export function MultiVendorModule() {
 
         <div className="flex items-center gap-2">
           <button
-            onClick={() => toast.info("New vendor invitation link generated and copied to clipboard!")}
+            onClick={() =>
+              toast.info("New vendor invitation link generated and copied to clipboard!")
+            }
             className="px-4 py-2 rounded-2xl bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 transition flex items-center gap-1.5"
           >
             <Plus className="w-3.5 h-3.5" />
@@ -131,19 +132,27 @@ export function MultiVendorModule() {
       {/* Metrics Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
         <div className="p-4 rounded-3xl bg-card border border-border">
-          <span className="text-[10px] uppercase font-bold text-muted-foreground">Total Vendors</span>
+          <span className="text-[10px] uppercase font-bold text-muted-foreground">
+            Total Vendors
+          </span>
           <p className="font-serif font-bold text-2xl mt-1 text-foreground">{vendors.length}</p>
         </div>
         <div className="p-4 rounded-3xl bg-card border border-border">
-          <span className="text-[10px] uppercase font-bold text-muted-foreground">Marketplace GMV</span>
+          <span className="text-[10px] uppercase font-bold text-muted-foreground">
+            Marketplace GMV
+          </span>
           <p className="font-serif font-bold text-2xl mt-1 text-primary">৳482,000</p>
         </div>
         <div className="p-4 rounded-3xl bg-card border border-border">
-          <span className="text-[10px] uppercase font-bold text-muted-foreground">Platform Commission</span>
+          <span className="text-[10px] uppercase font-bold text-muted-foreground">
+            Platform Commission
+          </span>
           <p className="font-serif font-bold text-2xl mt-1 text-emerald-600">৳57,840</p>
         </div>
         <div className="p-4 rounded-3xl bg-card border border-border">
-          <span className="text-[10px] uppercase font-bold text-muted-foreground">Pending Payouts</span>
+          <span className="text-[10px] uppercase font-bold text-muted-foreground">
+            Pending Payouts
+          </span>
           <p className="font-serif font-bold text-2xl mt-1 text-amber-600">৳60,700</p>
         </div>
       </div>
@@ -180,7 +189,9 @@ export function MultiVendorModule() {
                 <tr key={v.id} className="hover:bg-secondary/30 transition">
                   <td className="p-3.5">
                     <div className="font-bold text-foreground">{v.shopName}</div>
-                    <div className="text-[11px] text-muted-foreground">{v.name} · {v.phone}</div>
+                    <div className="text-[11px] text-muted-foreground">
+                      {v.name} · {v.phone}
+                    </div>
                   </td>
                   <td className="p-3.5 text-muted-foreground">{v.division}</td>
                   <td className="p-3.5 text-center font-bold text-primary">{v.commissionRate}%</td>
@@ -238,14 +249,24 @@ export function MultiVendorModule() {
           <div className="bg-card border border-border rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 animate-scale-up text-xs">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <h3 className="font-serif font-bold text-base">Process Merchant Payout</h3>
-              <button onClick={() => setActiveVendorModal(null)} className="p-1 rounded-xl hover:bg-secondary">
+              <button
+                onClick={() => setActiveVendorModal(null)}
+                className="p-1 rounded-xl hover:bg-secondary"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="p-3 rounded-2xl bg-secondary/50 border border-border space-y-1">
-              <p className="font-bold text-foreground">{activeVendorModal.shopName} ({activeVendorModal.name})</p>
-              <p className="text-muted-foreground">Available Balance: <strong className="text-emerald-600">৳{activeVendorModal.walletBalance.toLocaleString()}</strong></p>
+              <p className="font-bold text-foreground">
+                {activeVendorModal.shopName} ({activeVendorModal.name})
+              </p>
+              <p className="text-muted-foreground">
+                Available Balance:{" "}
+                <strong className="text-emerald-600">
+                  ৳{activeVendorModal.walletBalance.toLocaleString()}
+                </strong>
+              </p>
               <p className="text-muted-foreground">Merchant Phone: {activeVendorModal.phone}</p>
             </div>
 
@@ -259,7 +280,9 @@ export function MultiVendorModule() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold mb-1">Disbursement Amount (BDT ৳)</label>
+              <label className="block text-xs font-semibold mb-1">
+                Disbursement Amount (BDT ৳)
+              </label>
               <input
                 type="number"
                 max={activeVendorModal.walletBalance}

@@ -53,7 +53,8 @@ export function FinancialReportsModule({ totalRevenue }: FinancialReportsModuleP
 
   const [newExpenseTitle, setNewExpenseTitle] = useState("");
   const [newExpenseAmount, setNewExpenseAmount] = useState<number>(5000);
-  const [newExpenseCategory, setNewExpenseCategory] = useState<ExpenseItem["category"]>("marketing_ads");
+  const [newExpenseCategory, setNewExpenseCategory] =
+    useState<ExpenseItem["category"]>("marketing_ads");
   const [newExpensePayment, setNewExpensePayment] = useState<ExpenseItem["paidVia"]>("bKash");
 
   // Comprehensive Bangladeshi P&L Breakdown
@@ -62,7 +63,8 @@ export function FinancialReportsModule({ totalRevenue }: FinancialReportsModuleP
   const gatewayFees = Math.round(totalRevenue * 0.018); // ~1.8% bKash/SSL average
   const vatTax = Math.round(totalRevenue * 0.05); // 5% NBR VAT
   const totalRecordedExpenses = expenses.reduce((sum, item) => sum + item.amount, 0);
-  const netProfit = totalRevenue - cogs - courierFees - gatewayFees - vatTax - totalRecordedExpenses;
+  const netProfit =
+    totalRevenue - cogs - courierFees - gatewayFees - vatTax - totalRecordedExpenses;
   const netMarginPercent = totalRevenue > 0 ? Math.round((netProfit / totalRevenue) * 100) : 28;
 
   const handleAddExpense = (e: React.FormEvent) => {
@@ -75,7 +77,11 @@ export function FinancialReportsModule({ totalRevenue }: FinancialReportsModuleP
       amount: newExpenseAmount,
       category: newExpenseCategory,
       paidVia: newExpensePayment,
-      date: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+      date: new Date().toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }),
     };
 
     setExpenses([newExp, ...expenses]);
@@ -87,7 +93,9 @@ export function FinancialReportsModule({ totalRevenue }: FinancialReportsModuleP
     const csvContent =
       "data:text/csv;charset=utf-8," +
       "Category,Description,Amount (BDT),Date,Paid Via\n" +
-      expenses.map((e) => `"${e.category}","${e.title}",${e.amount},"${e.date}","${e.paidVia}"`).join("\n");
+      expenses
+        .map((e) => `"${e.category}","${e.title}",${e.amount},"${e.date}","${e.paidVia}"`)
+        .join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -137,28 +145,38 @@ export function FinancialReportsModule({ totalRevenue }: FinancialReportsModuleP
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
           <div className="p-4 rounded-2xl bg-secondary/40 border border-border">
             <span className="text-muted-foreground font-bold">Gross Revenue</span>
-            <p className="text-2xl font-serif font-bold text-foreground mt-1">৳{totalRevenue.toLocaleString()}</p>
+            <p className="text-2xl font-serif font-bold text-foreground mt-1">
+              ৳{totalRevenue.toLocaleString()}
+            </p>
             <span className="text-[10px] text-emerald-600 font-semibold">100% of sales</span>
           </div>
 
           <div className="p-4 rounded-2xl bg-secondary/40 border border-border">
             <span className="text-muted-foreground font-bold">Cost of Goods (COGS)</span>
-            <p className="text-2xl font-serif font-bold text-rose-600 mt-1">-৳{cogs.toLocaleString()}</p>
+            <p className="text-2xl font-serif font-bold text-rose-600 mt-1">
+              -৳{cogs.toLocaleString()}
+            </p>
             <span className="text-[10px] text-muted-foreground">42% production cost</span>
           </div>
 
           <div className="p-4 rounded-2xl bg-secondary/40 border border-border">
             <span className="text-muted-foreground font-bold">Logistics & Gateway Fees</span>
-            <p className="text-2xl font-serif font-bold text-amber-600 mt-1">-৳{(courierFees + gatewayFees).toLocaleString()}</p>
+            <p className="text-2xl font-serif font-bold text-amber-600 mt-1">
+              -৳{(courierFees + gatewayFees).toLocaleString()}
+            </p>
             <span className="text-[10px] text-muted-foreground">Couriers + bKash 1.5%</span>
           </div>
 
           <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
-            <span className="text-emerald-700 dark:text-emerald-400 font-bold">Net Profit ({netMarginPercent}%)</span>
+            <span className="text-emerald-700 dark:text-emerald-400 font-bold">
+              Net Profit ({netMarginPercent}%)
+            </span>
             <p className="text-2xl font-serif font-bold text-emerald-600 dark:text-emerald-400 mt-1">
               ৳{netProfit.toLocaleString()}
             </p>
-            <span className="text-[10px] text-emerald-600 font-semibold">After all overhead & VAT</span>
+            <span className="text-[10px] text-emerald-600 font-semibold">
+              After all overhead & VAT
+            </span>
           </div>
         </div>
       </div>
@@ -251,9 +269,7 @@ export function FinancialReportsModule({ totalRevenue }: FinancialReportsModuleP
                     {exp.category.replace("_", " ")} · {exp.date} · Paid via {exp.paidVia}
                   </div>
                 </div>
-                <div className="font-bold text-rose-600">
-                  -৳{exp.amount.toLocaleString()}
-                </div>
+                <div className="font-bold text-rose-600">-৳{exp.amount.toLocaleString()}</div>
               </div>
             ))}
           </div>

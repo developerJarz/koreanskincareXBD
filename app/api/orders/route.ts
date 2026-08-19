@@ -81,10 +81,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(JSON.parse(JSON.stringify(order.toJSON())), { status: 201 });
   } catch (err: any) {
     console.error("Create order error:", err);
-    return NextResponse.json(
-      { error: err.message || "Failed to create order" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: err.message || "Failed to create order" }, { status: 500 });
   }
 }
 

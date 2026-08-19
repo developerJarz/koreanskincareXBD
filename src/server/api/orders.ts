@@ -26,7 +26,7 @@ export const createOrder = createServerFn({ method: "POST" })
       userId?: string;
       guestEmail?: string;
       guestPhone?: string;
-    }) => data
+    }) => data,
   )
   .handler(async ({ data }) => {
     await connectDB();
@@ -47,9 +47,7 @@ export const createOrder = createServerFn({ method: "POST" })
       let variantInfo = undefined;
 
       if (item.variantSku && product.variants?.length) {
-        const variant = product.variants.find(
-          (v) => v.sku === item.variantSku
-        );
+        const variant = product.variants.find((v) => v.sku === item.variantSku);
         if (variant) {
           price = variant.price;
           variantInfo = {
@@ -82,17 +80,15 @@ export const createOrder = createServerFn({ method: "POST" })
               stock: -item.quantity,
               totalSold: item.quantity,
             },
-          }
+          },
         );
       }
     }
 
     // Calculate shipping
     const isDhaka =
-      data.shippingAddress.division === "Dhaka" &&
-      data.shippingAddress.district === "Dhaka";
-    const shippingCost =
-      subtotal >= 2000 ? 0 : isDhaka ? 70 : 120;
+      data.shippingAddress.division === "Dhaka" && data.shippingAddress.district === "Dhaka";
+    const shippingCost = subtotal >= 2000 ? 0 : isDhaka ? 70 : 120;
 
     const total = subtotal + shippingCost;
 
@@ -124,9 +120,7 @@ export const getOrderById = createServerFn({ method: "GET" })
   .validator((orderId: string) => orderId)
   .handler(async ({ data: orderId }) => {
     await connectDB();
-    const order = await Order.findById(orderId)
-      .populate("user", "name email")
-      .lean();
+    const order = await Order.findById(orderId).populate("user", "name email").lean();
     return order ? JSON.parse(JSON.stringify(order)) : null;
   });
 
@@ -141,20 +135,14 @@ export const getOrderByNumber = createServerFn({ method: "GET" })
 
 // ─── Get user orders ───
 export const getUserOrders = createServerFn({ method: "GET" })
-  .validator(
-    (data: { userId: string; page?: number; pageSize?: number }) => data
-  )
+  .validator((data: { userId: string; page?: number; pageSize?: number }) => data)
   .handler(async ({ data }) => {
     await connectDB();
     const { userId, page = 1, pageSize = 10 } = data;
     const skip = (page - 1) * pageSize;
 
     const [orders, total] = await Promise.all([
-      Order.find({ user: userId })
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(pageSize)
-        .lean(),
+      Order.find({ user: userId }).sort({ createdAt: -1 }).skip(skip).limit(pageSize).lean(),
       Order.countDocuments({ user: userId }),
     ]);
 
@@ -176,7 +164,7 @@ export const updateOrderStatus = createServerFn({ method: "POST" })
       trackingId?: string;
       courierName?: string;
       notes?: string;
-    }) => data
+    }) => data,
   )
   .handler(async ({ data }) => {
     await connectDB();
@@ -195,13 +183,7 @@ export const updateOrderStatus = createServerFn({ method: "POST" })
 
 // ─── Get all orders (Admin) ───
 export const getAllOrders = createServerFn({ method: "GET" })
-  .validator(
-    (data: {
-      status?: string;
-      page?: number;
-      pageSize?: number;
-    }) => data
-  )
+  .validator((data: { status?: string; page?: number; pageSize?: number }) => data)
   .handler(async ({ data }) => {
     await connectDB();
     const { status, page = 1, pageSize = 20 } = data;

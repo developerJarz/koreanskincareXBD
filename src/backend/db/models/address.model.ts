@@ -25,11 +25,10 @@ const addressSchema = new Schema<AddressDocument>(
         return ret;
       },
     },
-  }
+  },
 );
 
 addressSchema.index({ user: 1 });
 
 export const Address: Model<AddressDocument> =
-  mongoose.models.Address ||
-  mongoose.model<AddressDocument>("Address", addressSchema);
+  mongoose.models.Address || mongoose.model<AddressDocument>("Address", addressSchema);

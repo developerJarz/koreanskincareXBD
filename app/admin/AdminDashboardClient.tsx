@@ -198,30 +198,35 @@ export default function AdminDashboardClient({
   // Store Customization & Settings State
   const [siteName, setSiteName] = useState(initialSettings.siteName || "Shajgoj.bd");
   const [siteDescription, setSiteDescription] = useState(
-    initialSettings.siteDescription || "Premium beauty, jewelry & lifestyle accessories for Bangladesh"
+    initialSettings.siteDescription ||
+      "Premium beauty, jewelry & lifestyle accessories for Bangladesh",
   );
-  const [contactEmail, setContactEmail] = useState(initialSettings.contactEmail || "hello@shajgoj.bd");
-  const [contactPhone, setContactPhone] = useState(initialSettings.contactPhone || "+880 1711-223344");
+  const [contactEmail, setContactEmail] = useState(
+    initialSettings.contactEmail || "hello@shajgoj.bd",
+  );
+  const [contactPhone, setContactPhone] = useState(
+    initialSettings.contactPhone || "+880 1711-223344",
+  );
   const [storeAddress, setStoreAddress] = useState(
-    initialSettings.address || "House 42, Road 11, Banani, Dhaka 1213, Bangladesh"
+    initialSettings.address || "House 42, Road 11, Banani, Dhaka 1213, Bangladesh",
   );
   const [freeShippingThreshold, setFreeShippingThreshold] = useState(
-    String(initialSettings.shipping?.freeShippingThreshold ?? 2000)
+    String(initialSettings.shipping?.freeShippingThreshold ?? 2000),
   );
   const [insideDhakaFee, setInsideDhakaFee] = useState(
-    String(initialSettings.shipping?.insideDhakaCost ?? 70)
+    String(initialSettings.shipping?.insideDhakaCost ?? 70),
   );
   const [outsideDhakaFee, setOutsideDhakaFee] = useState(
-    String(initialSettings.shipping?.outsideDhakaCost ?? 120)
+    String(initialSettings.shipping?.outsideDhakaCost ?? 120),
   );
   const [instagramUrl, setInstagramUrl] = useState(
-    initialSettings.socialLinks?.instagram || "https://instagram.com/shajgojbd"
+    initialSettings.socialLinks?.instagram || "https://instagram.com/shajgojbd",
   );
   const [facebookUrl, setFacebookUrl] = useState(
-    initialSettings.socialLinks?.facebook || "https://facebook.com/shajgojbd"
+    initialSettings.socialLinks?.facebook || "https://facebook.com/shajgojbd",
   );
   const [whatsappNumber, setWhatsappNumber] = useState(
-    initialSettings.socialLinks?.whatsapp || "+8801711223344"
+    initialSettings.socialLinks?.whatsapp || "+8801711223344",
   );
   const [isSavingSettings, setIsSavingSettings] = useState(false);
 
@@ -278,9 +283,7 @@ export default function AdminDashboardClient({
 
       if (!res.ok) throw new Error("Failed to update user role");
 
-      setUsersList((prev) =>
-        prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u))
-      );
+      setUsersList((prev) => prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u)));
       toast.success(`User role updated to ${newRole}`);
     } catch (err) {
       toast.error("Failed to update user role");
@@ -291,7 +294,7 @@ export default function AdminDashboardClient({
     try {
       const newStatus = !currentStatus;
       setUsersList((prev) =>
-        prev.map((u) => (u.id === userId ? { ...u, isActive: newStatus } : u))
+        prev.map((u) => (u.id === userId ? { ...u, isActive: newStatus } : u)),
       );
       toast.success(`User status updated to ${newStatus ? "ACTIVE" : "SUSPENDED"}`);
     } catch (err) {
@@ -312,7 +315,7 @@ export default function AdminDashboardClient({
       if (!res.ok) throw new Error("Failed to update status");
 
       setOrders((prev) =>
-        prev.map((o) => (o._id === orderId || o.id === orderId ? { ...o, status: newStatus } : o))
+        prev.map((o) => (o._id === orderId || o.id === orderId ? { ...o, status: newStatus } : o)),
       );
       toast.success(`Order status updated to ${newStatus}`);
     } catch (err) {
@@ -369,7 +372,9 @@ export default function AdminDashboardClient({
             stock: Number(prodStock),
             category: prodCategory || categories[0]?._id,
             description: prodDescription,
-            images: prodImage ? [prodImage] : ["https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=800"],
+            images: prodImage
+              ? [prodImage]
+              : ["https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=800"],
             isFeatured: prodFeatured,
             isNewArrival: prodNewArrival,
             isBestseller: prodBestseller,
@@ -413,7 +418,9 @@ export default function AdminDashboardClient({
     setProdPrice(String(product.price));
     setProdComparePrice(product.compareAtPrice ? String(product.compareAtPrice) : "");
     setProdStock(String(product.stock ?? 10));
-    setProdCategory(typeof product.category === "object" ? product.category?._id : product.category || "");
+    setProdCategory(
+      typeof product.category === "object" ? product.category?._id : product.category || "",
+    );
     setProdImage(product.images?.[0] || "");
     setProdDescription(product.description || "");
     setProdFeatured(Boolean(product.isFeatured));
@@ -543,7 +550,11 @@ export default function AdminDashboardClient({
 
   // --- Handlers for Database Seeding ---
   const handleSeedDatabase = async () => {
-    if (!confirm("This will initialize/refresh sample products, categories, coupons, orders, and test users in MongoDB for Shajgoj.bd. Proceed?")) {
+    if (
+      !confirm(
+        "This will initialize/refresh sample products, categories, coupons, orders, and test users in MongoDB for Shajgoj.bd. Proceed?",
+      )
+    ) {
       return;
     }
     setIsSeedingDb(true);
@@ -739,7 +750,9 @@ export default function AdminDashboardClient({
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card border border-border p-4 rounded-3xl">
                   <div>
                     <h2 className="font-serif text-2xl font-bold">Catalog & Products</h2>
-                    <p className="text-xs text-muted-foreground">Manage luxury jewelry, bags, watches, pricing & variants</p>
+                    <p className="text-xs text-muted-foreground">
+                      Manage luxury jewelry, bags, watches, pricing & variants
+                    </p>
                   </div>
                   <button
                     onClick={() => {
@@ -763,19 +776,28 @@ export default function AdminDashboardClient({
                       <div className="space-y-2">
                         <div className="aspect-square bg-secondary/50 rounded-2xl overflow-hidden relative">
                           <img
-                            src={p.images?.[0] || "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=800"}
+                            src={
+                              p.images?.[0] ||
+                              "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=800"
+                            }
                             alt={p.name}
                             className="w-full h-full object-cover"
                           />
                           <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-black/60 text-white backdrop-blur-xs">
-                            {typeof p.category === "object" ? p.category?.name : p.category || "General"}
+                            {typeof p.category === "object"
+                              ? p.category?.name
+                              : p.category || "General"}
                           </span>
                         </div>
 
                         <h3 className="font-bold text-xs text-foreground line-clamp-1">{p.name}</h3>
                         <div className="flex items-center justify-between text-xs">
-                          <span className="font-bold text-primary text-sm">৳{p.price?.toLocaleString()}</span>
-                          <span className="text-[11px] text-muted-foreground font-semibold">Stock: {p.stock || 0} units</span>
+                          <span className="font-bold text-primary text-sm">
+                            ৳{p.price?.toLocaleString()}
+                          </span>
+                          <span className="text-[11px] text-muted-foreground font-semibold">
+                            Stock: {p.stock || 0} units
+                          </span>
                         </div>
                       </div>
 
@@ -807,7 +829,9 @@ export default function AdminDashboardClient({
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card border border-border p-4 rounded-3xl">
                   <div>
                     <h2 className="font-serif text-2xl font-bold">Categories & Collections</h2>
-                    <p className="text-xs text-muted-foreground">Organize product hierarchy, SEO slugs & promotional badges</p>
+                    <p className="text-xs text-muted-foreground">
+                      Organize product hierarchy, SEO slugs & promotional badges
+                    </p>
                   </div>
                   <button
                     onClick={() => {
@@ -838,7 +862,9 @@ export default function AdminDashboardClient({
                             /{c.slug}
                           </span>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{c.description || "Curated collection"}</p>
+                        <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                          {c.description || "Curated collection"}
+                        </p>
                       </div>
 
                       <div className="flex justify-end gap-2 pt-2 border-t border-border">
@@ -873,10 +899,7 @@ export default function AdminDashboardClient({
 
             {/* 7. Customers CRM Tab */}
             {activeTab === "customers" && (
-              <CustomerCrmModule
-                users={usersList}
-                onToggleUserStatus={handleToggleUserStatus}
-              />
+              <CustomerCrmModule users={usersList} onToggleUserStatus={handleToggleUserStatus} />
             )}
 
             {/* 8. Multi-Vendor Tab */}
@@ -924,7 +947,9 @@ export default function AdminDashboardClient({
             {activeTab === "settings" && (
               <div className="bg-card border border-border rounded-3xl p-6 lg:p-8 shadow-xs space-y-6 max-w-4xl">
                 <div>
-                  <h2 className="font-serif text-2xl font-bold">Store Configuration & Delivery Rules</h2>
+                  <h2 className="font-serif text-2xl font-bold">
+                    Store Configuration & Delivery Rules
+                  </h2>
                   <p className="text-xs text-muted-foreground">
                     Customize store name, contact hotline, shipping thresholds & social integrations
                   </p>
@@ -976,7 +1001,9 @@ export default function AdminDashboardClient({
                   </div>
 
                   <div>
-                    <label className="block font-semibold mb-1">Physical Flagship Store Address</label>
+                    <label className="block font-semibold mb-1">
+                      Physical Flagship Store Address
+                    </label>
                     <input
                       type="text"
                       value={storeAddress}
@@ -992,7 +1019,9 @@ export default function AdminDashboardClient({
                     </p>
                     <div className="grid sm:grid-cols-3 gap-3">
                       <div>
-                        <label className="block text-[11px] font-medium mb-1">Inside Dhaka Fee (৳)</label>
+                        <label className="block text-[11px] font-medium mb-1">
+                          Inside Dhaka Fee (৳)
+                        </label>
                         <input
                           type="number"
                           value={insideDhakaFee}
@@ -1001,7 +1030,9 @@ export default function AdminDashboardClient({
                         />
                       </div>
                       <div>
-                        <label className="block text-[11px] font-medium mb-1">Outside Dhaka Fee (৳)</label>
+                        <label className="block text-[11px] font-medium mb-1">
+                          Outside Dhaka Fee (৳)
+                        </label>
                         <input
                           type="number"
                           value={outsideDhakaFee}
@@ -1010,7 +1041,9 @@ export default function AdminDashboardClient({
                         />
                       </div>
                       <div>
-                        <label className="block text-[11px] font-medium mb-1">Free Delivery Min Spend (৳)</label>
+                        <label className="block text-[11px] font-medium mb-1">
+                          Free Delivery Min Spend (৳)
+                        </label>
                         <input
                           type="number"
                           value={freeShippingThreshold}
@@ -1254,7 +1287,11 @@ export default function AdminDashboardClient({
                   disabled={isSubmittingCat}
                   className="px-5 py-2 rounded-xl bg-primary text-primary-foreground font-bold hover:opacity-90 transition"
                 >
-                  {isSubmittingCat ? "Saving..." : editingCategory ? "Update Category" : "Add Category"}
+                  {isSubmittingCat
+                    ? "Saving..."
+                    : editingCategory
+                      ? "Update Category"
+                      : "Add Category"}
                 </button>
               </div>
             </form>
@@ -1296,7 +1333,9 @@ export default function AdminDashboardClient({
                 >
                   <div>
                     <span className="font-bold text-foreground">{acc.role}</span>
-                    <div className="text-[11px] text-muted-foreground">{acc.email} · Pass: <strong>{acc.pass}</strong></div>
+                    <div className="text-[11px] text-muted-foreground">
+                      {acc.email} · Pass: <strong>{acc.pass}</strong>
+                    </div>
                   </div>
                   <button
                     onClick={() => copyToClipboard(acc.email, acc.email)}

@@ -131,9 +131,7 @@ export function CouriersPaymentsModule() {
 
   const handleToggleCourier = (id: string) => {
     setCouriers((prev) =>
-      prev.map((c) =>
-        c.id === id ? { ...c, autoBooking: !c.autoBooking } : c
-      )
+      prev.map((c) => (c.id === id ? { ...c, autoBooking: !c.autoBooking } : c)),
     );
     toast.success("Courier automatic dispatch settings updated!");
   };
@@ -188,7 +186,11 @@ export function CouriersPaymentsModule() {
               </span>
             </div>
             <p className="text-muted-foreground">
-              Amount: <strong className="text-foreground">৳{trxResult.amount.toLocaleString()} {trxResult.currency}</strong> · Sender: {trxResult.senderPhone} · Timestamp: {trxResult.paidAt}
+              Amount:{" "}
+              <strong className="text-foreground">
+                ৳{trxResult.amount.toLocaleString()} {trxResult.currency}
+              </strong>{" "}
+              · Sender: {trxResult.senderPhone} · Timestamp: {trxResult.paidAt}
             </p>
           </div>
         )}
@@ -220,7 +222,9 @@ export function CouriersPaymentsModule() {
 
               <div>
                 <h4 className="font-bold text-xs text-foreground">{c.name}</h4>
-                <p className="text-[11px] font-mono text-muted-foreground mt-0.5">Key: {c.apiKey}</p>
+                <p className="text-[11px] font-mono text-muted-foreground mt-0.5">
+                  Key: {c.apiKey}
+                </p>
               </div>
 
               <div className="p-2.5 rounded-2xl bg-secondary/40 border border-border flex items-center justify-between text-xs">

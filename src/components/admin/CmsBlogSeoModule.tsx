@@ -1,17 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  FileText,
-  Plus,
-  Edit2,
-  Trash2,
-  Globe,
-  Code,
-  Check,
-  Copy,
-  Search,
-} from "lucide-react";
+import { FileText, Plus, Edit2, Trash2, Globe, Code, Check, Copy, Search } from "lucide-react";
 import { toast } from "sonner";
 
 export function CmsBlogSeoModule() {
@@ -59,13 +49,10 @@ export function CmsBlogSeoModule() {
         areaServed: "BD",
         availableLanguage: ["en", "bn"],
       },
-      sameAs: [
-        "https://facebook.com/shajgojbd",
-        "https://instagram.com/shajgojbd",
-      ],
+      sameAs: ["https://facebook.com/shajgojbd", "https://instagram.com/shajgojbd"],
     },
     null,
-    2
+    2,
   );
 
   const handleCopySchema = () => {
@@ -165,7 +152,9 @@ export function CmsBlogSeoModule() {
               >
                 <div>
                   <h4 className="font-bold text-foreground">{page.title}</h4>
-                  <p className="text-[11px] font-mono text-muted-foreground">URL: https://shajgoj.bd/{page.slug}</p>
+                  <p className="text-[11px] font-mono text-muted-foreground">
+                    URL: https://shajgoj.bd/{page.slug}
+                  </p>
                 </div>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-500/15 text-emerald-600">
                   {page.status}
@@ -182,7 +171,9 @@ export function CmsBlogSeoModule() {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="font-serif font-bold text-lg">Schema.org JSON-LD Structured Data</h3>
-              <p className="text-muted-foreground">Automated SEO rich snippets for Google Bangladesh</p>
+              <p className="text-muted-foreground">
+                Automated SEO rich snippets for Google Bangladesh
+              </p>
             </div>
             <button
               onClick={handleCopySchema}

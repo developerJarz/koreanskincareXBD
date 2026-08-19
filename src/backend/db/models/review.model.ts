@@ -41,12 +41,11 @@ const reviewSchema = new Schema<ReviewDocument>(
         return ret;
       },
     },
-  }
+  },
 );
 
 reviewSchema.index({ product: 1, status: 1 });
 reviewSchema.index({ user: 1 });
 
 export const Review: Model<ReviewDocument> =
-  mongoose.models.Review ||
-  mongoose.model<ReviewDocument>("Review", reviewSchema);
+  mongoose.models.Review || mongoose.model<ReviewDocument>("Review", reviewSchema);

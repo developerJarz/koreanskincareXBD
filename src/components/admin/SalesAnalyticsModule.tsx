@@ -38,28 +38,84 @@ export function SalesAnalyticsModule({
   const avgOrderValue = totalOrdersCount > 0 ? Math.round(totalRevenue / totalOrdersCount) : 2450;
   const estimatedCostOfGoods = Math.round(totalRevenue * 0.42);
   const estimatedGrossProfit = totalRevenue - estimatedCostOfGoods;
-  const grossMarginPercent = totalRevenue > 0 ? Math.round((estimatedGrossProfit / totalRevenue) * 100) : 58;
+  const grossMarginPercent =
+    totalRevenue > 0 ? Math.round((estimatedGrossProfit / totalRevenue) * 100) : 58;
   const conversionRate = 3.82; // % benchmark for fashion in BD
   const roas = 4.6; // Return on Ad Spend (Meta & TikTok BD)
   const cac = 310; // Customer Acquisition Cost in BDT ৳
 
   // Division-wise sales distribution in Bangladesh
   const divisionSales = [
-    { name: "Dhaka", count: Math.round(totalOrdersCount * 0.58), revenue: Math.round(totalRevenue * 0.60), share: 60 },
-    { name: "Chattogram", count: Math.round(totalOrdersCount * 0.18), revenue: Math.round(totalRevenue * 0.18), share: 18 },
-    { name: "Sylhet", count: Math.round(totalOrdersCount * 0.08), revenue: Math.round(totalRevenue * 0.09), share: 9 },
-    { name: "Rajshahi", count: Math.round(totalOrdersCount * 0.06), revenue: Math.round(totalRevenue * 0.05), share: 5 },
-    { name: "Khulna", count: Math.round(totalOrdersCount * 0.04), revenue: Math.round(totalRevenue * 0.04), share: 4 },
-    { name: "Mymensingh", count: Math.round(totalOrdersCount * 0.03), revenue: Math.round(totalRevenue * 0.02), share: 2 },
-    { name: "Rangpur & Barishal", count: Math.round(totalOrdersCount * 0.03), revenue: Math.round(totalRevenue * 0.02), share: 2 },
+    {
+      name: "Dhaka",
+      count: Math.round(totalOrdersCount * 0.58),
+      revenue: Math.round(totalRevenue * 0.6),
+      share: 60,
+    },
+    {
+      name: "Chattogram",
+      count: Math.round(totalOrdersCount * 0.18),
+      revenue: Math.round(totalRevenue * 0.18),
+      share: 18,
+    },
+    {
+      name: "Sylhet",
+      count: Math.round(totalOrdersCount * 0.08),
+      revenue: Math.round(totalRevenue * 0.09),
+      share: 9,
+    },
+    {
+      name: "Rajshahi",
+      count: Math.round(totalOrdersCount * 0.06),
+      revenue: Math.round(totalRevenue * 0.05),
+      share: 5,
+    },
+    {
+      name: "Khulna",
+      count: Math.round(totalOrdersCount * 0.04),
+      revenue: Math.round(totalRevenue * 0.04),
+      share: 4,
+    },
+    {
+      name: "Mymensingh",
+      count: Math.round(totalOrdersCount * 0.03),
+      revenue: Math.round(totalRevenue * 0.02),
+      share: 2,
+    },
+    {
+      name: "Rangpur & Barishal",
+      count: Math.round(totalOrdersCount * 0.03),
+      revenue: Math.round(totalRevenue * 0.02),
+      share: 2,
+    },
   ];
 
   // Sales Channel breakdown
   const salesChannels = [
-    { channel: "Online Web Store", share: 62, revenue: Math.round(totalRevenue * 0.62), color: "bg-primary" },
-    { channel: "Facebook & Instagram Shop", share: 24, revenue: Math.round(totalRevenue * 0.24), color: "bg-pink-500" },
-    { channel: "WhatsApp Direct Booking", share: 10, revenue: Math.round(totalRevenue * 0.10), color: "bg-emerald-500" },
-    { channel: "Banani Flagship POS Outlet", share: 4, revenue: Math.round(totalRevenue * 0.04), color: "bg-amber-500" },
+    {
+      channel: "Online Web Store",
+      share: 62,
+      revenue: Math.round(totalRevenue * 0.62),
+      color: "bg-primary",
+    },
+    {
+      channel: "Facebook & Instagram Shop",
+      share: 24,
+      revenue: Math.round(totalRevenue * 0.24),
+      color: "bg-pink-500",
+    },
+    {
+      channel: "WhatsApp Direct Booking",
+      share: 10,
+      revenue: Math.round(totalRevenue * 0.1),
+      color: "bg-emerald-500",
+    },
+    {
+      channel: "Banani Flagship POS Outlet",
+      share: 4,
+      revenue: Math.round(totalRevenue * 0.04),
+      color: "bg-amber-500",
+    },
   ];
 
   // Interactive 7-point Revenue Curve Data
@@ -79,7 +135,9 @@ export function SalesAnalyticsModule({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card border border-border p-4 rounded-3xl">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-xs uppercase tracking-wider text-primary font-bold">Executive Intelligence</span>
+            <span className="text-xs uppercase tracking-wider text-primary font-bold">
+              Executive Intelligence
+            </span>
             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
               Live BI Synced
             </span>
@@ -167,7 +225,8 @@ export function SalesAnalyticsModule({
             </div>
           </div>
           <div className="text-2xl lg:text-3xl font-serif font-bold text-foreground mt-2">
-            {conversionRate}% <span className="text-base text-muted-foreground font-normal">/ {roas}x</span>
+            {conversionRate}%{" "}
+            <span className="text-base text-muted-foreground font-normal">/ {roas}x</span>
           </div>
           <div className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
             <span>Avg CAC: ৳{cac} per buyer</span>
@@ -181,14 +240,17 @@ export function SalesAnalyticsModule({
           <div className="flex items-center justify-between">
             <div>
               <h3 className="font-serif font-bold text-lg">Revenue vs Net Margin Velocity</h3>
-              <p className="text-xs text-muted-foreground">Daily performance trajectory in Bangladeshi Taka (৳)</p>
+              <p className="text-xs text-muted-foreground">
+                Daily performance trajectory in Bangladeshi Taka (৳)
+              </p>
             </div>
             <div className="flex items-center gap-4 text-xs font-semibold">
               <span className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-primary inline-block"></span> Revenue
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> Profit
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>{" "}
+                Profit
               </span>
             </div>
           </div>
@@ -201,7 +263,10 @@ export function SalesAnalyticsModule({
                 const revHeight = Math.round((pt.rev / maxVal) * 100);
                 const profitHeight = Math.round((pt.profit / maxVal) * 100);
                 return (
-                  <div key={pt.label} className="flex flex-col items-center gap-2 h-full justify-end group">
+                  <div
+                    key={pt.label}
+                    className="flex flex-col items-center gap-2 h-full justify-end group"
+                  >
                     <div className="w-full flex items-end justify-center gap-1 sm:gap-2 h-full">
                       {/* Revenue Bar */}
                       <div
@@ -216,7 +281,9 @@ export function SalesAnalyticsModule({
                         title={`Profit: ৳${pt.profit.toLocaleString()}`}
                       />
                     </div>
-                    <span className="text-[10px] text-muted-foreground font-semibold truncate">{pt.label}</span>
+                    <span className="text-[10px] text-muted-foreground font-semibold truncate">
+                      {pt.label}
+                    </span>
                   </div>
                 );
               })}
@@ -237,10 +304,15 @@ export function SalesAnalyticsModule({
               <div key={ch.channel} className="space-y-1.5">
                 <div className="flex justify-between text-xs font-medium">
                   <span>{ch.channel}</span>
-                  <span className="font-bold">৳{ch.revenue.toLocaleString()} ({ch.share}%)</span>
+                  <span className="font-bold">
+                    ৳{ch.revenue.toLocaleString()} ({ch.share}%)
+                  </span>
                 </div>
                 <div className="w-full h-2 bg-secondary rounded-full overflow-hidden">
-                  <div className={`h-full ${ch.color} rounded-full`} style={{ width: `${ch.share}%` }} />
+                  <div
+                    className={`h-full ${ch.color} rounded-full`}
+                    style={{ width: `${ch.share}%` }}
+                  />
                 </div>
               </div>
             ))}
@@ -254,7 +326,9 @@ export function SalesAnalyticsModule({
           <div className="flex items-center justify-between">
             <div>
               <h3 className="font-serif font-bold text-lg">Bangladesh Division Distribution</h3>
-              <p className="text-xs text-muted-foreground">Order volume and revenue across 8 divisions</p>
+              <p className="text-xs text-muted-foreground">
+                Order volume and revenue across 8 divisions
+              </p>
             </div>
             <MapPin className="w-4 h-4 text-primary" />
           </div>
@@ -281,7 +355,9 @@ export function SalesAnalyticsModule({
           <div className="flex items-center justify-between">
             <div>
               <h3 className="font-serif font-bold text-lg">Top Grossing Products</h3>
-              <p className="text-xs text-muted-foreground">Highest revenue generating catalog items</p>
+              <p className="text-xs text-muted-foreground">
+                Highest revenue generating catalog items
+              </p>
             </div>
             <Flame className="w-4 h-4 text-amber-500" />
           </div>

@@ -10,10 +10,7 @@ export { Coupon, type CouponDocument } from "./coupon.model";
 export { Address, type AddressDocument } from "./address.model";
 export { Blog, type BlogDocument } from "./blog.model";
 export { Notification, type NotificationDocument } from "./notification.model";
-export {
-  HomepageSection,
-  type HomepageSectionDocument,
-} from "./homepage-section.model";
+export { HomepageSection, type HomepageSectionDocument } from "./homepage-section.model";
 export { Banner, type BannerDocument } from "./banner.model";
 export { Settings, type SettingsDocument } from "./settings.model";
 export { Payment, type PaymentDocument } from "./payment.model";

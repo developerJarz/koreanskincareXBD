@@ -53,18 +53,18 @@ export function ReturnsRefundsModule() {
   const [activeRefundModal, setActiveRefundModal] = useState<ReturnRequest | null>(null);
 
   const handleUpdateReturnStatus = (id: string, status: ReturnRequest["status"]) => {
-    setReturnRequests((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, status } : r))
-    );
+    setReturnRequests((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
     toast.success(`Return status updated to ${status.toUpperCase()}!`);
   };
 
   const handleExecuteRefund = () => {
     if (!activeRefundModal) return;
     setReturnRequests((prev) =>
-      prev.map((r) => (r.id === activeRefundModal.id ? { ...r, status: "refunded" } : r))
+      prev.map((r) => (r.id === activeRefundModal.id ? { ...r, status: "refunded" } : r)),
     );
-    toast.success(`Refund of ৳${activeRefundModal.refundAmount.toLocaleString()} disbursed via ${activeRefundModal.refundMethod.toUpperCase()}!`);
+    toast.success(
+      `Refund of ৳${activeRefundModal.refundAmount.toLocaleString()} disbursed via ${activeRefundModal.refundMethod.toUpperCase()}!`,
+    );
     setActiveRefundModal(null);
   };
 
@@ -109,7 +109,9 @@ export function ReturnsRefundsModule() {
                 <tr key={req.id} className="hover:bg-secondary/30 transition">
                   <td className="p-3.5">
                     <div className="font-bold text-foreground">{req.orderNumber}</div>
-                    <div className="text-[11px] text-muted-foreground">{req.customerName} ({req.customerPhone})</div>
+                    <div className="text-[11px] text-muted-foreground">
+                      {req.customerName} ({req.customerPhone})
+                    </div>
                   </td>
                   <td className="p-3.5">
                     <div className="font-semibold text-foreground">{req.productName}</div>
@@ -132,8 +134,8 @@ export function ReturnsRefundsModule() {
                         req.status === "refunded"
                           ? "bg-emerald-500/15 text-emerald-600"
                           : req.status === "approved"
-                          ? "bg-blue-500/15 text-blue-600"
-                          : "bg-amber-500/15 text-amber-600"
+                            ? "bg-blue-500/15 text-blue-600"
+                            : "bg-amber-500/15 text-amber-600"
                       }`}
                     >
                       {req.status}
@@ -171,19 +173,31 @@ export function ReturnsRefundsModule() {
           <div className="bg-card border border-border rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 animate-scale-up text-xs">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <h3 className="font-serif font-bold text-base">Disburse Customer Refund</h3>
-              <button onClick={() => setActiveRefundModal(null)} className="p-1 rounded-xl hover:bg-secondary">
+              <button
+                onClick={() => setActiveRefundModal(null)}
+                className="p-1 rounded-xl hover:bg-secondary"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="p-3 rounded-2xl bg-secondary/50 border border-border space-y-1">
-              <p className="font-bold text-foreground">Order {activeRefundModal.orderNumber} ({activeRefundModal.customerName})</p>
-              <p className="text-rose-600 font-bold text-sm">Refund Amount: ৳{activeRefundModal.refundAmount.toLocaleString()}</p>
-              <p className="text-muted-foreground">Target Channel: <strong>{activeRefundModal.refundMethod.toUpperCase()}</strong> ({activeRefundModal.customerPhone})</p>
+              <p className="font-bold text-foreground">
+                Order {activeRefundModal.orderNumber} ({activeRefundModal.customerName})
+              </p>
+              <p className="text-rose-600 font-bold text-sm">
+                Refund Amount: ৳{activeRefundModal.refundAmount.toLocaleString()}
+              </p>
+              <p className="text-muted-foreground">
+                Target Channel: <strong>{activeRefundModal.refundMethod.toUpperCase()}</strong> (
+                {activeRefundModal.customerPhone})
+              </p>
             </div>
 
             <p className="text-muted-foreground leading-relaxed">
-              Disbursing will automatically transfer ৳{activeRefundModal.refundAmount.toLocaleString()} to the customer via {activeRefundModal.refundMethod.toUpperCase()} and notify them with an SMS.
+              Disbursing will automatically transfer ৳
+              {activeRefundModal.refundAmount.toLocaleString()} to the customer via{" "}
+              {activeRefundModal.refundMethod.toUpperCase()} and notify them with an SMS.
             </p>
 
             <div className="flex justify-end gap-2 pt-2 border-t border-border">

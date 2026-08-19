@@ -41,7 +41,7 @@ const reviewSchema = new Schema<ReviewDocument>(
         return ret;
       },
     },
-  }
+  },
 );
 
 reviewSchema.index({ product: 1, status: 1 });
@@ -51,5 +51,4 @@ reviewSchema.index({ status: 1, createdAt: -1 });
 reviewSchema.index({ product: 1, user: 1 }, { unique: true });
 
 export const Review: Model<ReviewDocument> =
-  mongoose.models.Review ||
-  mongoose.model<ReviewDocument>("Review", reviewSchema);
+  mongoose.models.Review || mongoose.model<ReviewDocument>("Review", reviewSchema);

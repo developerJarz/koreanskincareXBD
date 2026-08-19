@@ -2,10 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/server/db/connection";
 import { Order } from "@/server/db/models";
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     await connectDB();
@@ -26,10 +23,7 @@ export async function GET(
   }
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const data = await request.json();

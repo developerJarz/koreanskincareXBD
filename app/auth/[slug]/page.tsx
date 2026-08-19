@@ -79,9 +79,13 @@ function LoginPage() {
   return (
     <section className="container-x py-16 lg:py-24 max-w-md">
       <div className="text-center mb-8">
-        <p className="text-xs tracking-[0.25em] uppercase text-primary font-bold">Access Your Account</p>
+        <p className="text-xs tracking-[0.25em] uppercase text-primary font-bold">
+          Access Your Account
+        </p>
         <h1 className="font-serif text-4xl lg:text-5xl mt-2">Welcome Back</h1>
-        <p className="text-xs text-muted-foreground mt-1">Sign in to manage orders, wishlist, or store operations</p>
+        <p className="text-xs text-muted-foreground mt-1">
+          Sign in to manage orders, wishlist, or store operations
+        </p>
       </div>
 
       <form
@@ -89,7 +93,9 @@ function LoginPage() {
         className="space-y-4 rounded-3xl border border-border bg-card p-6 lg:p-8 shadow-sm"
       >
         <div>
-          <label className="text-xs text-muted-foreground block mb-1 font-medium">Email Address</label>
+          <label className="text-xs text-muted-foreground block mb-1 font-medium">
+            Email Address
+          </label>
           <input
             type="email"
             required
@@ -176,9 +182,13 @@ function RegisterPage() {
   return (
     <section className="container-x py-16 lg:py-24 max-w-md">
       <div className="text-center mb-8">
-        <p className="text-xs tracking-[0.25em] uppercase text-primary font-bold">Join Shajgoj.bd</p>
+        <p className="text-xs tracking-[0.25em] uppercase text-primary font-bold">
+          Join Shajgoj.bd
+        </p>
         <h1 className="font-serif text-4xl lg:text-5xl mt-2">Create Account</h1>
-        <p className="text-xs text-muted-foreground mt-1">Enjoy exclusive member discounts & reward points</p>
+        <p className="text-xs text-muted-foreground mt-1">
+          Enjoy exclusive member discounts & reward points
+        </p>
       </div>
 
       <form
@@ -199,7 +209,9 @@ function RegisterPage() {
         </div>
 
         <div>
-          <label className="text-xs text-muted-foreground block mb-1 font-medium">Email Address</label>
+          <label className="text-xs text-muted-foreground block mb-1 font-medium">
+            Email Address
+          </label>
           <input
             type="email"
             required
@@ -212,7 +224,9 @@ function RegisterPage() {
         </div>
 
         <div>
-          <label className="text-xs text-muted-foreground block mb-1 font-medium">Create Password</label>
+          <label className="text-xs text-muted-foreground block mb-1 font-medium">
+            Create Password
+          </label>
           <input
             type="password"
             required
@@ -259,7 +273,9 @@ function ForgotPasswordPage() {
   return (
     <section className="container-x py-16 lg:py-24 max-w-md">
       <div className="text-center mb-8">
-        <p className="text-xs tracking-[0.25em] uppercase text-primary font-bold">Account Security</p>
+        <p className="text-xs tracking-[0.25em] uppercase text-primary font-bold">
+          Account Security
+        </p>
         <h1 className="font-serif text-4xl mt-2">Reset Password</h1>
       </div>
 
@@ -268,7 +284,9 @@ function ForgotPasswordPage() {
         className="space-y-4 rounded-3xl border border-border bg-card p-6 shadow-sm"
       >
         <div>
-          <label className="text-xs text-muted-foreground block mb-1 font-medium">Email Address</label>
+          <label className="text-xs text-muted-foreground block mb-1 font-medium">
+            Email Address
+          </label>
           <input
             type="email"
             required

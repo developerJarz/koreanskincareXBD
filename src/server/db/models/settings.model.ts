@@ -8,8 +8,7 @@ const settingsSchema = new Schema<SettingsDocument>(
     siteName: { type: String, default: "Shajgoj.bd" },
     siteDescription: {
       type: String,
-      default:
-        "Premium beauty, jewelry & lifestyle accessories for Bangladesh",
+      default: "Premium beauty, jewelry & lifestyle accessories for Bangladesh",
     },
     logo: { type: String },
     favicon: { type: String },
@@ -69,9 +68,8 @@ const settingsSchema = new Schema<SettingsDocument>(
         return ret;
       },
     },
-  }
+  },
 );
 
 export const Settings: Model<SettingsDocument> =
-  mongoose.models.Settings ||
-  mongoose.model<SettingsDocument>("Settings", settingsSchema);
+  mongoose.models.Settings || mongoose.model<SettingsDocument>("Settings", settingsSchema);

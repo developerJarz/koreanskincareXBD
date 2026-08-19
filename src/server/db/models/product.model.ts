@@ -17,7 +17,7 @@ const productVariantSchema = new Schema<IProductVariant>(
     images: [{ type: String }],
     isActive: { type: Boolean, default: true },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const productSchema = new Schema<ProductDocument>(
@@ -95,7 +95,7 @@ const productSchema = new Schema<ProductDocument>(
         return ret;
       },
     },
-  }
+  },
 );
 
 // Indexes for efficient queries
@@ -109,5 +109,4 @@ productSchema.index({ tags: 1 });
 productSchema.index({ name: "text", description: "text", tags: "text" });
 
 export const Product: Model<ProductDocument> =
-  mongoose.models.Product ||
-  mongoose.model<ProductDocument>("Product", productSchema);
+  mongoose.models.Product || mongoose.model<ProductDocument>("Product", productSchema);

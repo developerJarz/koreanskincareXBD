@@ -47,7 +47,11 @@ export async function PATCH(request: NextRequest) {
     }
 
     await connectDB();
-    const coupon = await Coupon.findByIdAndUpdate(id, { isActive: Boolean(isActive) }, { new: true }).lean();
+    const coupon = await Coupon.findByIdAndUpdate(
+      id,
+      { isActive: Boolean(isActive) },
+      { new: true },
+    ).lean();
     return NextResponse.json(JSON.parse(JSON.stringify(coupon)));
   } catch (err: any) {
     return NextResponse.json({ error: err.message || "Failed to update coupon" }, { status: 500 });

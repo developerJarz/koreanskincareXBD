@@ -40,7 +40,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   const [selectedColor, setSelectedColor] = useState<string>(p.colors?.[0] || "Standard Edition");
   const [selectedSize, setSelectedSize] = useState<string>(p.sizes?.[0] || "One Size");
   const [activeImage, setActiveImage] = useState(getImageSrc(p.img));
-  const [activeTab, setActiveTab] = useState<"details" | "reviews" | "shipping" | "care">("details");
+  const [activeTab, setActiveTab] = useState<"details" | "reviews" | "shipping" | "care">(
+    "details",
+  );
   const [isWishlisted, setIsWishlisted] = useState(false);
 
   const addItem = useCartStore((state) => state.addItem);
@@ -53,8 +55,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   );
 
   const trendingProducts = useMemo(
-    () =>
-      PRODUCTS.filter((item) => item.slug !== p.slug).slice(0, 4),
+    () => PRODUCTS.filter((item) => item.slug !== p.slug).slice(0, 4),
     [p.slug],
   );
 
@@ -99,7 +100,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
     }
   };
 
-  const discountPercent = p.was && p.was > p.price ? Math.round(((p.was - p.price) / p.was) * 100) : 0;
+  const discountPercent =
+    p.was && p.was > p.price ? Math.round(((p.was - p.price) / p.was) * 100) : 0;
 
   return (
     <div className="bg-background min-h-screen">
@@ -170,7 +172,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                   }`}
                   aria-label="Add to wishlist"
                 >
-                  <Heart className={`w-4 h-4 ${isWishlisted ? "fill-rose-500 text-rose-500" : ""}`} />
+                  <Heart
+                    className={`w-4 h-4 ${isWishlisted ? "fill-rose-500 text-rose-500" : ""}`}
+                  />
                 </button>
               </div>
 
@@ -345,7 +349,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                 <Truck className="w-4 h-4 text-primary shrink-0 mt-0.5" />
                 <div>
                   <p className="text-xs font-semibold">Fast Delivery</p>
-                  <p className="text-[11px] text-muted-foreground">1-2 days Dhaka, 2-3 days Nationwide</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    1-2 days Dhaka, 2-3 days Nationwide
+                  </p>
                 </div>
               </div>
 
@@ -353,7 +359,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                 <RotateCcw className="w-4 h-4 text-primary shrink-0 mt-0.5" />
                 <div>
                   <p className="text-xs font-semibold">7-Day Exchange</p>
-                  <p className="text-[11px] text-muted-foreground">Hassle-free size or defect replacement</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Hassle-free size or defect replacement
+                  </p>
                 </div>
               </div>
 
@@ -361,7 +369,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                 <ShieldCheck className="w-4 h-4 text-primary shrink-0 mt-0.5" />
                 <div>
                   <p className="text-xs font-semibold">100% Genuine</p>
-                  <p className="text-[11px] text-muted-foreground">Premium tarnish-resistant finish</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Premium tarnish-resistant finish
+                  </p>
                 </div>
               </div>
 
@@ -369,7 +379,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                 <Gift className="w-4 h-4 text-primary shrink-0 mt-0.5" />
                 <div>
                   <p className="text-xs font-semibold">Luxury Box</p>
-                  <p className="text-[11px] text-muted-foreground">Signature branded gift packing</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Signature branded gift packing
+                  </p>
                 </div>
               </div>
             </div>
@@ -425,34 +437,42 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
             {activeTab === "details" && (
               <div className="space-y-6">
                 <p>
-                  Every piece in the Shajgoj.bd collection is inspected individually for perfection in
-                  metal plating, stitching, and finishing. Designed for modern Bangladeshi women who
-                  appreciate understated elegance and enduring durability.
+                  Every piece in the Shajgoj.bd collection is inspected individually for perfection
+                  in metal plating, stitching, and finishing. Designed for modern Bangladeshi women
+                  who appreciate understated elegance and enduring durability.
                 </p>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="p-4 rounded-2xl bg-secondary/30 border border-border space-y-1">
                     <span className="text-xs text-muted-foreground uppercase font-bold tracking-wider">
                       Material
                     </span>
-                    <p className="text-foreground font-medium">Premium Grade Alloy / Anti-Tarnish Coating</p>
+                    <p className="text-foreground font-medium">
+                      Premium Grade Alloy / Anti-Tarnish Coating
+                    </p>
                   </div>
                   <div className="p-4 rounded-2xl bg-secondary/30 border border-border space-y-1">
                     <span className="text-xs text-muted-foreground uppercase font-bold tracking-wider">
                       Weight & Feel
                     </span>
-                    <p className="text-foreground font-medium">Lightweight, comfortable for all-day wear</p>
+                    <p className="text-foreground font-medium">
+                      Lightweight, comfortable for all-day wear
+                    </p>
                   </div>
                   <div className="p-4 rounded-2xl bg-secondary/30 border border-border space-y-1">
                     <span className="text-xs text-muted-foreground uppercase font-bold tracking-wider">
                       Packaging
                     </span>
-                    <p className="text-foreground font-medium">Custom luxury jewelry pouch & branded gift box</p>
+                    <p className="text-foreground font-medium">
+                      Custom luxury jewelry pouch & branded gift box
+                    </p>
                   </div>
                   <div className="p-4 rounded-2xl bg-secondary/30 border border-border space-y-1">
                     <span className="text-xs text-muted-foreground uppercase font-bold tracking-wider">
                       Origin & Craft
                     </span>
-                    <p className="text-foreground font-medium">Curated & quality-certified in Dhaka, Bangladesh</p>
+                    <p className="text-foreground font-medium">
+                      Curated & quality-certified in Dhaka, Bangladesh
+                    </p>
                   </div>
                 </div>
               </div>
@@ -468,15 +488,19 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                           <Star key={index} className="w-4 h-4 fill-primary" />
                         ))}
                       </div>
-                      <p className="font-semibold text-foreground">"Absolutely in love with this piece!"</p>
+                      <p className="font-semibold text-foreground">
+                        "Absolutely in love with this piece!"
+                      </p>
                     </div>
                     <span className="text-xs text-muted-foreground">3 days ago</span>
                   </div>
                   <p className="text-xs leading-relaxed">
-                    Ordered for my sister's birthday and she was thrilled. The packaging felt like an
-                    international luxury house and delivery took just 24 hours in Dhanmondi.
+                    Ordered for my sister's birthday and she was thrilled. The packaging felt like
+                    an international luxury house and delivery took just 24 hours in Dhanmondi.
                   </p>
-                  <p className="text-xs text-foreground font-medium">— Mehzabin A., Verified Buyer (Dhaka)</p>
+                  <p className="text-xs text-foreground font-medium">
+                    — Mehzabin A., Verified Buyer (Dhaka)
+                  </p>
                 </div>
 
                 <div className="p-6 rounded-3xl bg-secondary/40 border border-border space-y-4">
@@ -487,15 +511,19 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                           <Star key={index} className="w-4 h-4 fill-primary" />
                         ))}
                       </div>
-                      <p className="font-semibold text-foreground">"Superb finishing and fast COD delivery"</p>
+                      <p className="font-semibold text-foreground">
+                        "Superb finishing and fast COD delivery"
+                      </p>
                     </div>
                     <span className="text-xs text-muted-foreground">1 week ago</span>
                   </div>
                   <p className="text-xs leading-relaxed">
-                    Very impressed with the color sheen and weight. It looks even more expensive in person.
-                    The rider allowed me to verify before payment.
+                    Very impressed with the color sheen and weight. It looks even more expensive in
+                    person. The rider allowed me to verify before payment.
                   </p>
-                  <p className="text-xs text-foreground font-medium">— Nusrat K., Verified Buyer (Chattogram)</p>
+                  <p className="text-xs text-foreground font-medium">
+                    — Nusrat K., Verified Buyer (Chattogram)
+                  </p>
                 </div>
               </div>
             )}
@@ -505,20 +533,26 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                 <div className="p-4 rounded-2xl border border-border bg-card">
                   <h4 className="font-semibold text-foreground mb-1">Inside Dhaka Metropolitan:</h4>
                   <p className="text-xs">
-                    Standard Delivery: 24 to 48 hours (৳70 delivery fee, <strong>FREE on orders above ৳2,000</strong>).
+                    Standard Delivery: 24 to 48 hours (৳70 delivery fee,{" "}
+                    <strong>FREE on orders above ৳2,000</strong>).
                   </p>
                 </div>
                 <div className="p-4 rounded-2xl border border-border bg-card">
-                  <h4 className="font-semibold text-foreground mb-1">Outside Dhaka (All 64 Districts):</h4>
+                  <h4 className="font-semibold text-foreground mb-1">
+                    Outside Dhaka (All 64 Districts):
+                  </h4>
                   <p className="text-xs">
-                    SteadFast / Pathao Courier: 48 to 72 hours (৳120 delivery fee with Cash on Delivery).
+                    SteadFast / Pathao Courier: 48 to 72 hours (৳120 delivery fee with Cash on
+                    Delivery).
                   </p>
                 </div>
                 <div className="p-4 rounded-2xl border border-border bg-card">
-                  <h4 className="font-semibold text-foreground mb-1">Inspection & Return Policy:</h4>
+                  <h4 className="font-semibold text-foreground mb-1">
+                    Inspection & Return Policy:
+                  </h4>
                   <p className="text-xs">
-                    You can open and inspect the item in front of the delivery partner. We offer a 7-day
-                    replacement guarantee for any size or manufacturing discrepancy.
+                    You can open and inspect the item in front of the delivery partner. We offer a
+                    7-day replacement guarantee for any size or manufacturing discrepancy.
                   </p>
                 </div>
               </div>
@@ -530,7 +564,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                 <ul className="list-disc pl-5 space-y-2 text-xs">
                   <li>Avoid direct exposure to perfume, hairsprays, and harsh detergents.</li>
                   <li>Store in the provided airtight Shajgoj pouch when not in use.</li>
-                  <li>Gently wipe with a soft microfibre cloth after wearing to remove moisture.</li>
+                  <li>
+                    Gently wipe with a soft microfibre cloth after wearing to remove moisture.
+                  </li>
                   <li>Remove before swimming, exercising, or bathing.</li>
                 </ul>
               </div>
@@ -543,7 +579,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           <div className="mt-16 border-t border-border pt-14">
             <div className="flex items-end justify-between mb-8">
               <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-primary font-bold">Curated Matches</p>
+                <p className="text-xs uppercase tracking-[0.2em] text-primary font-bold">
+                  Curated Matches
+                </p>
                 <h2 className="font-serif text-3xl lg:text-4xl mt-1">Complete Your Look</h2>
               </div>
               <Link href="/shop" className="text-xs font-semibold text-primary hover:underline">
@@ -562,7 +600,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
         {trendingProducts.length > 0 && (
           <div className="mt-16 border-t border-border pt-14">
             <div className="mb-8">
-              <p className="text-xs uppercase tracking-[0.2em] text-primary font-bold">Trending Right Now</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-primary font-bold">
+                Trending Right Now
+              </p>
               <h2 className="font-serif text-3xl lg:text-4xl mt-1">Most Loved This Week</h2>
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">

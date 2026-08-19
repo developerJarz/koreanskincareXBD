@@ -183,15 +183,21 @@ export default function AccountPage() {
               <div className="space-y-8 animate-fade-up">
                 <div className="grid sm:grid-cols-3 gap-4">
                   <div className="bg-card p-6 rounded-3xl border border-border shadow-sm">
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Orders Placed</p>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
+                      Orders Placed
+                    </p>
                     <p className="font-sans text-3xl font-bold mt-2">{userOrders.length}</p>
                   </div>
                   <div className="bg-card p-6 rounded-3xl border border-border shadow-sm">
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Wallet Balance</p>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
+                      Wallet Balance
+                    </p>
                     <p className="font-sans text-3xl font-bold mt-2 text-primary">৳0</p>
                   </div>
                   <div className="bg-card p-6 rounded-3xl border border-border shadow-sm">
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Reward Points</p>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
+                      Reward Points
+                    </p>
                     <p className="font-sans text-3xl font-bold mt-2 text-amber-600">150 pts</p>
                   </div>
                 </div>
@@ -210,7 +216,9 @@ export default function AccountPage() {
                   {userOrders.length === 0 ? (
                     <div className="py-12 text-center space-y-3">
                       <Package className="w-12 h-12 text-muted-foreground mx-auto" />
-                      <p className="text-sm text-muted-foreground">You haven't placed any orders yet.</p>
+                      <p className="text-sm text-muted-foreground">
+                        You haven't placed any orders yet.
+                      </p>
                       <Link
                         href="/shop"
                         className="inline-block bg-primary text-primary-foreground px-6 py-2.5 rounded-full text-xs font-medium"
@@ -221,11 +229,15 @@ export default function AccountPage() {
                   ) : (
                     <div className="space-y-4">
                       {userOrders.slice(0, 3).map((order) => (
-                        <div key={order._id} className="p-4 rounded-2xl border border-border flex items-center justify-between">
+                        <div
+                          key={order._id}
+                          className="p-4 rounded-2xl border border-border flex items-center justify-between"
+                        >
                           <div>
                             <p className="font-mono text-sm font-bold">{order.orderNumber}</p>
                             <p className="text-xs text-muted-foreground mt-0.5">
-                              {order.items?.length || 1} items | Total: ৳{order.total?.toLocaleString()}
+                              {order.items?.length || 1} items | Total: ৳
+                              {order.total?.toLocaleString()}
                             </p>
                           </div>
                           <span className="text-xs px-3 py-1 rounded-full bg-primary/10 text-primary font-medium">
@@ -258,12 +270,17 @@ export default function AccountPage() {
                 ) : (
                   <div className="space-y-4">
                     {userOrders.map((order) => (
-                      <div key={order._id} className="p-5 rounded-2xl border border-border space-y-3">
+                      <div
+                        key={order._id}
+                        className="p-5 rounded-2xl border border-border space-y-3"
+                      >
                         <div className="flex items-center justify-between border-b border-border pb-3">
                           <div>
                             <span className="font-mono font-bold text-sm">{order.orderNumber}</span>
                             <span className="text-xs text-muted-foreground ml-3">
-                              {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : ""}
+                              {order.createdAt
+                                ? new Date(order.createdAt).toLocaleDateString()
+                                : ""}
                             </span>
                           </div>
                           <span className="text-xs px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 font-medium">
@@ -273,8 +290,14 @@ export default function AccountPage() {
 
                         <div className="flex justify-between items-center text-xs">
                           <div>
-                            <p className="text-muted-foreground">Payment Method: <strong className="text-foreground">{order.paymentMethod}</strong></p>
-                            <p className="text-muted-foreground">Shipping: {order.shippingAddress?.area}, {order.shippingAddress?.district}</p>
+                            <p className="text-muted-foreground">
+                              Payment Method:{" "}
+                              <strong className="text-foreground">{order.paymentMethod}</strong>
+                            </p>
+                            <p className="text-muted-foreground">
+                              Shipping: {order.shippingAddress?.area},{" "}
+                              {order.shippingAddress?.district}
+                            </p>
                           </div>
                           <p className="font-sans font-bold text-base text-primary">
                             ৳{order.total?.toLocaleString()}
@@ -292,12 +315,16 @@ export default function AccountPage() {
               <div className="bg-card p-6 lg:p-8 rounded-3xl border border-border shadow-sm space-y-6 animate-fade-up">
                 <div>
                   <h2 className="font-serif text-2xl">Profile Settings</h2>
-                  <p className="text-xs text-muted-foreground mt-0.5">Manage your personal information and contact details</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Manage your personal information and contact details
+                  </p>
                 </div>
 
                 <form onSubmit={handleUpdateProfile} className="space-y-4 max-w-lg">
                   <div>
-                    <label className="text-xs text-muted-foreground block mb-1 font-medium">Full Name</label>
+                    <label className="text-xs text-muted-foreground block mb-1 font-medium">
+                      Full Name
+                    </label>
                     <input
                       type="text"
                       required
@@ -308,7 +335,9 @@ export default function AccountPage() {
                   </div>
 
                   <div>
-                    <label className="text-xs text-muted-foreground block mb-1 font-medium">Phone Number</label>
+                    <label className="text-xs text-muted-foreground block mb-1 font-medium">
+                      Phone Number
+                    </label>
                     <input
                       type="tel"
                       value={profilePhone}
@@ -318,7 +347,9 @@ export default function AccountPage() {
                   </div>
 
                   <div>
-                    <label className="text-xs text-muted-foreground block mb-1 font-medium">Email Address</label>
+                    <label className="text-xs text-muted-foreground block mb-1 font-medium">
+                      Email Address
+                    </label>
                     <input
                       type="email"
                       disabled

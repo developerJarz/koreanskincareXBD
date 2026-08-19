@@ -87,12 +87,13 @@ export function InventoryWarehouseModule({
   const handleApplyStockAdjustment = async () => {
     if (!adjustStockProduct) return;
     const currentStock = adjustStockProduct.stock || 0;
-    const newStock = adjustmentReason === "damage" || adjustmentReason === "transfer_out"
-      ? Math.max(0, currentStock - adjustmentAmount)
-      : currentStock + adjustmentAmount;
+    const newStock =
+      adjustmentReason === "damage" || adjustmentReason === "transfer_out"
+        ? Math.max(0, currentStock - adjustmentAmount)
+        : currentStock + adjustmentAmount;
 
     setProducts((prev) =>
-      prev.map((p) => (p._id === adjustStockProduct._id ? { ...p, stock: newStock } : p))
+      prev.map((p) => (p._id === adjustStockProduct._id ? { ...p, stock: newStock } : p)),
     );
 
     if (onUpdateProductStock) {
@@ -100,7 +101,7 @@ export function InventoryWarehouseModule({
     }
 
     toast.success(
-      `Stock updated for ${adjustStockProduct.name}! New level: ${newStock} units (${adjustmentReason})`
+      `Stock updated for ${adjustStockProduct.name}! New level: ${newStock} units (${adjustmentReason})`,
     );
     setAdjustStockProduct(null);
   };
@@ -114,7 +115,9 @@ export function InventoryWarehouseModule({
             <Boxes className="w-5 h-5 text-primary" />
             <h2 className="font-serif text-2xl font-bold">Multi-Warehouse & Stock Control</h2>
           </div>
-          <p className="text-xs text-muted-foreground">Real-time inventory levels, barcode label printing & hub replenishment</p>
+          <p className="text-xs text-muted-foreground">
+            Real-time inventory levels, barcode label printing & hub replenishment
+          </p>
         </div>
 
         {lowStockItems.length > 0 && (
@@ -209,11 +212,14 @@ export function InventoryWarehouseModule({
                     <td className="p-3.5">
                       <div className="font-semibold text-foreground">{prod.name}</div>
                       <div className="text-[10px] font-mono text-muted-foreground">
-                        SKU: SHJ-{prod.slug ? prod.slug.slice(0, 8).toUpperCase() : `ACC-${100 + i}`}
+                        SKU: SHJ-
+                        {prod.slug ? prod.slug.slice(0, 8).toUpperCase() : `ACC-${100 + i}`}
                       </div>
                     </td>
                     <td className="p-3.5 capitalize text-muted-foreground">
-                      {typeof prod.category === "object" ? prod.category?.name : prod.category || "Accessories"}
+                      {typeof prod.category === "object"
+                        ? prod.category?.name
+                        : prod.category || "Accessories"}
                     </td>
                     <td className="p-3.5 text-center font-medium">{dhakaShare}</td>
                     <td className="p-3.5 text-center font-medium">{ctgShare}</td>
@@ -221,7 +227,9 @@ export function InventoryWarehouseModule({
                     <td className="p-3.5 text-center">
                       <span
                         className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                          isLow ? "bg-rose-500/15 text-rose-600 border border-rose-300" : "bg-emerald-500/15 text-emerald-600"
+                          isLow
+                            ? "bg-rose-500/15 text-rose-600 border border-rose-300"
+                            : "bg-emerald-500/15 text-emerald-600"
                         }`}
                       >
                         {stock} units {isLow && "⚠ Low"}
@@ -263,14 +271,19 @@ export function InventoryWarehouseModule({
           <div className="bg-card border border-border rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 animate-scale-up text-xs">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <h3 className="font-serif font-bold text-base">Adjust Stock Level</h3>
-              <button onClick={() => setAdjustStockProduct(null)} className="p-1 rounded-xl hover:bg-secondary">
+              <button
+                onClick={() => setAdjustStockProduct(null)}
+                className="p-1 rounded-xl hover:bg-secondary"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div>
               <p className="font-bold text-foreground">{adjustStockProduct.name}</p>
-              <p className="text-muted-foreground mt-0.5">Current Stock: <strong>{adjustStockProduct.stock || 0} units</strong></p>
+              <p className="text-muted-foreground mt-0.5">
+                Current Stock: <strong>{adjustStockProduct.stock || 0} units</strong>
+              </p>
             </div>
 
             <div>
@@ -324,7 +337,10 @@ export function InventoryWarehouseModule({
           <div className="bg-white text-neutral-900 rounded-3xl p-6 max-w-sm w-full shadow-2xl text-center space-y-4 print:shadow-none">
             <div className="border-b border-neutral-200 pb-3 flex justify-between items-center print:hidden">
               <span className="font-serif font-bold text-sm">Product Barcode Label</span>
-              <button onClick={() => setActiveBarcodeProduct(null)} className="p-1 rounded-lg hover:bg-neutral-100">
+              <button
+                onClick={() => setActiveBarcodeProduct(null)}
+                className="p-1 rounded-lg hover:bg-neutral-100"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -332,19 +348,25 @@ export function InventoryWarehouseModule({
             {/* Sticker Preview */}
             <div className="border-2 border-dashed border-neutral-300 p-4 rounded-2xl space-y-2 bg-neutral-50">
               <div className="font-serif font-bold text-sm">Shajgoj.bd</div>
-              <p className="font-bold text-xs text-neutral-800 line-clamp-1">{activeBarcodeProduct.name}</p>
+              <p className="font-bold text-xs text-neutral-800 line-clamp-1">
+                {activeBarcodeProduct.name}
+              </p>
               <div className="py-2 flex justify-center">
                 {/* Simulated Barcode Lines */}
                 <div className="flex items-center gap-0.5 h-12">
-                  {[2, 1, 3, 1, 2, 4, 1, 3, 2, 1, 4, 2, 1, 3, 1, 2, 4, 2, 1, 3, 2, 1, 3, 2].map((w, i) => (
-                    <div key={i} style={{ width: `${w * 1.5}px` }} className="bg-black h-full" />
-                  ))}
+                  {[2, 1, 3, 1, 2, 4, 1, 3, 2, 1, 4, 2, 1, 3, 1, 2, 4, 2, 1, 3, 2, 1, 3, 2].map(
+                    (w, i) => (
+                      <div key={i} style={{ width: `${w * 1.5}px` }} className="bg-black h-full" />
+                    ),
+                  )}
                 </div>
               </div>
               <p className="font-mono text-[11px] text-neutral-700 tracking-wider">
                 SHJ-{activeBarcodeProduct.slug?.slice(0, 10).toUpperCase() || "ACC-8801"}
               </p>
-              <p className="font-bold text-xs text-rose-600">MRP: ৳{(activeBarcodeProduct.price || 3490).toLocaleString()}</p>
+              <p className="font-bold text-xs text-rose-600">
+                MRP: ৳{(activeBarcodeProduct.price || 3490).toLocaleString()}
+              </p>
             </div>
 
             <div className="flex justify-end gap-2 print:hidden">

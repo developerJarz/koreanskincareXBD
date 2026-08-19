@@ -88,10 +88,16 @@ export function NotificationDrawer({
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-1">
-                      <h4 className="font-semibold text-xs text-foreground truncate">{notif.title}</h4>
-                      <span className="text-[10px] text-muted-foreground shrink-0">{notif.timestamp}</span>
+                      <h4 className="font-semibold text-xs text-foreground truncate">
+                        {notif.title}
+                      </h4>
+                      <span className="text-[10px] text-muted-foreground shrink-0">
+                        {notif.timestamp}
+                      </span>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{notif.message}</p>
+                    <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                      {notif.message}
+                    </p>
 
                     {notif.type === "order" && (
                       <button

@@ -291,13 +291,23 @@ export default function AdminDashboardClient({
   };
 
   const handleToggleUserStatus = async (userId: string, currentStatus: boolean) => {
+    const newStatus = !currentStatus;
+    // Optimistically update UI
+    setUsersList((prev) => prev.map((u) => (u.id === userId ? { ...u, isActive: newStatus } : u)));
     try {
-      const newStatus = !currentStatus;
-      setUsersList((prev) =>
-        prev.map((u) => (u.id === userId ? { ...u, isActive: newStatus } : u)),
-      );
+      const res = await fetch("/api/admin/users", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, isActive: newStatus }),
+      });
+
+      if (!res.ok) throw new Error("Failed to update user status");
       toast.success(`User status updated to ${newStatus ? "ACTIVE" : "SUSPENDED"}`);
     } catch (err) {
+      // Revert on failure
+      setUsersList((prev) =>
+        prev.map((u) => (u.id === userId ? { ...u, isActive: currentStatus } : u)),
+      );
       toast.error("Failed to update user status");
     }
   };
@@ -545,6 +555,25 @@ export default function AdminDashboardClient({
       toast.error(err.message || "Failed to save settings");
     } finally {
       setIsSavingSettings(false);
+    }
+  };
+
+  // --- Handler for Inventory Stock Updates ---
+  const handleUpdateProductStock = async (productId: string, newStock: number) => {
+    try {
+      const res = await fetch("/api/admin/products", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: productId, stock: newStock }),
+      });
+
+      if (!res.ok) throw new Error("Failed to update stock");
+
+      // Sync the products list in the parent state too
+      setProducts((prev) => prev.map((p) => (p._id === productId ? { ...p, stock: newStock } : p)));
+    } catch (err) {
+      toast.error("Failed to save stock update to database");
+      throw err; // Re-throw so the inventory module can handle revert
     }
   };
 
@@ -895,7 +924,12 @@ export default function AdminDashboardClient({
             )}
 
             {/* 6. Multi-Warehouse & Inventory Tab */}
-            {activeTab === "inventory" && <InventoryWarehouseModule products={products} />}
+            {activeTab === "inventory" && (
+              <InventoryWarehouseModule
+                products={products}
+                onUpdateProductStock={handleUpdateProductStock}
+              />
+            )}
 
             {/* 7. Customers CRM Tab */}
             {activeTab === "customers" && (

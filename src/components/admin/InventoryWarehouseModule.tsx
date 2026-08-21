@@ -84,6 +84,8 @@ export function InventoryWarehouseModule({
 
   const lowStockItems = products.filter((p) => (p.stock || 0) <= (p.lowStockThreshold || 5));
 
+  const [isSavingStock, setIsSavingStock] = useState(false);
+
   const handleApplyStockAdjustment = async () => {
     if (!adjustStockProduct) return;
     const currentStock = adjustStockProduct.stock || 0;
@@ -92,18 +94,30 @@ export function InventoryWarehouseModule({
         ? Math.max(0, currentStock - adjustmentAmount)
         : currentStock + adjustmentAmount;
 
+    // Optimistically update UI
     setProducts((prev) =>
       prev.map((p) => (p._id === adjustStockProduct._id ? { ...p, stock: newStock } : p)),
     );
 
-    if (onUpdateProductStock) {
-      await onUpdateProductStock(adjustStockProduct._id, newStock);
-    }
+    setIsSavingStock(true);
+    try {
+      if (onUpdateProductStock) {
+        await onUpdateProductStock(adjustStockProduct._id, newStock);
+      }
 
-    toast.success(
-      `Stock updated for ${adjustStockProduct.name}! New level: ${newStock} units (${adjustmentReason})`,
-    );
-    setAdjustStockProduct(null);
+      toast.success(
+        `Stock updated for ${adjustStockProduct.name}! New level: ${newStock} units (${adjustmentReason})`,
+      );
+      setAdjustStockProduct(null);
+    } catch (err) {
+      // Revert on failure
+      setProducts((prev) =>
+        prev.map((p) => (p._id === adjustStockProduct._id ? { ...p, stock: currentStock } : p)),
+      );
+      toast.error("Failed to save stock update. Reverted to previous value.");
+    } finally {
+      setIsSavingStock(false);
+    }
   };
 
   return (
@@ -322,9 +336,10 @@ export function InventoryWarehouseModule({
               <button
                 type="button"
                 onClick={handleApplyStockAdjustment}
-                className="px-5 py-2 rounded-xl bg-primary text-primary-foreground font-bold hover:opacity-90 transition"
+                disabled={isSavingStock}
+                className="px-5 py-2 rounded-xl bg-primary text-primary-foreground font-bold hover:opacity-90 transition disabled:opacity-50"
               >
-                Apply Stock Update
+                {isSavingStock ? "Saving..." : "Apply Stock Update"}
               </button>
             </div>
           </div>

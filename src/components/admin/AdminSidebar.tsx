@@ -147,17 +147,14 @@ export function AdminSidebar({
         {/* Brand Header */}
         <div className="h-16 border-b border-border px-5 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-serif font-bold text-lg shadow-sm">
-              S
-            </div>
-            <div>
-              <div className="font-serif font-bold text-lg tracking-tight leading-none">
-                Shajgoj<span className="text-primary">.bd</span>
-              </div>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mt-0.5">
-                Enterprise Admin
-              </p>
-            </div>
+            <img
+              src="/shajgoj.png"
+              alt="Shajgoj.bd"
+              className="h-8 w-auto object-contain max-w-[130px]"
+            />
+            <span className="px-2 py-0.5 rounded-full text-[9px] uppercase tracking-wider font-bold bg-primary/10 text-primary border border-primary/20">
+              Admin
+            </span>
           </div>
           <button
             onClick={onClose}

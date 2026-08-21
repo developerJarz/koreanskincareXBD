@@ -6,9 +6,13 @@ export function Footer() {
     <footer className="bg-foreground text-background mt-24">
       <div className="container-x py-16 grid grid-cols-2 md:grid-cols-4 gap-y-10 gap-x-8 md:gap-10">
         <div className="col-span-2 md:col-span-1">
-          <p className="font-serif text-2xl">
-            Shajgoj<span className="text-primary">.bd</span>
-          </p>
+          <Link href="/" className="inline-block hover:opacity-90 transition">
+            <img
+              src="/shajgoj.bd final.png"
+              alt="Shajgoj.bd"
+              className="h-10 lg:h-12 w-auto max-w-[180px] object-contain"
+            />
+          </Link>
           <p className="mt-4 text-sm opacity-70 max-w-xs">
             Premium beauty, fashion & lifestyle accessories for the modern woman of Bangladesh.
           </p>

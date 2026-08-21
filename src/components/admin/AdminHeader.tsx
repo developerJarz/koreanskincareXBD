@@ -88,6 +88,10 @@ export function AdminHeader({
           <Menu className="w-5 h-5" />
         </button>
 
+        <Link href="/" className="lg:hidden flex items-center">
+          <img src="/shajgoj.png" alt="Shajgoj.bd" className="h-7 w-auto object-contain" />
+        </Link>
+
         {/* Global Search Trigger */}
         <button
           onClick={onOpenCommandPalette}

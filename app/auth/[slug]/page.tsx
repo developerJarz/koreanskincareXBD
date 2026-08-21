@@ -78,7 +78,10 @@ function LoginPage() {
 
   return (
     <section className="container-x py-16 lg:py-24 max-w-md">
-      <div className="text-center mb-8">
+      <div className="text-center mb-8 flex flex-col items-center">
+        <Link href="/" className="mb-4 inline-block hover:opacity-80 transition">
+          <img src="/shajgoj.png" alt="Shajgoj.bd" className="h-10 w-auto object-contain" />
+        </Link>
         <p className="text-xs tracking-[0.25em] uppercase text-primary font-bold">
           Access Your Account
         </p>
@@ -181,7 +184,10 @@ function RegisterPage() {
 
   return (
     <section className="container-x py-16 lg:py-24 max-w-md">
-      <div className="text-center mb-8">
+      <div className="text-center mb-8 flex flex-col items-center">
+        <Link href="/" className="mb-4 inline-block hover:opacity-80 transition">
+          <img src="/shajgoj.png" alt="Shajgoj.bd" className="h-10 w-auto object-contain" />
+        </Link>
         <p className="text-xs tracking-[0.25em] uppercase text-primary font-bold">
           Join Shajgoj.bd
         </p>
@@ -272,7 +278,10 @@ function ForgotPasswordPage() {
 
   return (
     <section className="container-x py-16 lg:py-24 max-w-md">
-      <div className="text-center mb-8">
+      <div className="text-center mb-8 flex flex-col items-center">
+        <Link href="/" className="mb-4 inline-block hover:opacity-80 transition">
+          <img src="/shajgoj.png" alt="Shajgoj.bd" className="h-10 w-auto object-contain" />
+        </Link>
         <p className="text-xs tracking-[0.25em] uppercase text-primary font-bold">
           Account Security
         </p>

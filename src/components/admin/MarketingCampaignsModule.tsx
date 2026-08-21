@@ -62,24 +62,40 @@ export function MarketingCampaignsModule({
     },
   ]);
 
-  const handleCreateCoupon = (e: React.FormEvent) => {
+  const [isCreatingCoupon, setIsCreatingCoupon] = useState(false);
+
+  const handleCreateCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCouponCode.trim()) return;
 
-    const newCoupon = {
-      _id: `cpn_${Date.now()}`,
-      code: newCouponCode.toUpperCase().trim(),
-      type: "percentage",
-      value: newCouponDiscount,
-      minOrderAmount: newCouponMinSpend,
-      usageCount: 0,
-      usageLimit: 500,
-      isActive: true,
-    };
+    setIsCreatingCoupon(true);
+    try {
+      const res = await fetch("/api/admin/coupons", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: newCouponCode.toUpperCase().trim(),
+          type: "percentage",
+          value: newCouponDiscount,
+          minOrderAmount: newCouponMinSpend,
+          usageLimit: 500,
+        }),
+      });
 
-    setCoupons([newCoupon, ...coupons]);
-    toast.success(`Coupon "${newCoupon.code}" created successfully!`);
-    setNewCouponCode("");
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to create coupon");
+      }
+
+      const newCoupon = await res.json();
+      setCoupons([newCoupon, ...coupons]);
+      toast.success(`Coupon "${newCoupon.code}" created and saved to database!`);
+      setNewCouponCode("");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to create coupon");
+    } finally {
+      setIsCreatingCoupon(false);
+    }
   };
 
   const handleBroadcastSms = () => {
@@ -211,9 +227,10 @@ export function MarketingCampaignsModule({
               />
               <button
                 type="submit"
-                className="col-span-1 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 transition"
+                disabled={isCreatingCoupon}
+                className="col-span-1 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 transition disabled:opacity-50"
               >
-                + Add Coupon
+                {isCreatingCoupon ? "Saving..." : "+ Add Coupon"}
               </button>
             </div>
           </form>

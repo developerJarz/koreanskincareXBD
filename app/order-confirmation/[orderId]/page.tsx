@@ -75,9 +75,12 @@ export default function OrderConfirmationPage({
 
       <div className="mt-12 bg-card p-8 rounded-3xl border border-border shadow-xl space-y-6">
         <div className="flex items-center justify-between pb-6 border-b border-border">
-          <div>
-            <p className="text-xs text-muted-foreground">Order Reference</p>
-            <p className="font-mono text-lg font-bold">{orderNumber}</p>
+          <div className="flex items-center gap-3">
+            <img src="/shajgoj.png" alt="Shajgoj.bd" className="h-8 w-auto object-contain" />
+            <div>
+              <p className="text-xs text-muted-foreground">Order Reference</p>
+              <p className="font-mono text-lg font-bold">{orderNumber}</p>
+            </div>
           </div>
           <button
             onClick={() => window.print()}

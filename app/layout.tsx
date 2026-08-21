@@ -13,6 +13,11 @@ export const metadata: Metadata = {
   title: "Shajgoj.bd — Premium Beauty, Accessories & Lifestyle in Bangladesh",
   description:
     "Discover Shajgoj.bd — premium beauty, bags, rings, earrings, necklaces, watches & accessories. Cash on delivery all over Bangladesh.",
+  icons: {
+    icon: [{ url: "/favicon.png", type: "image/png" }, { url: "/favicon.ico" }],
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
+  },
 };
 
 export const viewport = {
@@ -23,7 +28,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+        <link rel="icon" href="/favicon.png" type="image/png" />
+        <link rel="shortcut icon" href="/favicon.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/favicon.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link

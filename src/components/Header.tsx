@@ -38,8 +38,12 @@ export function Header() {
           >
             <Menu className="w-5 h-5" />
           </button>
-          <Link href="/" className="font-serif text-xl lg:text-2xl tracking-tight">
-            Shajgoj<span className="text-primary">.bd</span>
+          <Link href="/" className="flex items-center gap-2 tracking-tight group">
+            <img
+              src="/shajgoj.png"
+              alt="Shajgoj.bd"
+              className="h-8 lg:h-9 w-auto max-w-[140px] lg:max-w-[180px] object-contain transition-transform group-hover:scale-105"
+            />
           </Link>
           <nav className="hidden lg:flex items-center gap-8 text-sm">
             {NAV.map((n) => (
@@ -97,9 +101,9 @@ export function Header() {
       {menu && (
         <div className="fixed inset-0 z-50 bg-background lg:hidden animate-fade-up">
           <div className="flex items-center justify-between h-14 px-5 border-b border-border">
-            <span className="font-serif text-xl">
-              Shajgoj<span className="text-primary">.bd</span>
-            </span>
+            <Link href="/" onClick={() => setMenu(false)} className="flex items-center gap-2">
+              <img src="/shajgoj.png" alt="Shajgoj.bd" className="h-7 w-auto object-contain" />
+            </Link>
             <button onClick={() => setMenu(false)} aria-label="Close">
               <X className="w-5 h-5" />
             </button>

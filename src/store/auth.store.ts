@@ -58,7 +58,7 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
     {
-      name: "shajgoj-auth",
+      name: "koreanskincare-auth",
       storage: createJSONStorage(() => {
         if (typeof window !== "undefined") {
           return localStorage;

@@ -1,8 +1,9 @@
-# Shajgoj.bd — Enterprise Bangladeshi E-Commerce Management System & Storefront
+# koreanskincare.bd — Enterprise Bangladeshi E-Commerce Management System & Storefront
 
 A production-ready enterprise e-commerce platform and comprehensive Bangladeshi management system tailored with Cash on Delivery, bKash, Nagad, SSLCommerz, Pathao, RedX, Steadfast, Multi-Warehouse Inventory, and Advanced Business Intelligence.
 
 ## ✨ Features
+
 - **Modern Luxury E-Commerce**: Next.js 15, React 19, TypeScript, Tailwind CSS, Lucide icons.
 - **Enterprise Admin Operations Hub (`/admin`)**:
   - Advanced Sales Analytics & Business Intelligence (Real-time revenue, profit margin, CAC, LTV, Bangladesh district sales).
@@ -31,12 +32,3 @@ npm run dev
 npm run build
 npm start
 ```
-
-## 🔐 Default Test Accounts
-
-| Role | Email | Password |
-| :--- | :--- | :--- |
-| **Super Admin** | `superadmin@shajgoj.bd` | `admin123` |
-| **Admin** | `admin@shajgoj.bd` | `admin123` |
-| **Staff (Moderator)** | `staff@shajgoj.bd` | `staff123` |
-| **Customer** | `customer@shajgoj.bd` | `customer123` |

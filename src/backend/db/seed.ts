@@ -12,30 +12,31 @@ export const seedDatabase = createServerFn({ method: "POST" }).handler(async () 
   }
 
   // ─── 1. Create Role-Based Demo Users ───
-  const defaultPasswordHash = await bcryptjs.hash("admin123", 12);
-  const staffPasswordHash = await bcryptjs.hash("staff123", 12);
-  const customerPasswordHash = await bcryptjs.hash("customer123", 12);
+  const superAdminPasswordHash = await bcryptjs.hash("Shajgoj#SuperAdmin!2026$X9", 12);
+  const adminPasswordHash = await bcryptjs.hash("Shajgoj#Admin!9982*Secure", 12);
+  const staffPasswordHash = await bcryptjs.hash("Staff#Mod@Shajgoj8821$", 12);
+  const customerPasswordHash = await bcryptjs.hash("Customer#Lux!Nusrat2026@", 12);
 
   await User.create([
     {
       name: "Super Admin",
-      email: "superadmin@shajgoj.bd",
-      password: defaultPasswordHash,
+      email: "superadmin@koreanskincare.bd",
+      password: superAdminPasswordHash,
       role: "super_admin",
       emailVerified: true,
       provider: "credentials",
     },
     {
-      name: "Shajgoj Admin",
-      email: "admin@shajgoj.bd",
-      password: defaultPasswordHash,
+      name: "koreanskincare.bd Admin",
+      email: "admin@koreanskincare.bd",
+      password: adminPasswordHash,
       role: "admin",
       emailVerified: true,
       provider: "credentials",
     },
     {
       name: "Store Staff",
-      email: "staff@shajgoj.bd",
+      email: "staff@koreanskincare.bd",
       password: staffPasswordHash,
       role: "staff",
       emailVerified: true,
@@ -43,7 +44,7 @@ export const seedDatabase = createServerFn({ method: "POST" }).handler(async () 
     },
     {
       name: "Nusrat Jahan",
-      email: "customer@shajgoj.bd",
+      email: "customer@koreanskincare.bd",
       password: customerPasswordHash,
       role: "customer",
       emailVerified: true,
@@ -423,7 +424,8 @@ export const seedDatabase = createServerFn({ method: "POST" }).handler(async () 
           {
             name: "Tasnia H.",
             city: "Sylhet",
-            quote: "Fast delivery, beautiful pieces. Shajgoj is my go-to for gifting.",
+            quote:
+              "Fast delivery, authentic products. koreanskincare.bd is my go-to for daily skincare.",
           },
         ],
       },
@@ -443,9 +445,9 @@ export const seedDatabase = createServerFn({ method: "POST" }).handler(async () 
 
   // ─── 5. Create Default Settings ───
   await Settings.create({
-    siteName: "Shajgoj.bd",
-    siteDescription: "Premium beauty, jewelry & lifestyle accessories for Bangladesh",
-    contactEmail: "hello@shajgoj.bd",
+    siteName: "koreanskincare.bd",
+    siteDescription: "Premium authentic Korean skincare & beauty essentials for Bangladesh",
+    contactEmail: "hello@koreanskincare.bd",
     contactPhone: "+880 1711-223344",
     address: "House 42, Road 11, Banani, Dhaka 1213",
     shipping: {
@@ -476,10 +478,13 @@ export const seedDatabase = createServerFn({ method: "POST" }).handler(async () 
     message: "Database seeded successfully!",
     skipped: false,
     roles: {
-      super_admin: { email: "superadmin@shajgoj.bd", password: "admin123" },
-      admin: { email: "admin@shajgoj.bd", password: "admin123" },
-      staff: { email: "staff@shajgoj.bd", password: "staff123" },
-      customer: { email: "customer@shajgoj.bd", password: "customer123" },
+      super_admin: {
+        email: "superadmin@koreanskincare.bd",
+        password: "Shajgoj#SuperAdmin!2026$X9",
+      },
+      admin: { email: "admin@koreanskincare.bd", password: "Shajgoj#Admin!9982*Secure" },
+      staff: { email: "staff@koreanskincare.bd", password: "Staff#Mod@Shajgoj8821$" },
+      customer: { email: "customer@koreanskincare.bd", password: "Customer#Lux!Nusrat2026@" },
     },
   };
 });

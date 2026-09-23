@@ -111,12 +111,12 @@ export const ADMIN_PAGE_SIZE = 20;
 
 // ─── Cloudinary ───
 export const CLOUDINARY_FOLDERS = {
-  products: "shajgoj/products",
-  categories: "shajgoj/categories",
-  brands: "shajgoj/brands",
-  banners: "shajgoj/banners",
-  blog: "shajgoj/blog",
-  avatars: "shajgoj/avatars",
+  products: "koreanskincare/products",
+  categories: "koreanskincare/categories",
+  brands: "koreanskincare/brands",
+  banners: "koreanskincare/banners",
+  blog: "koreanskincare/blog",
+  avatars: "koreanskincare/avatars",
 } as const;
 
 // ─── Currency ───

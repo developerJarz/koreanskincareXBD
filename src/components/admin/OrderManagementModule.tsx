@@ -246,19 +246,26 @@ export function OrderManagementModule({
                       </div>
                     </td>
                     <td className="p-4">
-                      <div className="font-semibold text-foreground">
-                        {ord.shippingAddress?.fullName || "Nusrat Jahan"}
-                      </div>
-                      <div className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
-                        <Phone className="w-3 h-3" />
-                        <span>{ord.shippingAddress?.phone || "+880 1711-223344"}</span>
-                      </div>
-                      <div className="text-[11px] text-muted-foreground flex items-center gap-1">
-                        <MapPin className="w-3 h-3" />
-                        <span>
-                          {ord.shippingAddress?.city || "Dhaka"},{" "}
-                          {ord.shippingAddress?.division || "Dhaka"}
-                        </span>
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-primary/15 text-primary flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs border border-primary/20">
+                          {(ord.shippingAddress?.fullName || "N").charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <div className="font-semibold text-foreground">
+                            {ord.shippingAddress?.fullName || "Nusrat Jahan"}
+                          </div>
+                          <div className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                            <Phone className="w-3 h-3" />
+                            <span>{ord.shippingAddress?.phone || "+880 1711-223344"}</span>
+                          </div>
+                          <div className="text-[11px] text-muted-foreground flex items-center gap-1">
+                            <MapPin className="w-3 h-3" />
+                            <span>
+                              {ord.shippingAddress?.city || "Dhaka"},{" "}
+                              {ord.shippingAddress?.division || "Dhaka"}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </td>
                     <td className="p-4">
@@ -269,11 +276,11 @@ export function OrderManagementModule({
                           "Blush Crossbody & Ring"}
                       </div>
                     </td>
-                    <td className="p-4 font-bold text-foreground">
+                    <td className="p-4 font-bold text-foreground text-sm font-sans">
                       ৳{(ord.total || 3490).toLocaleString()}
                     </td>
                     <td className="p-4">
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-secondary border border-border">
+                      <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-secondary/80 border border-border shadow-2xs">
                         {ord.paymentMethod || "COD"}
                       </span>
                     </td>
@@ -281,7 +288,7 @@ export function OrderManagementModule({
                       <select
                         value={ord.status || "pending"}
                         onChange={(e) => handleStatusChange(ord._id || ord.id, e.target.value)}
-                        className="px-2.5 py-1 rounded-xl text-[11px] font-bold uppercase border border-border bg-background focus:outline-hidden"
+                        className="px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase border border-border/80 bg-card shadow-2xs focus:outline-hidden cursor-pointer"
                         style={{ color: statusColor }}
                       >
                         <option value="pending">Pending</option>
@@ -429,7 +436,7 @@ export function OrderManagementModule({
             <div className="flex justify-between items-start border-b border-neutral-200 pb-5">
               <div>
                 <h1 className="font-serif text-2xl font-bold tracking-tight">
-                  Shajgoj<span className="text-rose-600">.bd</span>
+                  koreanskincare<span className="text-rose-600">.bd</span>
                 </h1>
                 <p className="text-xs text-neutral-500 mt-1">Official Tax Invoice & Packing Slip</p>
                 <p className="text-[11px] text-neutral-500">
@@ -466,7 +473,7 @@ export function OrderManagementModule({
                   {activeInvoiceOrder.shippingAddress?.phone || "+880 1711-223344"}
                 </p>
                 <p className="text-neutral-600">
-                  {activeInvoiceOrder.shippingAddress?.email || "customer@shajgoj.bd"}
+                  {activeInvoiceOrder.shippingAddress?.email || "customer@koreanskincare.bd"}
                 </p>
               </div>
               <div className="text-right">
@@ -521,7 +528,9 @@ export function OrderManagementModule({
             {/* Calculations Summary */}
             <div className="flex justify-between items-center border-t border-neutral-300 pt-4 text-xs">
               <div className="text-[11px] text-neutral-500 max-w-xs">
-                <p className="font-bold text-neutral-800">Thank you for choosing Shajgoj.bd!</p>
+                <p className="font-bold text-neutral-800">
+                  Thank you for choosing koreanskincare.bd!
+                </p>
                 <p>7-day hassle-free replacement guarantee on all eligible accessories.</p>
               </div>
               <div className="space-y-1 text-right w-48">

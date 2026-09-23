@@ -85,8 +85,8 @@ export function CouriersPaymentsModule() {
       id: "sslcommerz",
       name: "SSLCommerz Enterprise Gateway (Visa/Mastercard/Amex)",
       status: "active",
-      appKey: "ssl_store_shajgoj_live",
-      merchantNumber: "Store ID: shajgojlive",
+      appKey: "ssl_store_koreanskincare_live",
+      merchantNumber: "Store ID: koreanskincarelive",
       fee: "2.5%",
     },
     {

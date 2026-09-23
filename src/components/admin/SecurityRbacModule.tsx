@@ -14,14 +14,27 @@ import {
   RefreshCw,
   X,
   UserCheck,
+  Eye,
+  EyeOff,
+  Check,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useAuthStore } from "@/store/auth.store";
 import type { ActivityLog } from "./types";
 
 export function SecurityRbacModule() {
+  const { user } = useAuthStore();
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(true);
   const [ipBlacklist, setIpBlacklist] = useState<string[]>(["103.231.160.45", "182.160.118.90"]);
   const [newIp, setNewIp] = useState("");
+
+  // Password change state
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([
     {
@@ -37,7 +50,7 @@ export function SecurityRbacModule() {
     },
     {
       id: "log_2",
-      user: "Shajgoj Admin",
+      user: "Store Admin",
       role: "admin",
       action: "Created promo code EID2026 (15% OFF)",
       entity: "Coupon",
@@ -130,6 +143,64 @@ export function SecurityRbacModule() {
   const handleRevokeSessions = () => {
     setActiveSessions(activeSessions.filter((s) => s.isCurrent));
     toast.success("All other active admin sessions revoked successfully!");
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!newPassword || newPassword.length < 6) {
+      toast.error("New password must be at least 6 characters long.");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast.error("New passwords do not match!");
+      return;
+    }
+
+    setIsChangingPassword(true);
+    try {
+      const res = await fetch("/api/admin/users/password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: user?.id || user?.email || "admin@koreanskincare.bd",
+          email: user?.email || "admin@koreanskincare.bd",
+          currentPassword: currentPassword || undefined,
+          newPassword,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to update password");
+      }
+
+      toast.success("Admin password changed successfully in database!");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+
+      // Add audit log
+      setActivityLogs((prev) => [
+        {
+          id: `log_${Date.now()}`,
+          user: user?.name || "Admin",
+          role: user?.role || "admin",
+          action: "Changed administrative security password",
+          entity: "User",
+          entityId: user?.id || "admin",
+          timestamp: "Just now",
+          ipAddress: "103.145.118.22 (Dhaka, BD)",
+          status: "success",
+        },
+        ...prev,
+      ]);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update password");
+    } finally {
+      setIsChangingPassword(false);
+    }
   };
 
   return (
@@ -232,6 +303,135 @@ export function SecurityRbacModule() {
             </button>
           </form>
         </div>
+      </div>
+
+      {/* Admin Password & Credentials Management */}
+      <div className="bg-card border border-border rounded-3xl p-6 shadow-xs space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-4">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2.5 rounded-2xl bg-primary/10 text-primary">
+              <Key className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-serif font-bold text-lg">Change Admin Password</h3>
+              <p className="text-xs text-muted-foreground">
+                Update credentials for <strong>{user?.name || "Administrator"}</strong> (
+                {user?.email || "admin@koreanskincare.bd"})
+              </p>
+            </div>
+          </div>
+          <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-purple-500/10 text-purple-600 border border-purple-500/20">
+            BCRYPT ENCRYPTED (12 ROUNDS)
+          </span>
+        </div>
+
+        <form onSubmit={handleChangePassword} className="grid md:grid-cols-3 gap-4 text-xs">
+          <div>
+            <label className="block font-semibold mb-1.5 text-foreground">
+              Current Password{" "}
+              <span className="text-muted-foreground font-normal">(Optional for Admin)</span>
+            </label>
+            <div className="relative">
+              <input
+                type={showCurrentPassword ? "text" : "password"}
+                placeholder="••••••••••••"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-2xl border border-border bg-background focus:outline-hidden pr-10 text-xs"
+              />
+              <button
+                type="button"
+                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="block font-semibold mb-1.5 text-foreground">
+              New Hard / Strong Password <span className="text-rose-500">*</span>
+            </label>
+            <div className="relative">
+              <input
+                type={showNewPassword ? "text" : "password"}
+                required
+                placeholder="Min 6-8 chars with #, $, !"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-2xl border border-border bg-background focus:outline-hidden pr-10 text-xs font-mono"
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPassword(!showNewPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+            {newPassword && (
+              <div className="mt-1.5 flex items-center gap-1.5 text-[10px]">
+                <div
+                  className={`h-1.5 flex-1 rounded-full ${
+                    newPassword.length > 10
+                      ? "bg-emerald-500"
+                      : newPassword.length >= 6
+                        ? "bg-amber-500"
+                        : "bg-rose-500"
+                  }`}
+                />
+                <span
+                  className={
+                    newPassword.length > 10
+                      ? "text-emerald-600 font-bold"
+                      : newPassword.length >= 6
+                        ? "text-amber-600 font-bold"
+                        : "text-rose-600 font-bold"
+                  }
+                >
+                  {newPassword.length > 10
+                    ? "Very Strong"
+                    : newPassword.length >= 6
+                      ? "Good"
+                      : "Too Short"}
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div>
+            <label className="block font-semibold mb-1.5 text-foreground">
+              Confirm New Password <span className="text-rose-500">*</span>
+            </label>
+            <input
+              type="password"
+              required
+              placeholder="Re-type new password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="w-full px-3.5 py-2.5 rounded-2xl border border-border bg-background focus:outline-hidden text-xs font-mono"
+            />
+            {confirmPassword && confirmPassword !== newPassword && (
+              <p className="text-rose-500 text-[10px] mt-1 font-semibold">Passwords do not match</p>
+            )}
+          </div>
+
+          <div className="md:col-span-3 flex justify-end gap-3 pt-2">
+            <button
+              type="submit"
+              disabled={isChangingPassword || !newPassword || newPassword !== confirmPassword}
+              className="px-6 py-2.5 rounded-2xl bg-primary text-primary-foreground font-bold hover:opacity-90 transition flex items-center gap-2 shadow-xs disabled:opacity-50 text-xs"
+            >
+              {isChangingPassword ? (
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Check className="w-3.5 h-3.5" />
+              )}
+              <span>{isChangingPassword ? "Saving to Database..." : "Update Admin Password"}</span>
+            </button>
+          </div>
+        </form>
       </div>
 
       {/* Role Permissions Matrix */}

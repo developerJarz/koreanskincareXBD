@@ -3,9 +3,9 @@ import type { Metadata } from "next";
 import ShopPageClient from "./ShopPageClient";
 
 export const metadata: Metadata = {
-  title: "Shop All Beauty & Accessories — Shajgoj.bd",
+  title: "Shop All Korean Skincare & Beauty — KoreanSkincare.bd",
   description:
-    "Shop the full Shajgoj.bd collection — premium bags, rings, earrings, necklaces, watches and lifestyle accessories.",
+    "Shop the full KoreanSkincare.bd collection — 100% authentic Korean skincare, clinical toners, serums, sunscreens, and glass skin essentials.",
 };
 
 export default async function ShopPage({

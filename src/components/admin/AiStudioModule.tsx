@@ -31,17 +31,17 @@ export function AiStudioModule() {
   const [isGeneratingCopy, setIsGeneratingCopy] = useState(false);
 
   // SEO Optimizer State
-  const [seoTargetKeyword, setSeoTargetKeyword] = useState("luxury bags bangladesh");
+  const [seoTargetKeyword, setSeoTargetKeyword] = useState("luxury skincare bangladesh");
   const [generatedMetaTitle, setGeneratedMetaTitle] = useState(
-    "Buy Luxury Emerald Handbag Online in Bangladesh | Shajgoj.bd",
+    "Buy Authentic Korean Skincare Online in Bangladesh | koreanskincare.bd",
   );
   const [generatedMetaDesc, setGeneratedMetaDesc] = useState(
-    "Discover the Emerald Velvet Handbag at Shajgoj.bd. Handcrafted with premium gold hardware and luxury velvet finish. Fast 24-hr Cash on Delivery all over Bangladesh.",
+    "Discover authentic Korean skincare at koreanskincare.bd. Handcrafted with premium ingredients and radiant finish. Fast 24-hr Cash on Delivery all over Bangladesh.",
   );
 
   // Ad Copy State
   const [generatedAdCopy, setGeneratedAdCopy] = useState(
-    `✨ Discover Timeless Luxury at Shajgoj.bd ✨\n\nElevate your signature look with our handcrafted Emerald Velvet Collection. Hand-inspected perfection with 7-day exchange guarantee and Cash on Delivery across all 64 districts in Bangladesh!\n\n🛍️ Shop Now at shajgoj.bd\n🎁 Special Offer: Use code SHAJGOJ10 for 10% OFF!\n\n#ShajgojBD #LuxuryFashionBD #DhakaFashion #BangladeshAccessories #EidCollection2026`,
+    `✨ Discover Authentic Korean Skincare at koreanskincare.bd ✨\n\nElevate your signature glow with our curated Korean Skincare Collection. 100% authentic with 7-day exchange guarantee and Cash on Delivery across all 64 districts in Bangladesh!\n\n🛍️ Shop Now at koreanskincare.bd\n🎁 Special Offer: Use code KOREAN10 for 10% OFF!\n\n#KoreanSkincareBD #KBeautyBD #DhakaGlow #BangladeshSkincare #AuthenticKBeauty2026`,
   );
 
   // Image Studio State
@@ -55,7 +55,7 @@ export function AiStudioModule() {
     setTimeout(() => {
       setIsGeneratingCopy(false);
       setGeneratedCopy(
-        `Exquisitely curated for contemporary Bangladeshi lifestyles, the ${productName} blends minimalist luxury with uncompromising durability. Featuring anti-tarnish luxury coating, lightweight ergonomic design, and delivered in our signature Shajgoj luxury pouch. Perfect for both traditional festive attire and modern everyday wear.`,
+        `Exquisitely curated for contemporary Bangladeshi lifestyles, the ${productName} blends minimalist luxury with nourishing skincare perfection. Featuring dermatologist-tested formulations, lightweight texture, and delivered in our signature koreanskincare.bd luxury pouch. Perfect for everyday radiant beauty.`,
       );
       toast.success("AI Product Description generated!");
     }, 900);
@@ -202,7 +202,7 @@ export function AiStudioModule() {
                 {generatedMetaTitle}
               </h4>
               <p className="text-[11px] text-emerald-700 dark:text-emerald-400">
-                https://shajgoj.bd › product › emerald-handbag
+                https://koreanskincare.bd › product › emerald-handbag
               </p>
               <p className="text-xs text-muted-foreground leading-relaxed">{generatedMetaDesc}</p>
             </div>

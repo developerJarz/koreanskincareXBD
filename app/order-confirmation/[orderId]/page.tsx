@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { use, useEffect, useState } from "react";
 import { CheckCircle2, Package, MapPin, Truck, ArrowRight, Printer, Loader2 } from "lucide-react";
+import { SiteLogoLink } from "@/components/Logo";
 
 export default function OrderConfirmationPage({
   params,
@@ -75,9 +76,9 @@ export default function OrderConfirmationPage({
 
       <div className="mt-12 bg-card p-8 rounded-3xl border border-border shadow-xl space-y-6">
         <div className="flex items-center justify-between pb-6 border-b border-border">
-          <div className="flex items-center gap-3">
-            <img src="/shajgoj.png" alt="Shajgoj.bd" className="h-8 w-auto object-contain" />
-            <div>
+          <div className="flex items-center gap-4">
+            <SiteLogoLink variant="header" />
+            <div className="border-l border-border pl-4">
               <p className="text-xs text-muted-foreground">Order Reference</p>
               <p className="font-mono text-lg font-bold">{orderNumber}</p>
             </div>

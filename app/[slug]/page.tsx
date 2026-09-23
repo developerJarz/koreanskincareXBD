@@ -45,12 +45,12 @@ function AboutPage() {
             <span className="italic text-primary">Made in Bangladesh.</span>
           </h1>
           <p className="mt-6 text-muted-foreground leading-relaxed">
-            Shajgoj.bd was born in Dhaka out of a simple frustration — that the modern women of
-            Bangladesh deserved better than the same tired accessories, sold the same tired way.
+            KoreanSkincare.bd was born in Dhaka out of a passion to bring 100% authentic,
+            high-quality Korean skincare and premium lifestyle beauty products to Bangladesh.
           </p>
           <p className="mt-4 text-muted-foreground leading-relaxed">
-            We curate every ring, every bag and every pair of earrings ourselves. Small drops,
-            premium materials, honest prices. No bulk, no compromise.
+            We curate every product directly from authorized suppliers. Small drops, authentic
+            ingredients, honest prices. No counterfeit, no compromise.
           </p>
           <Link
             href="/shop"
@@ -63,7 +63,7 @@ function AboutPage() {
           <div className="absolute -inset-4 bg-blush blur-3xl opacity-40 rounded-3xl" />
           <img
             src={getImageSrc(hero)}
-            alt="Shajgoj.bd accessories"
+            alt="koreanskincare.bd beauty"
             className="relative rounded-3xl w-full object-cover aspect-[4/5]"
           />
         </div>
@@ -143,7 +143,7 @@ function ContactPage() {
           back to you quickly.
         </p>
         <div className="mt-8 space-y-3 text-sm">
-          <p>Email: hello@shajgoj.bd</p>
+          <p>Email: hello@koreanskincare.bd</p>
           <p>Phone: +880 1711-223344</p>
           <p>Banani, Dhaka, Bangladesh</p>
         </div>

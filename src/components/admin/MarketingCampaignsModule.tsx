@@ -34,7 +34,7 @@ export function MarketingCampaignsModule({
   const [newCouponDiscount, setNewCouponDiscount] = useState(15);
   const [newCouponMinSpend, setNewCouponMinSpend] = useState(2000);
   const [smsCampaignText, setSmsCampaignText] = useState(
-    "Shajgoj.bd Eid-ul-Fitr Grand Sale! Enjoy 20% OFF on premium jewelry & luxury bags. Use code: SHAJGOJVIP. Shop at shajgoj.bd",
+    "koreanskincare.bd Eid-ul-Fitr Grand Sale! Enjoy 20% OFF on authentic Korean skincare. Use code: KOREANVIP. Shop at koreanskincare.bd",
   );
   const [smsAudience, setSmsAudience] = useState("vip");
 
@@ -43,21 +43,21 @@ export function MarketingCampaignsModule({
       id: "sms_1",
       title: "Order Confirmation SMS",
       trigger: "order_placed",
-      body: "Assalamu Alaikum {name}, your order {order_id} of BDT {amount} is confirmed at Shajgoj.bd. Hotline: 01711223344",
+      body: "Assalamu Alaikum {name}, your order {order_id} of BDT {amount} is confirmed at koreanskincare.bd. Hotline: 01711223344",
       isActive: true,
     },
     {
       id: "sms_2",
       title: "Courier Shipped & Tracking",
       trigger: "shipped",
-      body: "Your Shajgoj.bd parcel is dispatched via {courier}. Tracking ID: {tracking_code}. Expect delivery within 24-48 hrs!",
+      body: "Your koreanskincare.bd parcel is dispatched via {courier}. Tracking ID: {tracking_code}. Expect delivery within 24-48 hrs!",
       isActive: true,
     },
     {
       id: "sms_3",
       title: "Eid Mubarak Festive Promo",
       trigger: "eid_promo",
-      body: "Eid Mubarak {name}! Get flat 15% OFF on all signature collections at Shajgoj.bd with code: EID2026. Free delivery across BD!",
+      body: "Eid Mubarak {name}! Get flat 15% OFF on all signature collections at koreanskincare.bd with code: EID2026. Free delivery across BD!",
       isActive: true,
     },
   ]);

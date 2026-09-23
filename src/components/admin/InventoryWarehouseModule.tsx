@@ -362,7 +362,7 @@ export function InventoryWarehouseModule({
 
             {/* Sticker Preview */}
             <div className="border-2 border-dashed border-neutral-300 p-4 rounded-2xl space-y-2 bg-neutral-50">
-              <div className="font-serif font-bold text-sm">Shajgoj.bd</div>
+              <div className="font-serif font-bold text-sm">koreanskincare.bd</div>
               <p className="font-bold text-xs text-neutral-800 line-clamp-1">
                 {activeBarcodeProduct.name}
               </p>

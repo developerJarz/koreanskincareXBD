@@ -181,7 +181,7 @@ export function ReviewsAbandonedCartsModule() {
 
                 <div className="flex items-center gap-2">
                   <a
-                    href={`https://wa.me/${cart.customerPhone.replace(/[^0-9]/g, "")}?text=Hello%20${encodeURIComponent(cart.customerName)}%2C%20we%20noticed%20you%20left%20items%20in%20your%20Shajgoj.bd%20cart!%20Enjoy%20an%20exclusive%2010%25%20OFF%20with%20code%20RECOVER10%3A%20https%3A%2F%2Fshajgoj.bd%2Fcart`}
+                    href={`https://wa.me/${cart.customerPhone.replace(/[^0-9]/g, "")}?text=Hello%20${encodeURIComponent(cart.customerName)}%2C%20we%20noticed%20you%20left%20items%20in%20your%20koreanskincare.bd%20cart!%20Enjoy%20an%20exclusive%2010%25%20OFF%20with%20code%20RECOVER10%3A%20https%3A%2F%2Fkoreanskincare.bd%2Fcart`}
                     target="_blank"
                     rel="noreferrer"
                     onClick={() => handleSendRecoveryOffer(cart, "whatsapp")}
@@ -231,7 +231,7 @@ export function ReviewsAbandonedCartsModule() {
                 <p className="text-muted-foreground leading-relaxed italic">"{rev.comment}"</p>
                 {rev.adminReply && (
                   <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20 text-foreground text-[11px]">
-                    <strong className="text-primary">Official Shajgoj Reply:</strong>{" "}
+                    <strong className="text-primary">Official koreanskincare.bd Reply:</strong>{" "}
                     {rev.adminReply}
                   </div>
                 )}

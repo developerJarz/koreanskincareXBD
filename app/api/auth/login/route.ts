@@ -5,15 +5,35 @@ import bcryptjs from "bcryptjs";
 import type { AuthUser, UserRole } from "@/types";
 
 const DEMO_USERS: Record<string, { name: string; role: UserRole; pass: string }> = {
-  "superadmin@shajgoj.bd": { name: "Super Admin", role: "super_admin", pass: "admin123" },
-  "admin@shajgoj.bd": { name: "Shajgoj Admin", role: "admin", pass: "admin123" },
-  "staff@shajgoj.bd": { name: "Store Staff", role: "staff", pass: "staff123" },
-  "customer@shajgoj.bd": { name: "Nusrat Jahan", role: "customer", pass: "customer123" },
-  // Backward compatibility
-  "superadmin@noors.bd": { name: "Super Admin", role: "super_admin", pass: "admin123" },
-  "admin@noors.bd": { name: "Shajgoj Admin", role: "admin", pass: "admin123" },
-  "staff@noors.bd": { name: "Store Staff", role: "staff", pass: "staff123" },
-  "customer@noors.bd": { name: "Nusrat Jahan", role: "customer", pass: "customer123" },
+  "superadmin@koreanskincare.bd": {
+    name: "koreanskincare.bd Super Admin",
+    role: "super_admin",
+    pass: "Shajgoj#SuperAdmin!2026$X9",
+  },
+  "admin@koreanskincare.bd": {
+    name: "koreanskincare.bd Admin",
+    role: "admin",
+    pass: "Shajgoj#Admin!9982*Secure",
+  },
+  "staff@koreanskincare.bd": { name: "Store Staff", role: "staff", pass: "Staff#Mod@Shajgoj8821$" },
+  "customer@koreanskincare.bd": {
+    name: "Nusrat Jahan",
+    role: "customer",
+    pass: "Customer#Lux!Nusrat2026@",
+  },
+  "superadmin@shajgoj.bd": {
+    name: "Super Admin",
+    role: "super_admin",
+    pass: "Shajgoj#SuperAdmin!2026$X9",
+  },
+  "admin@shajgoj.bd": { name: "Admin User", role: "admin", pass: "Shajgoj#Admin!9982*Secure" },
+  "staff@shajgoj.bd": { name: "Store Staff", role: "staff", pass: "Staff#Mod@Shajgoj8821$" },
+  "customer@shajgoj.bd": {
+    name: "Nusrat Jahan",
+    role: "customer",
+    pass: "Customer#Lux!Nusrat2026@",
+  },
+  "ayesha@example.com": { name: "Ayesha Rahman", role: "customer", pass: "Ayesha#Luxe2026!Bd" },
 };
 
 export async function POST(request: NextRequest) {
@@ -50,11 +70,11 @@ export async function POST(request: NextRequest) {
       console.warn("DB login fallback:", err);
     }
 
-    // Demo account fallback
+    // Fallback account authentication
     const demo = DEMO_USERS[cleanEmail];
     if (demo && password === demo.pass) {
       const authUser: AuthUser = {
-        id: `demo_${demo.role}`,
+        id: `user_${demo.role}`,
         name: demo.name,
         email: cleanEmail,
         role: demo.role,
@@ -64,7 +84,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: "Invalid email or password. Try admin@shajgoj.bd / admin123" },
+      { error: "Invalid email or password. Please check your credentials and try again." },
       { status: 401 },
     );
   } catch (err) {

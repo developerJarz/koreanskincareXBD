@@ -26,6 +26,7 @@ import {
   Flame,
 } from "lucide-react";
 import type { AdminTab } from "./types";
+import { Logo } from "@/components/Logo";
 
 interface AdminSidebarProps {
   activeTab: AdminTab;
@@ -146,13 +147,9 @@ export function AdminSidebar({
       >
         {/* Brand Header */}
         <div className="h-16 border-b border-border px-5 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <img
-              src="/shajgoj.png"
-              alt="Shajgoj.bd"
-              className="h-8 w-auto object-contain max-w-[130px]"
-            />
-            <span className="px-2 py-0.5 rounded-full text-[9px] uppercase tracking-wider font-bold bg-primary/10 text-primary border border-primary/20">
+          <div className="flex items-center gap-2">
+            <Logo variant="admin" size="sm" />
+            <span className="px-2 py-0.5 rounded-full text-[9px] uppercase tracking-wider font-bold bg-primary/10 text-primary border border-primary/20 ml-1">
               Admin
             </span>
           </div>
@@ -166,11 +163,11 @@ export function AdminSidebar({
         </div>
 
         {/* Navigation List */}
-        <div className="flex-1 overflow-y-auto px-3 py-4 space-y-5 scrollbar-thin">
+        <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6 scrollbar-thin">
           {navGroups.map((group) => (
             <div key={group.title} className="space-y-1">
-              <div className="px-3 py-1 text-[11px] uppercase tracking-wider font-bold text-muted-foreground/70">
-                {group.title}
+              <div className="px-3 py-1 text-[10px] uppercase tracking-wider font-bold text-muted-foreground/60 flex items-center justify-between">
+                <span>{group.title}</span>
               </div>
               {group.items.map((item) => {
                 const Icon = item.icon;
@@ -182,37 +179,45 @@ export function AdminSidebar({
                       setActiveTab(item.tab);
                       onClose();
                     }}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all ${
+                    className={`w-full relative group flex items-center justify-between px-3 py-2.5 rounded-2xl text-xs font-medium transition-all duration-200 ${
                       isActive
-                        ? "bg-primary text-primary-foreground shadow-xs font-semibold"
-                        : "text-muted-foreground hover:text-foreground hover:bg-secondary/70"
+                        ? "bg-primary text-primary-foreground font-semibold shadow-md shadow-primary/20"
+                        : "text-muted-foreground hover:text-foreground hover:bg-secondary/80"
                     }`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <Icon
-                        className={`w-4 h-4 shrink-0 ${isActive ? "text-primary-foreground" : "text-muted-foreground"}`}
-                      />
-                      <span className="truncate">{item.label}</span>
+                      <div
+                        className={`p-1 rounded-lg transition-colors ${
+                          isActive
+                            ? "bg-white/15 text-primary-foreground"
+                            : "group-hover:bg-primary/10 group-hover:text-primary"
+                        }`}
+                      >
+                        <Icon className="w-4 h-4 shrink-0" />
+                      </div>
+                      <span className="truncate tracking-tight">{item.label}</span>
                     </div>
 
                     <div className="flex items-center gap-1.5 shrink-0">
                       {item.isHot && !isActive && (
-                        <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/20 text-amber-600 dark:text-amber-400">
+                        <span className="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20">
                           AI / Eid
                         </span>
                       )}
                       {item.badge !== undefined && (
                         <span
-                          className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold text-white ${
-                            isActive ? "bg-white/30 text-white" : item.badgeColor || "bg-primary"
+                          className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold text-white shadow-xs ${
+                            isActive ? "bg-white/25 text-white" : item.badgeColor || "bg-primary"
                           }`}
                         >
                           {item.badge}
                         </span>
                       )}
                       <ChevronRight
-                        className={`w-3.5 h-3.5 opacity-40 transition-transform ${
-                          isActive ? "translate-x-0.5 opacity-90" : ""
+                        className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                          isActive
+                            ? "translate-x-0.5 text-primary-foreground opacity-100"
+                            : "opacity-30 group-hover:opacity-75 group-hover:translate-x-0.5"
                         }`}
                       />
                     </div>
@@ -224,18 +229,23 @@ export function AdminSidebar({
         </div>
 
         {/* Footer Quick Status */}
-        <div className="p-3 border-t border-border bg-secondary/30">
-          <div className="flex items-center justify-between p-2 rounded-xl bg-card border border-border text-xs">
+        <div className="p-3 border-t border-border bg-secondary/20 backdrop-blur-xs">
+          <div className="flex items-center justify-between p-2.5 rounded-2xl bg-card border border-border/80 shadow-xs text-xs">
             <div className="flex items-center gap-2">
-              <span className="relative flex h-2 w-2">
+              <span className="relative flex h-2.5 w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
               </span>
-              <span className="text-[11px] font-medium text-muted-foreground">
-                Store Live & Synced
-              </span>
+              <div>
+                <p className="text-[11px] font-semibold text-foreground leading-tight">
+                  Store Active
+                </p>
+                <p className="text-[9px] text-muted-foreground">MongoDB Connected</p>
+              </div>
             </div>
-            <span className="text-[10px] font-bold text-primary">v2.4 Pro</span>
+            <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
+              v2.4 Pro
+            </span>
           </div>
         </div>
       </aside>

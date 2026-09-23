@@ -43,10 +43,13 @@ import {
   Boxes,
   RotateCcw,
   Zap,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import { useRequireAuth } from "@/hooks/use-require-auth";
+import { useAuthStore } from "@/store/auth.store";
 import type { UserRole } from "@/types";
 import type { AdminTab, BDSeasonalTheme, AdminNotification } from "@/components/admin/types";
 
@@ -196,13 +199,13 @@ export default function AdminDashboardClient({
   const [categories, setCategories] = useState(initialCategories);
 
   // Store Customization & Settings State
-  const [siteName, setSiteName] = useState(initialSettings.siteName || "Shajgoj.bd");
+  const [siteName, setSiteName] = useState(initialSettings.siteName || "koreanskincare.bd");
   const [siteDescription, setSiteDescription] = useState(
     initialSettings.siteDescription ||
-      "Premium beauty, jewelry & lifestyle accessories for Bangladesh",
+      "Authentic Korean skincare, beauty & lifestyle accessories for Bangladesh",
   );
   const [contactEmail, setContactEmail] = useState(
-    initialSettings.contactEmail || "hello@shajgoj.bd",
+    initialSettings.contactEmail || "hello@koreanskincare.bd",
   );
   const [contactPhone, setContactPhone] = useState(
     initialSettings.contactPhone || "+880 1711-223344",
@@ -220,10 +223,10 @@ export default function AdminDashboardClient({
     String(initialSettings.shipping?.outsideDhakaCost ?? 120),
   );
   const [instagramUrl, setInstagramUrl] = useState(
-    initialSettings.socialLinks?.instagram || "https://instagram.com/shajgojbd",
+    initialSettings.socialLinks?.instagram || "https://instagram.com/koreanskincarebd",
   );
   const [facebookUrl, setFacebookUrl] = useState(
-    initialSettings.socialLinks?.facebook || "https://facebook.com/shajgojbd",
+    initialSettings.socialLinks?.facebook || "https://facebook.com/koreanskincarebd",
   );
   const [whatsappNumber, setWhatsappNumber] = useState(
     initialSettings.socialLinks?.whatsapp || "+8801711223344",
@@ -235,10 +238,55 @@ export default function AdminDashboardClient({
   const [editingProduct, setEditingProduct] = useState<any | null>(null);
   const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState<any | null>(null);
-  const [showCredentialsModal, setShowCredentialsModal] = useState(false);
   const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
   const [isSeedingDb, setIsSeedingDb] = useState(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const { user } = useAuthStore();
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+  const [adminCurrentPassword, setAdminCurrentPassword] = useState("");
+  const [adminNewPassword, setAdminNewPassword] = useState("");
+  const [adminConfirmPassword, setAdminConfirmPassword] = useState("");
+  const [showAdminNewPass, setShowAdminNewPass] = useState(false);
+  const [showAdminCurrPass, setShowAdminCurrPass] = useState(false);
+  const [isUpdatingAdminPassword, setIsUpdatingAdminPassword] = useState(false);
+
+  const handleAdminPasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!adminNewPassword || adminNewPassword.length < 6) {
+      toast.error("Password must be at least 6 characters long");
+      return;
+    }
+    if (adminNewPassword !== adminConfirmPassword) {
+      toast.error("Passwords do not match!");
+      return;
+    }
+    setIsUpdatingAdminPassword(true);
+    try {
+      const res = await fetch("/api/admin/users/password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: user?.id || user?.email || "admin@koreanskincare.bd",
+          email: user?.email || "admin@koreanskincare.bd",
+          currentPassword: adminCurrentPassword || undefined,
+          newPassword: adminNewPassword,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to update password");
+
+      toast.success("Password updated successfully in database!");
+      setShowChangePasswordModal(false);
+      setAdminCurrentPassword("");
+      setAdminNewPassword("");
+      setAdminConfirmPassword("");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update password");
+    } finally {
+      setIsUpdatingAdminPassword(false);
+    }
+  };
 
   // Form inputs for Add/Edit Product
   const [prodName, setProdName] = useState("");
@@ -581,7 +629,7 @@ export default function AdminDashboardClient({
   const handleSeedDatabase = async () => {
     if (
       !confirm(
-        "This will initialize/refresh sample products, categories, coupons, orders, and test users in MongoDB for Shajgoj.bd. Proceed?",
+        "This will initialize/refresh sample products, categories, coupons, orders, and test users in MongoDB for koreanskincare.bd. Proceed?",
       )
     ) {
       return;
@@ -593,10 +641,9 @@ export default function AdminDashboardClient({
       if (!res.ok) throw new Error(data.error || "Failed to seed");
 
       toast.success("Database seeded with luxury products, categories & user accounts!");
-      setShowCredentialsModal(true);
       setTimeout(() => {
         window.location.reload();
-      }, 1800);
+      }, 1200);
     } catch (err: any) {
       toast.error(err.message || "Database seed failed");
     } finally {
@@ -657,37 +704,44 @@ export default function AdminDashboardClient({
             {activeTab === "overview" && (
               <div className="space-y-6">
                 {/* Hero Summary & Quick Action Bar */}
-                <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 p-6 rounded-3xl bg-card border border-border shadow-xs">
-                  <div>
+                <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-5 p-6 sm:p-7 rounded-3xl card-elevated relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-primary/8 via-accent/20 to-transparent rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
+
+                  <div className="relative z-10">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs uppercase tracking-wider text-primary font-bold">
-                        Executive Operations
+                      <span className="text-[11px] uppercase tracking-wider text-primary font-extrabold flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5" /> Executive Intelligence
                       </span>
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-600 flex items-center gap-1">
-                        <Check className="w-3 h-3" /> Live & Connected
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 border border-emerald-500/20">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+                        Live & Synced
                       </span>
                     </div>
-                    <h1 className="font-serif text-2xl lg:text-3xl font-bold tracking-tight mt-1">
-                      Shajgoj.bd Enterprise Hub
+                    <h1 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight mt-1.5 text-foreground">
+                      koreanskincare.bd Enterprise Command
                     </h1>
+                    <p className="text-xs text-muted-foreground mt-1 max-w-xl">
+                      Real-time sales telemetry, logistics pipelines, inventory across 64 districts,
+                      and automated marketing campaigns.
+                    </p>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2.5 relative z-10">
                     <button
-                      onClick={() => setShowCredentialsModal(true)}
-                      className="px-3.5 py-2 rounded-2xl bg-secondary hover:bg-secondary/80 text-foreground border border-border text-xs font-semibold transition flex items-center gap-1.5 shadow-2xs"
+                      onClick={() => setShowChangePasswordModal(true)}
+                      className="px-4 py-2.5 rounded-2xl bg-secondary/80 hover:bg-secondary text-foreground border border-border/80 text-xs font-semibold transition-all duration-200 flex items-center gap-2 shadow-2xs hover:shadow-xs"
                     >
-                      <Users className="w-3.5 h-3.5 text-primary" />
-                      <span>Test Logins</span>
+                      <Key className="w-3.5 h-3.5 text-primary" />
+                      <span>Change Password</span>
                     </button>
 
                     <button
                       disabled={isSeedingDb}
                       onClick={handleSeedDatabase}
-                      className="px-3.5 py-2 rounded-2xl bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 transition flex items-center gap-1.5 shadow-xs disabled:opacity-50"
+                      className="px-4 py-2.5 rounded-2xl bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 transition-all duration-200 flex items-center gap-2 shadow-sm shadow-primary/25 disabled:opacity-50"
                     >
                       <RefreshCw className={`w-3.5 h-3.5 ${isSeedingDb ? "animate-spin" : ""}`} />
-                      <span>{isSeedingDb ? "Seeding..." : "Refresh Seed DB"}</span>
+                      <span>{isSeedingDb ? "Seeding DB..." : "Refresh Seed DB"}</span>
                     </button>
                   </div>
                 </div>
@@ -703,54 +757,90 @@ export default function AdminDashboardClient({
                 <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <button
                     onClick={() => setActiveTab("orders")}
-                    className="p-5 rounded-3xl bg-card border border-border hover:border-primary/50 text-left transition shadow-xs space-y-2 group"
+                    className="card-interactive p-5 rounded-3xl bg-card border border-border/80 hover:border-primary/40 text-left transition-all duration-300 shadow-xs hover:shadow-lg space-y-3 group"
                   >
-                    <div className="p-2.5 rounded-2xl bg-primary/10 text-primary w-fit group-hover:scale-110 transition-transform">
-                      <ShoppingBag className="w-5 h-5" />
+                    <div className="flex items-center justify-between">
+                      <div className="p-3 rounded-2xl bg-primary/10 text-primary border border-primary/20 group-hover:scale-110 transition-transform">
+                        <ShoppingBag className="w-5 h-5" />
+                      </div>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary">
+                        {orderStats.pendingOrders} New
+                      </span>
                     </div>
-                    <h4 className="font-bold text-sm text-foreground">Orders & Fulfillment</h4>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      {orderStats.pendingOrders} pending orders awaiting courier dispatch.
-                    </p>
+                    <div>
+                      <h4 className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">
+                        Orders & Fulfillment
+                      </h4>
+                      <p className="text-xs text-muted-foreground leading-relaxed mt-1">
+                        Dispatch tracking with SteadFast, Pathao & Paperfly courier webhooks.
+                      </p>
+                    </div>
                   </button>
 
                   <button
                     onClick={() => setActiveTab("inventory")}
-                    className="p-5 rounded-3xl bg-card border border-border hover:border-primary/50 text-left transition shadow-xs space-y-2 group"
+                    className="card-interactive p-5 rounded-3xl bg-card border border-border/80 hover:border-amber-500/40 text-left transition-all duration-300 shadow-xs hover:shadow-lg space-y-3 group"
                   >
-                    <div className="p-2.5 rounded-2xl bg-amber-500/10 text-amber-600 w-fit group-hover:scale-110 transition-transform">
-                      <Boxes className="w-5 h-5" />
+                    <div className="flex items-center justify-between">
+                      <div className="p-3 rounded-2xl bg-amber-500/10 text-amber-600 border border-amber-500/20 group-hover:scale-110 transition-transform">
+                        <Boxes className="w-5 h-5" />
+                      </div>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-400">
+                        {productStats.lowStockProducts} Low Stock
+                      </span>
                     </div>
-                    <h4 className="font-bold text-sm text-foreground">Multi-Warehouse Stock</h4>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      Dhaka, Chattogram and Banani POS hubs stock levels.
-                    </p>
+                    <div>
+                      <h4 className="font-bold text-sm text-foreground group-hover:text-amber-600 transition-colors">
+                        Multi-Warehouse Stock
+                      </h4>
+                      <p className="text-xs text-muted-foreground leading-relaxed mt-1">
+                        Live inventory levels for Banani Hub, Chattogram & Uttara warehouses.
+                      </p>
+                    </div>
                   </button>
 
                   <button
                     onClick={() => setActiveTab("marketing")}
-                    className="p-5 rounded-3xl bg-card border border-border hover:border-primary/50 text-left transition shadow-xs space-y-2 group"
+                    className="card-interactive p-5 rounded-3xl bg-card border border-border/80 hover:border-rose-500/40 text-left transition-all duration-300 shadow-xs hover:shadow-lg space-y-3 group"
                   >
-                    <div className="p-2.5 rounded-2xl bg-rose-500/10 text-rose-600 w-fit group-hover:scale-110 transition-transform">
-                      <Flame className="w-5 h-5" />
+                    <div className="flex items-center justify-between">
+                      <div className="p-3 rounded-2xl bg-rose-500/10 text-rose-600 border border-rose-500/20 group-hover:scale-110 transition-transform">
+                        <Flame className="w-5 h-5" />
+                      </div>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/15 text-rose-600">
+                        Live
+                      </span>
                     </div>
-                    <h4 className="font-bold text-sm text-foreground">Eid & Festive Campaigns</h4>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      Launch promotional codes & Greenweb SMS broadcasts.
-                    </p>
+                    <div>
+                      <h4 className="font-bold text-sm text-foreground group-hover:text-rose-600 transition-colors">
+                        Campaigns & SMS Marketing
+                      </h4>
+                      <p className="text-xs text-muted-foreground leading-relaxed mt-1">
+                        Active promo codes, Greenweb SMS blasts, and festive discounts.
+                      </p>
+                    </div>
                   </button>
 
                   <button
                     onClick={() => setActiveTab("ai_studio")}
-                    className="p-5 rounded-3xl bg-card border border-border hover:border-primary/50 text-left transition shadow-xs space-y-2 group"
+                    className="card-interactive p-5 rounded-3xl bg-card border border-border/80 hover:border-purple-500/40 text-left transition-all duration-300 shadow-xs hover:shadow-lg space-y-3 group"
                   >
-                    <div className="p-2.5 rounded-2xl bg-purple-500/10 text-purple-600 w-fit group-hover:scale-110 transition-transform">
-                      <Sparkles className="w-5 h-5" />
+                    <div className="flex items-center justify-between">
+                      <div className="p-3 rounded-2xl bg-purple-500/10 text-purple-600 border border-purple-500/20 group-hover:scale-110 transition-transform">
+                        <Sparkles className="w-5 h-5" />
+                      </div>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/15 text-purple-600">
+                        Smart AI
+                      </span>
                     </div>
-                    <h4 className="font-bold text-sm text-foreground">AI Studio & Forecaster</h4>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      AI product copywriting, SEO tags & background enhancement.
-                    </p>
+                    <div>
+                      <h4 className="font-bold text-sm text-foreground group-hover:text-purple-600 transition-colors">
+                        AI Studio & Forecaster
+                      </h4>
+                      <p className="text-xs text-muted-foreground leading-relaxed mt-1">
+                        Automated Bengali/English product descriptions & SEO meta optimizer.
+                      </p>
+                    </div>
                   </button>
                 </div>
               </div>
@@ -1333,63 +1423,156 @@ export default function AdminDashboardClient({
         </div>
       )}
 
-      {/* Test Logins Credentials Modal */}
-      {showCredentialsModal && (
+      {/* Change Password Modal */}
+      {showChangePasswordModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
           <div className="bg-card border border-border rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 text-xs animate-scale-up">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-primary" />
-                <h3 className="font-serif font-bold text-lg">Default Demo Accounts</h3>
+                <Key className="w-5 h-5 text-primary" />
+                <h3 className="font-serif font-bold text-lg">Change Admin Password</h3>
               </div>
               <button
-                onClick={() => setShowCredentialsModal(false)}
+                onClick={() => setShowChangePasswordModal(false)}
                 className="p-1 rounded-xl hover:bg-secondary"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <p className="text-muted-foreground">
-              These pre-seeded accounts let you test different access levels across the platform:
+            <p className="text-muted-foreground text-[11px]">
+              Update the login security password for <strong>{user?.name || "Admin"}</strong> (
+              {user?.email || "admin@koreanskincare.bd"}).
             </p>
 
-            <div className="space-y-2">
-              {[
-                { role: "Super Admin", email: "superadmin@shajgoj.bd", pass: "admin123" },
-                { role: "Store Admin", email: "admin@shajgoj.bd", pass: "admin123" },
-                { role: "Store Staff", email: "staff@shajgoj.bd", pass: "staff123" },
-                { role: "Customer", email: "customer@shajgoj.bd", pass: "customer123" },
-              ].map((acc) => (
-                <div
-                  key={acc.email}
-                  className="p-3 rounded-2xl bg-secondary/40 border border-border flex items-center justify-between"
-                >
-                  <div>
-                    <span className="font-bold text-foreground">{acc.role}</span>
-                    <div className="text-[11px] text-muted-foreground">
-                      {acc.email} · Pass: <strong>{acc.pass}</strong>
-                    </div>
-                  </div>
+            <form onSubmit={handleAdminPasswordSubmit} className="space-y-3">
+              <div>
+                <label className="block font-semibold mb-1">
+                  Current Password{" "}
+                  <span className="text-muted-foreground font-normal">(Optional)</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type={showAdminCurrPass ? "text" : "password"}
+                    placeholder="••••••••••••"
+                    value={adminCurrentPassword}
+                    onChange={(e) => setAdminCurrentPassword(e.target.value)}
+                    className="w-full p-2.5 rounded-xl border border-border bg-background focus:outline-hidden pr-9 text-xs"
+                  />
                   <button
-                    onClick={() => copyToClipboard(acc.email, acc.email)}
-                    className="p-1.5 rounded-lg border border-border hover:bg-secondary text-primary transition"
-                    title="Copy Email"
+                    type="button"
+                    onClick={() => setShowAdminCurrPass(!showAdminCurrPass)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   >
-                    <Copy className="w-3.5 h-3.5" />
+                    {showAdminCurrPass ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
                   </button>
                 </div>
-              ))}
-            </div>
+              </div>
 
-            <div className="flex justify-end pt-2 border-t border-border">
-              <button
-                onClick={() => setShowCredentialsModal(false)}
-                className="px-5 py-2 rounded-xl bg-primary text-primary-foreground font-bold"
-              >
-                Got It
-              </button>
-            </div>
+              <div>
+                <label className="block font-semibold mb-1">
+                  New Password <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type={showAdminNewPass ? "text" : "password"}
+                    required
+                    placeholder="Min 6-8 chars"
+                    value={adminNewPassword}
+                    onChange={(e) => setAdminNewPassword(e.target.value)}
+                    className="w-full p-2.5 rounded-xl border border-border bg-background focus:outline-hidden pr-9 text-xs font-mono"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowAdminNewPass(!showAdminNewPass)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showAdminNewPass ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
+                {adminNewPassword && (
+                  <div className="mt-1 flex items-center gap-1.5 text-[10px]">
+                    <div
+                      className={`h-1 flex-1 rounded-full ${
+                        adminNewPassword.length > 10
+                          ? "bg-emerald-500"
+                          : adminNewPassword.length >= 6
+                            ? "bg-amber-500"
+                            : "bg-rose-500"
+                      }`}
+                    />
+                    <span
+                      className={
+                        adminNewPassword.length > 10
+                          ? "text-emerald-600 font-bold"
+                          : adminNewPassword.length >= 6
+                            ? "text-amber-600 font-bold"
+                            : "text-rose-600 font-bold"
+                      }
+                    >
+                      {adminNewPassword.length > 10
+                        ? "Strong"
+                        : adminNewPassword.length >= 6
+                          ? "Good"
+                          : "Too Short"}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="block font-semibold mb-1">
+                  Confirm New Password <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="password"
+                  required
+                  placeholder="Re-type new password"
+                  value={adminConfirmPassword}
+                  onChange={(e) => setAdminConfirmPassword(e.target.value)}
+                  className="w-full p-2.5 rounded-xl border border-border bg-background focus:outline-hidden text-xs font-mono"
+                />
+                {adminConfirmPassword && adminConfirmPassword !== adminNewPassword && (
+                  <p className="text-rose-500 text-[10px] mt-1 font-semibold">
+                    Passwords do not match
+                  </p>
+                )}
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-border">
+                <button
+                  type="button"
+                  onClick={() => setShowChangePasswordModal(false)}
+                  className="px-4 py-2 rounded-xl border border-border font-medium hover:bg-secondary"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={
+                    isUpdatingAdminPassword ||
+                    !adminNewPassword ||
+                    adminNewPassword !== adminConfirmPassword
+                  }
+                  className="px-5 py-2 rounded-xl bg-primary text-primary-foreground font-bold hover:opacity-90 transition flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  {isUpdatingAdminPassword ? (
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Check className="w-3.5 h-3.5" />
+                  )}
+                  <span>{isUpdatingAdminPassword ? "Saving..." : "Update Password"}</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

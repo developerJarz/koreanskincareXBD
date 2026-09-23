@@ -41,7 +41,7 @@ export function ApiWebhooksHealthModule() {
   const [webhooks, setWebhooks] = useState([
     {
       id: "whk_1",
-      url: "https://api.steadfast.com.bd/v1/shajgoj-callback",
+      url: "https://api.steadfast.com.bd/v1/koreanskincare-callback",
       event: "order.created",
       status: "active",
       lastTrigger: "12 mins ago (HTTP 200 OK)",
@@ -74,7 +74,7 @@ export function ApiWebhooksHealthModule() {
 
       // Trigger dummy download
       const backupData = {
-        store: "Shajgoj.bd",
+        store: "koreanskincare.bd",
         version: "2.4-enterprise",
         timestamp: new Date().toISOString(),
         status: "complete_snapshot",
@@ -83,7 +83,7 @@ export function ApiWebhooksHealthModule() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `shajgoj_db_backup_${Date.now()}.json`;
+      a.download = `koreanskincare_db_backup_${Date.now()}.json`;
       a.click();
       toast.success("Database backup downloaded successfully!");
     }, 1200);

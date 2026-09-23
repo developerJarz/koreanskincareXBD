@@ -5,14 +5,14 @@ export interface SettingsDocument extends Omit<ISiteSettings, "_id">, Document {
 
 const settingsSchema = new Schema<SettingsDocument>(
   {
-    siteName: { type: String, default: "Shajgoj.bd" },
+    siteName: { type: String, default: "koreanskincare.bd" },
     siteDescription: {
       type: String,
-      default: "Premium beauty, jewelry & lifestyle accessories for Bangladesh",
+      default: "Authentic Korean skincare, beauty & lifestyle essentials for Bangladesh",
     },
     logo: { type: String },
     favicon: { type: String },
-    contactEmail: { type: String, default: "hello@shajgoj.bd" },
+    contactEmail: { type: String, default: "hello@koreanskincare.bd" },
     contactPhone: { type: String, default: "+880 1711-223344" },
     address: {
       type: String,
@@ -28,12 +28,12 @@ const settingsSchema = new Schema<SettingsDocument>(
     seo: {
       defaultTitle: {
         type: String,
-        default: "Shajgoj.bd — Premium Beauty & Lifestyle in Bangladesh",
+        default: "koreanskincare.bd — Authentic Korean Skincare & Beauty in Bangladesh",
       },
       defaultDescription: {
         type: String,
         default:
-          "Discover Shajgoj.bd — a curated collection of premium beauty, jewelry, and modern lifestyle fashion for Bangladesh.",
+          "Discover koreanskincare.bd — a curated collection of 100% authentic Korean skincare, beauty, and modern lifestyle products for Bangladesh.",
       },
       ogImage: { type: String },
       googleAnalyticsId: { type: String },

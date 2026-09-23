@@ -20,10 +20,10 @@ export const seedDatabase = createServerFn({ method: "POST" }).handler(async () 
   }
 
   // ─── 1. Create Super Admin ───
-  const hashedPassword = await bcryptjs.hash("admin123", 12);
+  const hashedPassword = await bcryptjs.hash("Shajgoj#SuperAdmin!2026$X9", 12);
   const admin = await User.create({
-    name: "Shajgoj Admin",
-    email: "admin@shajgoj.bd",
+    name: "koreanskincare.bd Admin",
+    email: "admin@koreanskincare.bd",
     password: hashedPassword,
     role: "super_admin",
     emailVerified: true,
@@ -402,7 +402,8 @@ export const seedDatabase = createServerFn({ method: "POST" }).handler(async () 
           {
             name: "Tasnia H.",
             city: "Sylhet",
-            quote: "Fast delivery, beautiful pieces. Shajgoj is my go-to for gifting.",
+            quote:
+              "Fast delivery, authentic products. koreanskincare.bd is my go-to for daily skincare.",
           },
         ],
       },
@@ -422,9 +423,9 @@ export const seedDatabase = createServerFn({ method: "POST" }).handler(async () 
 
   // ─── 5. Create Default Settings ───
   await Settings.create({
-    siteName: "Shajgoj.bd",
-    siteDescription: "Premium beauty, jewelry & lifestyle accessories for Bangladesh",
-    contactEmail: "hello@shajgoj.bd",
+    siteName: "koreanskincare.bd",
+    siteDescription: "Premium authentic Korean skincare & beauty essentials for Bangladesh",
+    contactEmail: "hello@koreanskincare.bd",
     contactPhone: "+880 1711-223344",
     address: "House 42, Road 11, Banani, Dhaka 1213",
     shipping: {
@@ -455,7 +456,7 @@ export const seedDatabase = createServerFn({ method: "POST" }).handler(async () 
     message: "Database seeded successfully!",
     skipped: false,
     data: {
-      admin: { email: "admin@shajgoj.bd", password: "admin123" },
+      admin: { email: "admin@koreanskincare.bd", password: "Shajgoj#SuperAdmin!2026$X9" },
       categories: categories.length,
       products: productData.length,
       homepageSections: 8,

@@ -167,69 +167,79 @@ export function SalesAnalyticsModule({
       {/* Primary KPI Metrics Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Gross Revenue */}
-        <div className="bg-card border border-border p-5 rounded-3xl relative overflow-hidden shadow-xs">
-          <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
+        <div className="card-interactive bg-card border border-border/80 p-5 rounded-3xl relative overflow-hidden shadow-xs hover:shadow-lg">
+          <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
             <span>Gross Revenue</span>
-            <div className="p-2 rounded-xl bg-primary/10 text-primary">
+            <div className="p-2.5 rounded-2xl bg-primary/10 text-primary border border-primary/20 shadow-xs">
               <DollarSign className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl lg:text-3xl font-serif font-bold text-foreground mt-2">
+          <div className="text-2xl lg:text-3xl font-serif font-bold text-foreground mt-2.5 tracking-tight">
             ৳{totalRevenue.toLocaleString()}
           </div>
-          <div className="mt-3 flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
-            <ArrowUpRight className="w-3.5 h-3.5" />
-            <span>+24.8% vs last period</span>
+          <div className="mt-3 flex items-center justify-between">
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+              <ArrowUpRight className="w-3 h-3" /> +24.8%
+            </span>
+            <span className="text-[10px] text-muted-foreground font-medium">vs last month</span>
           </div>
         </div>
 
         {/* Estimated Gross Profit */}
-        <div className="bg-card border border-border p-5 rounded-3xl relative overflow-hidden shadow-xs">
-          <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
+        <div className="card-interactive bg-card border border-border/80 p-5 rounded-3xl relative overflow-hidden shadow-xs hover:shadow-lg">
+          <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
             <span>Gross Profit ({grossMarginPercent}%)</span>
-            <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600">
+            <div className="p-2.5 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-xs">
               <TrendingUp className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl lg:text-3xl font-serif font-bold text-foreground mt-2">
+          <div className="text-2xl lg:text-3xl font-serif font-bold text-foreground mt-2.5 tracking-tight">
             ৳{estimatedGrossProfit.toLocaleString()}
           </div>
-          <div className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <span>COGS: ৳{estimatedCostOfGoods.toLocaleString()}</span>
+          <div className="mt-3 flex items-center justify-between">
+            <span className="text-[11px] text-muted-foreground font-medium">
+              COGS: ৳{estimatedCostOfGoods.toLocaleString()}
+            </span>
+            <span className="text-[10px] font-bold text-emerald-600">Healthy Margin</span>
           </div>
         </div>
 
         {/* Average Order Value (AOV) */}
-        <div className="bg-card border border-border p-5 rounded-3xl relative overflow-hidden shadow-xs">
-          <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
+        <div className="card-interactive bg-card border border-border/80 p-5 rounded-3xl relative overflow-hidden shadow-xs hover:shadow-lg">
+          <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
             <span>Average Order Value</span>
-            <div className="p-2 rounded-xl bg-purple-500/10 text-purple-600">
+            <div className="p-2.5 rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 shadow-xs">
               <ShoppingBag className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl lg:text-3xl font-serif font-bold text-foreground mt-2">
+          <div className="text-2xl lg:text-3xl font-serif font-bold text-foreground mt-2.5 tracking-tight">
             ৳{avgOrderValue.toLocaleString()}
           </div>
-          <div className="mt-3 flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
-            <ArrowUpRight className="w-3.5 h-3.5" />
-            <span>+8.2% basket size</span>
+          <div className="mt-3 flex items-center justify-between">
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+              <ArrowUpRight className="w-3 h-3" /> +8.2%
+            </span>
+            <span className="text-[10px] text-muted-foreground font-medium">basket size</span>
           </div>
         </div>
 
         {/* Conversion & ROAS */}
-        <div className="bg-card border border-border p-5 rounded-3xl relative overflow-hidden shadow-xs">
-          <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
-            <span>Conversion / ROAS</span>
-            <div className="p-2 rounded-xl bg-amber-500/10 text-amber-600">
+        <div className="card-interactive bg-card border border-border/80 p-5 rounded-3xl relative overflow-hidden shadow-xs hover:shadow-lg">
+          <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
+            <span>Conversion & ROAS</span>
+            <div className="p-2.5 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shadow-xs">
               <Percent className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl lg:text-3xl font-serif font-bold text-foreground mt-2">
+          <div className="text-2xl lg:text-3xl font-serif font-bold text-foreground mt-2.5 tracking-tight">
             {conversionRate}%{" "}
-            <span className="text-base text-muted-foreground font-normal">/ {roas}x</span>
+            <span className="text-sm text-muted-foreground font-sans font-semibold">
+              / {roas}x ROAS
+            </span>
           </div>
-          <div className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <span>Avg CAC: ৳{cac} per buyer</span>
+          <div className="mt-3 flex items-center justify-between">
+            <span className="text-[11px] text-muted-foreground font-medium">Avg CAC: ৳{cac}</span>
+            <span className="text-[10px] font-bold text-amber-600">Meta + TikTok</span>
           </div>
         </div>
       </div>

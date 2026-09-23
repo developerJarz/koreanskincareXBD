@@ -17,9 +17,11 @@ import {
   Package,
   ShoppingBag,
   LogOut,
+  Key,
 } from "lucide-react";
 import type { BDSeasonalTheme, AdminNotification, AdminTab } from "./types";
 import { useAuthStore } from "@/store/auth.store";
+import { SiteLogoLink } from "@/components/Logo";
 
 interface AdminHeaderProps {
   onOpenSidebar: () => void;
@@ -88,21 +90,19 @@ export function AdminHeader({
           <Menu className="w-5 h-5" />
         </button>
 
-        <Link href="/" className="lg:hidden flex items-center">
-          <img src="/shajgoj.png" alt="Shajgoj.bd" className="h-7 w-auto object-contain" />
-        </Link>
+        <SiteLogoLink variant="admin" className="lg:hidden" />
 
         {/* Global Search Trigger */}
         <button
           onClick={onOpenCommandPalette}
-          className="hidden sm:flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-secondary/60 hover:bg-secondary border border-border text-xs text-muted-foreground transition w-64 md:w-80 justify-between group shadow-2xs"
+          className="hidden sm:flex items-center gap-2.5 px-3.5 py-2 rounded-2xl bg-secondary/70 hover:bg-secondary border border-border/80 text-xs text-muted-foreground transition-all duration-200 w-64 md:w-80 justify-between group shadow-xs hover:border-primary/30"
         >
           <div className="flex items-center gap-2">
-            <Search className="w-3.5 h-3.5 group-hover:text-foreground transition-colors" />
-            <span className="truncate">Search orders, SKU, customers...</span>
+            <Search className="w-3.5 h-3.5 group-hover:text-primary transition-colors" />
+            <span className="truncate">Search SKU, orders, users...</span>
           </div>
-          <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-background border border-border rounded text-muted-foreground">
-            Ctrl+K
+          <kbd className="px-2 py-0.5 text-[10px] font-mono bg-card border border-border rounded-md text-foreground shadow-2xs font-semibold">
+            ⌘K
           </kbd>
         </button>
       </div>
@@ -113,18 +113,18 @@ export function AdminHeader({
         <div className="relative">
           <button
             onClick={() => setThemeDropdownOpen(!themeDropdownOpen)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-border bg-card hover:bg-secondary text-xs font-medium transition"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl border border-border/80 bg-card hover:bg-secondary text-xs font-semibold transition-all duration-200 shadow-2xs"
             title="Switch Seasonal Bangladeshi Campaign Mode"
           >
             <span>{seasonalThemeConfig[seasonalTheme].iconText}</span>
-            <span className="hidden md:inline text-[11px] font-semibold">
+            <span className="hidden md:inline text-[11px]">
               {seasonalThemeConfig[seasonalTheme].label}
             </span>
           </button>
 
           {themeDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-56 bg-card border border-border rounded-2xl p-1.5 shadow-xl z-50 animate-in fade-in zoom-in-95">
-              <div className="px-3 py-1.5 text-[10px] uppercase font-bold tracking-wider text-muted-foreground border-b border-border">
+            <div className="absolute right-0 mt-2 w-56 glass-card border border-border/80 rounded-2xl p-1.5 shadow-2xl z-50 animate-in fade-in zoom-in-95">
+              <div className="px-3 py-1.5 text-[10px] uppercase font-bold tracking-wider text-muted-foreground/80 border-b border-border/60">
                 Festive Campaign Mode
               </div>
               {(Object.keys(seasonalThemeConfig) as BDSeasonalTheme[]).map((themeKey) => (
@@ -134,10 +134,10 @@ export function AdminHeader({
                     setSeasonalTheme(themeKey);
                     setThemeDropdownOpen(false);
                   }}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs transition ${
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs transition duration-150 ${
                     seasonalTheme === themeKey
                       ? "bg-primary/15 text-primary font-bold"
-                      : "hover:bg-secondary text-foreground"
+                      : "hover:bg-secondary/80 text-foreground"
                   }`}
                 >
                   <span className="flex items-center gap-2">
@@ -154,7 +154,7 @@ export function AdminHeader({
         {/* Quick Action Menu */}
         <button
           onClick={() => setActiveTab("products")}
-          className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 transition shadow-xs"
+          className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-2xl bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-all duration-200 shadow-sm shadow-primary/20"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>New Product</span>
@@ -164,7 +164,7 @@ export function AdminHeader({
         <Link
           href="/"
           target="_blank"
-          className="p-2 rounded-xl border border-border text-muted-foreground hover:text-foreground hover:bg-secondary transition hidden md:inline-flex"
+          className="p-2 rounded-2xl border border-border/80 text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200 hidden md:inline-flex shadow-2xs"
           title="Open Storefront in New Tab"
         >
           <ExternalLink className="w-4 h-4" />
@@ -173,13 +173,13 @@ export function AdminHeader({
         {/* Notification Center Trigger */}
         <button
           onClick={onOpenNotifications}
-          className="p-2 rounded-xl border border-border text-muted-foreground hover:text-foreground hover:bg-secondary relative transition"
+          className="p-2 rounded-2xl border border-border/80 text-muted-foreground hover:text-foreground hover:bg-secondary relative transition-all duration-200 shadow-2xs"
           aria-label="Notifications"
           title="Notification Center"
         >
           <Bell className="w-4 h-4" />
           {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center animate-pulse">
+            <span className="absolute -top-1 -right-1 w-4.5 h-4.5 bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center animate-pulse shadow-sm">
               {unreadCount}
             </span>
           )}
@@ -189,25 +189,27 @@ export function AdminHeader({
         <div className="relative">
           <button
             onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-            className="flex items-center gap-2 p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl border border-border bg-secondary/50 hover:bg-secondary transition"
+            className="flex items-center gap-2.5 p-1.5 sm:px-3 sm:py-1.5 rounded-2xl border border-border/80 bg-card hover:bg-secondary transition-all duration-200 shadow-2xs"
           >
-            <div className="w-7 h-7 rounded-lg bg-primary/20 text-primary flex items-center justify-center font-bold text-xs">
+            <div className="w-7 h-7 rounded-xl bg-primary text-primary-foreground flex items-center justify-center font-bold text-xs shadow-xs">
               {user?.name ? user.name.charAt(0).toUpperCase() : "A"}
             </div>
             <div className="hidden lg:block text-left">
-              <div className="text-xs font-semibold leading-none">{user?.name || "Admin"}</div>
-              <span className="text-[10px] text-muted-foreground capitalize">
+              <div className="text-xs font-semibold leading-none text-foreground">
+                {user?.name || "Admin"}
+              </div>
+              <span className="text-[10px] text-muted-foreground font-medium capitalize">
                 {user?.role?.replace("_", " ") || "Super Admin"}
               </span>
             </div>
           </button>
 
           {userDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-52 bg-card border border-border rounded-2xl p-1.5 shadow-xl z-50 animate-in fade-in zoom-in-95">
-              <div className="px-3 py-2 border-b border-border">
+            <div className="absolute right-0 mt-2 w-56 glass-card border border-border/80 rounded-2xl p-2 shadow-2xl z-50 animate-in fade-in zoom-in-95">
+              <div className="px-3 py-2 border-b border-border/60">
                 <p className="text-xs font-bold text-foreground">{user?.name || "Admin User"}</p>
                 <p className="text-[11px] text-muted-foreground truncate">
-                  {user?.email || "admin@shajgoj.bd"}
+                  {user?.email || "admin@koreanskincare.bd"}
                 </p>
               </div>
               <button
@@ -216,6 +218,16 @@ export function AdminHeader({
                   setUserDropdownOpen(false);
                 }}
                 className="w-full flex items-center gap-2 px-3 py-2 text-xs text-foreground hover:bg-secondary rounded-xl transition mt-1"
+              >
+                <Key className="w-3.5 h-3.5 text-primary" />
+                <span>Change Password</span>
+              </button>
+              <button
+                onClick={() => {
+                  setActiveTab("security_rbac");
+                  setUserDropdownOpen(false);
+                }}
+                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-foreground hover:bg-secondary rounded-xl transition"
               >
                 <ShieldCheck className="w-3.5 h-3.5 text-primary" />
                 <span>Security & Permissions</span>

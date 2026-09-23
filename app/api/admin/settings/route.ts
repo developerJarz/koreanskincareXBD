@@ -11,14 +11,14 @@ export async function GET() {
     if (!settings) {
       // Create default settings if not exists
       settings = await Settings.create({
-        siteName: "Shajgoj.bd",
-        siteDescription: "Premium beauty, jewelry & lifestyle accessories for Bangladesh",
-        contactEmail: "hello@shajgoj.bd",
+        siteName: "koreanskincare.bd",
+        siteDescription: "Authentic Korean skincare, beauty & lifestyle accessories for Bangladesh",
+        contactEmail: "hello@koreanskincare.bd",
         contactPhone: "+880 1711-223344",
         address: "House 42, Road 11, Banani, Dhaka 1213",
         socialLinks: {
-          instagram: "https://instagram.com/shajgojbd",
-          facebook: "https://facebook.com/shajgojbd",
+          instagram: "https://instagram.com/koreanskincarebd",
+          facebook: "https://facebook.com/koreanskincarebd",
           whatsapp: "https://wa.me/8801711223344",
         },
         shipping: {

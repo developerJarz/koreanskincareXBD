@@ -8,7 +8,7 @@ import type { UserRole } from "@/types";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Admin Dashboard — Shajgoj.bd",
+  title: "Admin Dashboard — koreanskincare.bd",
   description:
     "Enterprise store operations, sales analytics, multi-warehouse & catalog management.",
 };

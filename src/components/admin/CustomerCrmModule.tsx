@@ -17,6 +17,9 @@ import {
   Award,
   Calendar,
   Send,
+  Key,
+  RefreshCw,
+  Check,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { AdminUserRow } from "./types";
@@ -32,6 +35,9 @@ export function CustomerCrmModule({ users, onToggleUserStatus }: CustomerCrmModu
   const [activeCustomer, setActiveCustomer] = useState<AdminUserRow | null>(null);
   const [smsModalCustomer, setSmsModalCustomer] = useState<AdminUserRow | null>(null);
   const [smsText, setSmsText] = useState("");
+  const [resetPassModalCustomer, setResetPassModalCustomer] = useState<AdminUserRow | null>(null);
+  const [customerNewPassword, setCustomerNewPassword] = useState("");
+  const [isResettingPass, setIsResettingPass] = useState(false);
 
   // Customer RFM segmentation logic
   const getCustomerSegment = (user: AdminUserRow) => {
@@ -69,6 +75,39 @@ export function CustomerCrmModule({ users, onToggleUserStatus }: CustomerCrmModu
     toast.success(`SMS sent to ${smsModalCustomer?.name || "Customer"} successfully!`);
     setSmsModalCustomer(null);
     setSmsText("");
+  };
+
+  const handleResetCustomerPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!customerNewPassword || customerNewPassword.length < 6) {
+      toast.error("Password must be at least 6 characters long.");
+      return;
+    }
+    if (!resetPassModalCustomer) return;
+
+    setIsResettingPass(true);
+    try {
+      const res = await fetch("/api/admin/users/password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: resetPassModalCustomer.id,
+          email: resetPassModalCustomer.email,
+          newPassword: customerNewPassword,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to update password");
+
+      toast.success(`Password for ${resetPassModalCustomer.name} updated successfully!`);
+      setResetPassModalCustomer(null);
+      setCustomerNewPassword("");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to reset customer password");
+    } finally {
+      setIsResettingPass(false);
+    }
   };
 
   return (
@@ -193,7 +232,7 @@ export function CustomerCrmModule({ users, onToggleUserStatus }: CustomerCrmModu
               <div className="flex items-center gap-2 pt-2 border-t border-border">
                 {/* WhatsApp Chat Button */}
                 <a
-                  href={`https://wa.me/8801711223344?text=Hello%20${encodeURIComponent(user.name)}%2C%20greetings%20from%20Shajgoj.bd!`}
+                  href={`https://wa.me/8801711223344?text=Hello%20${encodeURIComponent(user.name)}%2C%20greetings%20from%20koreanskincare.bd!`}
                   target="_blank"
                   rel="noreferrer"
                   className="flex-1 py-1.5 px-2.5 rounded-xl border border-border bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 text-[11px] font-bold flex items-center justify-center gap-1.5 transition"
@@ -208,7 +247,7 @@ export function CustomerCrmModule({ users, onToggleUserStatus }: CustomerCrmModu
                   onClick={() => {
                     setSmsModalCustomer(user);
                     setSmsText(
-                      `Hello ${user.name}, enjoy exclusive 15% OFF on our newest Eid collection at Shajgoj.bd! Use code: SHAJGOJVIP`,
+                      `Hello ${user.name}, enjoy exclusive 15% OFF on our authentic Korean skincare at koreanskincare.bd! Use code: KOREANVIP`,
                     );
                   }}
                   className="py-1.5 px-2.5 rounded-xl border border-border hover:bg-secondary text-[11px] font-semibold text-foreground transition"
@@ -313,7 +352,18 @@ export function CustomerCrmModule({ users, onToggleUserStatus }: CustomerCrmModu
               </div>
             </div>
 
-            <div className="pt-4 border-t border-border flex gap-2">
+            <div className="pt-4 border-t border-border flex flex-wrap gap-2">
+              <button
+                onClick={() => {
+                  setResetPassModalCustomer(activeCustomer);
+                  setCustomerNewPassword("");
+                  setActiveCustomer(null);
+                }}
+                className="py-2.5 px-3.5 rounded-2xl text-xs font-bold bg-primary/10 text-primary hover:bg-primary/20 transition flex items-center gap-1.5"
+              >
+                <Key className="w-3.5 h-3.5" />
+                <span>Reset Password</span>
+              </button>
               <button
                 onClick={() => {
                   onToggleUserStatus(activeCustomer.id, activeCustomer.isActive);
@@ -334,6 +384,65 @@ export function CustomerCrmModule({ users, onToggleUserStatus }: CustomerCrmModu
                 Close
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reset Customer Password Modal */}
+      {resetPassModalCustomer && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
+          <div className="bg-card border border-border rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 animate-scale-up text-xs">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <div className="flex items-center gap-2">
+                <Key className="w-4 h-4 text-primary" />
+                <h3 className="font-serif font-bold text-base">Reset Account Password</h3>
+              </div>
+              <button
+                onClick={() => setResetPassModalCustomer(null)}
+                className="p-1 rounded-xl hover:bg-secondary"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <p className="text-muted-foreground">
+              Set a new password for{" "}
+              <strong className="text-foreground">{resetPassModalCustomer.name}</strong> (
+              {resetPassModalCustomer.email}):
+            </p>
+            <form onSubmit={handleResetCustomerPassword} className="space-y-3">
+              <div>
+                <label className="block font-semibold mb-1">New Password</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Enter new password (min 6 chars)"
+                  value={customerNewPassword}
+                  onChange={(e) => setCustomerNewPassword(e.target.value)}
+                  className="w-full p-2.5 rounded-xl border border-border bg-background focus:outline-hidden font-mono text-xs"
+                />
+              </div>
+              <div className="flex justify-end gap-2 pt-2 border-t border-border">
+                <button
+                  type="button"
+                  onClick={() => setResetPassModalCustomer(null)}
+                  className="px-4 py-2 rounded-xl border border-border font-medium hover:bg-secondary"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isResettingPass || !customerNewPassword}
+                  className="px-4 py-2 rounded-xl bg-primary text-primary-foreground font-bold flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  {isResettingPass ? (
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Check className="w-3.5 h-3.5" />
+                  )}
+                  <span>{isResettingPass ? "Updating..." : "Save Password"}</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

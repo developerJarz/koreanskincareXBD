@@ -7,6 +7,7 @@ import { use, useState } from "react";
 import { toast } from "sonner";
 
 import { useAuthStore } from "@/store/auth.store";
+import { SiteLogoLink } from "@/components/Logo";
 
 type RouteParams = { slug: string };
 
@@ -79,9 +80,9 @@ function LoginPage() {
   return (
     <section className="container-x py-16 lg:py-24 max-w-md">
       <div className="text-center mb-8 flex flex-col items-center">
-        <Link href="/" className="mb-4 inline-block hover:opacity-80 transition">
-          <img src="/shajgoj.png" alt="Shajgoj.bd" className="h-10 w-auto object-contain" />
-        </Link>
+        <div className="mb-4">
+          <SiteLogoLink variant="header" />
+        </div>
         <p className="text-xs tracking-[0.25em] uppercase text-primary font-bold">
           Access Your Account
         </p>
@@ -185,11 +186,11 @@ function RegisterPage() {
   return (
     <section className="container-x py-16 lg:py-24 max-w-md">
       <div className="text-center mb-8 flex flex-col items-center">
-        <Link href="/" className="mb-4 inline-block hover:opacity-80 transition">
-          <img src="/shajgoj.png" alt="Shajgoj.bd" className="h-10 w-auto object-contain" />
-        </Link>
+        <div className="mb-4">
+          <SiteLogoLink variant="header" />
+        </div>
         <p className="text-xs tracking-[0.25em] uppercase text-primary font-bold">
-          Join Shajgoj.bd
+          Join KoreanSkincare.bd
         </p>
         <h1 className="font-serif text-4xl lg:text-5xl mt-2">Create Account</h1>
         <p className="text-xs text-muted-foreground mt-1">
@@ -279,9 +280,9 @@ function ForgotPasswordPage() {
   return (
     <section className="container-x py-16 lg:py-24 max-w-md">
       <div className="text-center mb-8 flex flex-col items-center">
-        <Link href="/" className="mb-4 inline-block hover:opacity-80 transition">
-          <img src="/shajgoj.png" alt="Shajgoj.bd" className="h-10 w-auto object-contain" />
-        </Link>
+        <div className="mb-4">
+          <SiteLogoLink variant="header" />
+        </div>
         <p className="text-xs tracking-[0.25em] uppercase text-primary font-bold">
           Account Security
         </p>

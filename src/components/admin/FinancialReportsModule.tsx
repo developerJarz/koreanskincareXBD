@@ -99,7 +99,7 @@ export function FinancialReportsModule({ totalRevenue }: FinancialReportsModuleP
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `shajgoj_${type}_report_${Date.now()}.csv`);
+    link.setAttribute("download", `koreanskincare_${type}_report_${Date.now()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

@@ -29,7 +29,7 @@ export function CmsBlogSeoModule() {
   ]);
 
   const [cmsPages, setCmsPages] = useState([
-    { title: "About Shajgoj.bd & Our Story", slug: "about", status: "published" },
+    { title: "About koreanskincare.bd & Our Story", slug: "about", status: "published" },
     { title: "Delivery Policy & 64 District Hubs", slug: "delivery-policy", status: "published" },
     { title: "7-Day Return & Replacement Terms", slug: "return-policy", status: "published" },
     { title: "Privacy Policy & Customer Data", slug: "privacy", status: "published" },
@@ -39,9 +39,9 @@ export function CmsBlogSeoModule() {
     {
       "@context": "https://schema.org",
       "@type": "Organization",
-      name: "Shajgoj.bd",
-      url: "https://shajgoj.bd",
-      logo: "https://shajgoj.bd/logo.png",
+      name: "koreanskincare.bd",
+      url: "https://koreanskincare.bd",
+      logo: "https://koreanskincare.bd/logo.png",
       contactPoint: {
         "@type": "ContactPoint",
         telephone: "+880 1711-223344",
@@ -49,7 +49,7 @@ export function CmsBlogSeoModule() {
         areaServed: "BD",
         availableLanguage: ["en", "bn"],
       },
-      sameAs: ["https://facebook.com/shajgojbd", "https://instagram.com/shajgojbd"],
+      sameAs: ["https://facebook.com/koreanskincarebd", "https://instagram.com/koreanskincarebd"],
     },
     null,
     2,
@@ -153,7 +153,7 @@ export function CmsBlogSeoModule() {
                 <div>
                   <h4 className="font-bold text-foreground">{page.title}</h4>
                   <p className="text-[11px] font-mono text-muted-foreground">
-                    URL: https://shajgoj.bd/{page.slug}
+                    URL: https://koreanskincare.bd/{page.slug}
                   </p>
                 </div>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-500/15 text-emerald-600">

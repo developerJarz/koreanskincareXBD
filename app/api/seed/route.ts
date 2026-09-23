@@ -29,25 +29,44 @@ async function handleSeed(request: NextRequest) {
         usersCount: existingUsers,
         productsCount: existingProducts,
         credentials: {
-          superAdmin: { email: "superadmin@shajgoj.bd", password: "admin123", role: "super_admin" },
-          admin: { email: "admin@shajgoj.bd", password: "admin123", role: "admin" },
-          staff: { email: "staff@shajgoj.bd", password: "staff123", role: "staff" },
-          customer: { email: "customer@shajgoj.bd", password: "customer123", role: "customer" },
+          superAdmin: {
+            email: "superadmin@koreanskincare.bd",
+            password: "Shajgoj#SuperAdmin!2026$X9",
+            role: "super_admin",
+          },
+          admin: {
+            email: "admin@koreanskincare.bd",
+            password: "Shajgoj#Admin!9982*Secure",
+            role: "admin",
+          },
+          staff: {
+            email: "staff@koreanskincare.bd",
+            password: "Staff#Mod@Shajgoj8821$",
+            role: "staff",
+          },
+          customer: {
+            email: "customer@koreanskincare.bd",
+            password: "Customer#Lux!Nusrat2026@",
+            role: "customer",
+          },
+          ayesha: { email: "ayesha@example.com", password: "Ayesha#Luxe2026!Bd", role: "customer" },
         },
       });
     }
 
     // 1. Seed Users with Secure Hashed Passwords
-    const adminPasswordHash = await bcryptjs.hash("admin123", 12);
-    const staffPasswordHash = await bcryptjs.hash("staff123", 12);
-    const customerPasswordHash = await bcryptjs.hash("customer123", 12);
+    const superAdminPasswordHash = await bcryptjs.hash("Shajgoj#SuperAdmin!2026$X9", 12);
+    const adminPasswordHash = await bcryptjs.hash("Shajgoj#Admin!9982*Secure", 12);
+    const staffPasswordHash = await bcryptjs.hash("Staff#Mod@Shajgoj8821$", 12);
+    const customerPasswordHash = await bcryptjs.hash("Customer#Lux!Nusrat2026@", 12);
+    const ayeshaPasswordHash = await bcryptjs.hash("Ayesha#Luxe2026!Bd", 12);
 
     await User.deleteMany({});
     const seededUsers = await User.insertMany([
       {
-        name: "Shajgoj Super Admin",
-        email: "superadmin@shajgoj.bd",
-        password: adminPasswordHash,
+        name: "koreanskincare.bd Super Admin",
+        email: "superadmin@koreanskincare.bd",
+        password: superAdminPasswordHash,
         role: "super_admin",
         emailVerified: true,
         phone: "+880 1711-000001",
@@ -57,8 +76,8 @@ async function handleSeed(request: NextRequest) {
         rewardPoints: 1200,
       },
       {
-        name: "Shajgoj Store Admin",
-        email: "admin@shajgoj.bd",
+        name: "koreanskincare.bd Store Admin",
+        email: "admin@koreanskincare.bd",
         password: adminPasswordHash,
         role: "admin",
         emailVerified: true,
@@ -70,7 +89,7 @@ async function handleSeed(request: NextRequest) {
       },
       {
         name: "Store Staff (Moderator)",
-        email: "staff@shajgoj.bd",
+        email: "staff@koreanskincare.bd",
         password: staffPasswordHash,
         role: "staff",
         emailVerified: true,
@@ -82,7 +101,7 @@ async function handleSeed(request: NextRequest) {
       },
       {
         name: "Nusrat Jahan",
-        email: "customer@shajgoj.bd",
+        email: "customer@koreanskincare.bd",
         password: customerPasswordHash,
         role: "customer",
         emailVerified: true,
@@ -92,10 +111,35 @@ async function handleSeed(request: NextRequest) {
         walletBalance: 1200,
         rewardPoints: 350,
       },
+      // Backwards-compatible aliases
+      {
+        name: "Super Admin (Alias)",
+        email: "superadmin@shajgoj.bd",
+        password: superAdminPasswordHash,
+        role: "super_admin",
+        emailVerified: true,
+        phone: "+880 1711-000001",
+        provider: "credentials",
+        isActive: true,
+        walletBalance: 15000,
+        rewardPoints: 1200,
+      },
+      {
+        name: "Store Admin (Alias)",
+        email: "admin@shajgoj.bd",
+        password: adminPasswordHash,
+        role: "admin",
+        emailVerified: true,
+        phone: "+880 1711-000002",
+        provider: "credentials",
+        isActive: true,
+        walletBalance: 5000,
+        rewardPoints: 500,
+      },
       {
         name: "Ayesha Rahman",
         email: "ayesha@example.com",
-        password: customerPasswordHash,
+        password: ayeshaPasswordHash,
         role: "customer",
         emailVerified: true,
         phone: "+880 1819-445566",
@@ -112,7 +156,7 @@ async function handleSeed(request: NextRequest) {
       CATEGORIES.map((c, i) => ({
         name: c.name,
         slug: c.slug,
-        description: `Premium ${c.name.toLowerCase()} handcrafted for luxury and elegance at Shajgoj.bd`,
+        description: `Premium authentic ${c.name.toLowerCase()} for koreanskincare.bd`,
         image: typeof c.img === "string" ? c.img : (c.img as any)?.src || "",
         sortOrder: i,
         isActive: true,
@@ -177,7 +221,7 @@ async function handleSeed(request: NextRequest) {
         startsAt: new Date(),
       },
       {
-        code: "SHAJGOJVIP",
+        code: "KOREANVIP",
         type: "percentage",
         value: 20,
         minOrderAmount: 3000,
@@ -192,14 +236,14 @@ async function handleSeed(request: NextRequest) {
     // 5. Seed Store Settings
     await Settings.deleteMany({});
     await Settings.create({
-      siteName: "Shajgoj.bd",
-      siteDescription: "Premium beauty, jewelry & accessories for modern Bangladeshi lifestyles",
-      contactEmail: "hello@shajgoj.bd",
+      siteName: "koreanskincare.bd",
+      siteDescription: "Premium authentic Korean skincare & beauty essentials for Bangladesh",
+      contactEmail: "hello@koreanskincare.bd",
       contactPhone: "+880 1711-223344",
       address: "House 42, Road 11, Banani, Dhaka 1213, Bangladesh",
       socialLinks: {
-        instagram: "https://instagram.com/shajgojbd",
-        facebook: "https://facebook.com/shajgojbd",
+        instagram: "https://instagram.com/koreanskincarebd",
+        facebook: "https://facebook.com/koreanskincarebd",
         whatsapp: "https://wa.me/8801711223344",
       },
       shipping: {
@@ -219,7 +263,7 @@ async function handleSeed(request: NextRequest) {
     // 6. Seed Realistic Sample Orders for Analytics & Testing
     await Order.deleteMany({});
     const customerUser =
-      seededUsers.find((u) => u.email === "customer@shajgoj.bd") || seededUsers[3];
+      seededUsers.find((u) => u.email === "customer@koreanskincare.bd") || seededUsers[3];
     await Order.insertMany([
       {
         orderNumber: "ORD-2026-8801",
@@ -334,10 +378,27 @@ async function handleSeed(request: NextRequest) {
         orders: 3,
       },
       credentials: {
-        superAdmin: { email: "superadmin@shajgoj.bd", password: "admin123", role: "super_admin" },
-        admin: { email: "admin@shajgoj.bd", password: "admin123", role: "admin" },
-        staff: { email: "staff@shajgoj.bd", password: "staff123", role: "staff" },
-        customer: { email: "customer@shajgoj.bd", password: "customer123", role: "customer" },
+        superAdmin: {
+          email: "superadmin@koreanskincare.bd",
+          password: "Shajgoj#SuperAdmin!2026$X9",
+          role: "super_admin",
+        },
+        admin: {
+          email: "admin@koreanskincare.bd",
+          password: "Shajgoj#Admin!9982*Secure",
+          role: "admin",
+        },
+        staff: {
+          email: "staff@koreanskincare.bd",
+          password: "Staff#Mod@Shajgoj8821$",
+          role: "staff",
+        },
+        customer: {
+          email: "customer@koreanskincare.bd",
+          password: "Customer#Lux!Nusrat2026@",
+          role: "customer",
+        },
+        ayesha: { email: "ayesha@example.com", password: "Ayesha#Luxe2026!Bd", role: "customer" },
       },
     });
   } catch (err: any) {

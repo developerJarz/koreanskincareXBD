@@ -1,260 +1,196 @@
 "use client";
 
-import React, { useState } from "react";
-import Link from "next/link";
-import {
-  Search,
-  Bell,
-  Sun,
-  Moon,
-  Sparkles,
-  Menu,
-  ExternalLink,
-  Plus,
-  Zap,
-  Check,
-  ShieldCheck,
-  Package,
-  ShoppingBag,
-  LogOut,
-  Key,
-} from "lucide-react";
-import type { BDSeasonalTheme, AdminNotification, AdminTab } from "./types";
+import React, { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Search, Bell, Menu, Plus, LogOut, Key, ShieldCheck } from "lucide-react";
+import type { AdminNotification, AdminTab } from "./types";
+import { getNavItem } from "./nav";
 import { useAuthStore } from "@/store/auth.store";
-import { SiteLogoLink } from "@/components/Logo";
 
 interface AdminHeaderProps {
+  activeTab: AdminTab;
+  sidebarOpen: boolean;
   onOpenSidebar: () => void;
   onOpenCommandPalette: () => void;
   onOpenNotifications: () => void;
+  onChangePassword: () => void;
   notifications: AdminNotification[];
-  seasonalTheme: BDSeasonalTheme;
-  setSeasonalTheme: (theme: BDSeasonalTheme) => void;
   setActiveTab: (tab: AdminTab) => void;
 }
 
+const ROLE_LABELS: Record<string, string> = {
+  super_admin: "Super admin",
+  admin: "Admin",
+  staff: "Staff",
+};
+
 export function AdminHeader({
+  activeTab,
+  sidebarOpen,
   onOpenSidebar,
   onOpenCommandPalette,
   onOpenNotifications,
+  onChangePassword,
   notifications,
-  seasonalTheme,
-  setSeasonalTheme,
   setActiveTab,
 }: AdminHeaderProps) {
+  const router = useRouter();
   const { user, logout } = useAuthStore();
-  const [themeDropdownOpen, setThemeDropdownOpen] = useState(false);
-  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
+  const current = getNavItem(activeTab);
+  const initial = user?.name?.trim().charAt(0).toUpperCase() || "A";
 
-  const seasonalThemeConfig: Record<
-    BDSeasonalTheme,
-    { label: string; iconText: string; color: string; banner: string }
-  > = {
-    standard: {
-      label: "Classic Luxe",
-      iconText: "✨",
-      color: "text-foreground",
-      banner: "bg-primary text-primary-foreground",
-    },
-    ramadan: {
-      label: "Ramadan Kareem",
-      iconText: "🌙",
-      color: "text-emerald-600 dark:text-emerald-400",
-      banner: "bg-emerald-900 text-emerald-100",
-    },
-    eid: {
-      label: "Eid Mubarak Mega Edit",
-      iconText: "🕌",
-      color: "text-amber-600 dark:text-amber-400",
-      banner: "bg-gradient-to-r from-amber-700 via-yellow-600 to-amber-800 text-white",
-    },
-    boishakh: {
-      label: "Pohela Boishakh 1433",
-      iconText: "🏮",
-      color: "text-rose-600 dark:text-rose-400",
-      banner: "bg-gradient-to-r from-red-600 to-rose-700 text-white",
-    },
+  // Close the account menu on outside click or Escape
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onPointer = (e: PointerEvent) => {
+      if (!menuRef.current?.contains(e.target as Node)) setMenuOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMenuOpen(false);
+    document.addEventListener("pointerdown", onPointer);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onPointer);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [menuOpen]);
+
+  const handleSignOut = () => {
+    setMenuOpen(false);
+    logout();
+    router.replace("/auth/login");
   };
 
+  const iconButton =
+    "relative inline-flex items-center justify-center w-9 h-9 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors focus-visible:outline-2 focus-visible:outline-ring";
+
   return (
-    <header className="sticky top-0 z-30 h-16 bg-card/90 backdrop-blur-md border-b border-border px-4 lg:px-6 flex items-center justify-between gap-3">
-      {/* Left: Mobile Menu & Breadcrumbs / Title */}
-      <div className="flex items-center gap-3">
-        <button
-          onClick={onOpenSidebar}
-          className="p-2 rounded-xl border border-border text-foreground hover:bg-secondary lg:hidden"
-          aria-label="Open Sidebar"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
+    <header className="sticky top-0 z-30 h-14 shrink-0 bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/85 border-b border-border px-3 sm:px-4 lg:px-8 flex items-center gap-2 sm:gap-3">
+      <button
+        onClick={onOpenSidebar}
+        className={`${iconButton} lg:hidden -ml-1`}
+        aria-label="Open menu"
+        aria-controls="admin-sidebar"
+        aria-expanded={sidebarOpen}
+      >
+        <Menu className="w-5 h-5" />
+      </button>
 
-        <SiteLogoLink variant="admin" className="lg:hidden" />
-
-        {/* Global Search Trigger */}
-        <button
-          onClick={onOpenCommandPalette}
-          className="hidden sm:flex items-center gap-2.5 px-3.5 py-2 rounded-2xl bg-secondary/70 hover:bg-secondary border border-border/80 text-xs text-muted-foreground transition-all duration-200 w-64 md:w-80 justify-between group shadow-xs hover:border-primary/30"
-        >
-          <div className="flex items-center gap-2">
-            <Search className="w-3.5 h-3.5 group-hover:text-primary transition-colors" />
-            <span className="truncate">Search SKU, orders, users...</span>
-          </div>
-          <kbd className="px-2 py-0.5 text-[10px] font-mono bg-card border border-border rounded-md text-foreground shadow-2xs font-semibold">
-            ⌘K
-          </kbd>
-        </button>
+      {/* Where you are */}
+      <div className="min-w-0 flex-1">
+        <h1 className="text-[15px] font-semibold text-foreground leading-tight truncate font-sans tracking-normal">
+          {current.label}
+        </h1>
+        <p className="hidden sm:block text-xs text-muted-foreground truncate">
+          {current.description}
+        </p>
       </div>
 
-      {/* Right Action Icons */}
-      <div className="flex items-center gap-2 sm:gap-3">
-        {/* Seasonal Campaign / Theme Switcher */}
-        <div className="relative">
-          <button
-            onClick={() => setThemeDropdownOpen(!themeDropdownOpen)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl border border-border/80 bg-card hover:bg-secondary text-xs font-semibold transition-all duration-200 shadow-2xs"
-            title="Switch Seasonal Bangladeshi Campaign Mode"
-          >
-            <span>{seasonalThemeConfig[seasonalTheme].iconText}</span>
-            <span className="hidden md:inline text-[11px]">
-              {seasonalThemeConfig[seasonalTheme].label}
-            </span>
-          </button>
+      <button
+        onClick={onOpenCommandPalette}
+        className="hidden md:flex items-center gap-2 w-56 lg:w-72 h-9 px-3 rounded-lg bg-secondary/70 hover:bg-secondary border border-border text-xs text-muted-foreground transition-colors focus-visible:outline-2 focus-visible:outline-ring"
+      >
+        <Search className="w-3.5 h-3.5 shrink-0" />
+        <span className="truncate">Search orders, products, people</span>
+        <kbd className="ml-auto px-1.5 py-0.5 text-[10px] bg-card border border-border rounded text-foreground font-semibold">
+          Ctrl K
+        </kbd>
+      </button>
+      <button
+        onClick={onOpenCommandPalette}
+        className={`${iconButton} md:hidden`}
+        aria-label="Search"
+      >
+        <Search className="w-4.5 h-4.5" />
+      </button>
 
-          {themeDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-56 glass-card border border-border/80 rounded-2xl p-1.5 shadow-2xl z-50 animate-in fade-in zoom-in-95">
-              <div className="px-3 py-1.5 text-[10px] uppercase font-bold tracking-wider text-muted-foreground/80 border-b border-border/60">
-                Festive Campaign Mode
-              </div>
-              {(Object.keys(seasonalThemeConfig) as BDSeasonalTheme[]).map((themeKey) => (
-                <button
-                  key={themeKey}
-                  onClick={() => {
-                    setSeasonalTheme(themeKey);
-                    setThemeDropdownOpen(false);
-                  }}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs transition duration-150 ${
-                    seasonalTheme === themeKey
-                      ? "bg-primary/15 text-primary font-bold"
-                      : "hover:bg-secondary/80 text-foreground"
-                  }`}
-                >
-                  <span className="flex items-center gap-2">
-                    <span>{seasonalThemeConfig[themeKey].iconText}</span>
-                    <span>{seasonalThemeConfig[themeKey].label}</span>
-                  </span>
-                  {seasonalTheme === themeKey && <Check className="w-3.5 h-3.5 text-primary" />}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+      <button
+        onClick={() => setActiveTab("products")}
+        className="hidden sm:inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+      >
+        <Plus className="w-3.5 h-3.5" />
+        <span>Add product</span>
+      </button>
 
-        {/* Quick Action Menu */}
+      <button
+        onClick={onOpenNotifications}
+        className={iconButton}
+        aria-label={unreadCount ? `Notifications, ${unreadCount} unread` : "Notifications"}
+      >
+        <Bell className="w-4.5 h-4.5" />
+        {unreadCount > 0 && (
+          <span className="absolute top-1 right-1 min-w-4 h-4 px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold leading-4 text-center tabular-nums">
+            {unreadCount}
+          </span>
+        )}
+      </button>
+
+      <div className="relative" ref={menuRef}>
         <button
-          onClick={() => setActiveTab("products")}
-          className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-2xl bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-all duration-200 shadow-sm shadow-primary/20"
+          onClick={() => setMenuOpen((open) => !open)}
+          className="flex items-center gap-2.5 h-9 pl-1 pr-1 lg:pr-3 rounded-lg hover:bg-secondary transition-colors focus-visible:outline-2 focus-visible:outline-ring"
+          aria-haspopup="menu"
+          aria-expanded={menuOpen}
+          aria-label="Account menu"
         >
-          <Plus className="w-3.5 h-3.5" />
-          <span>New Product</span>
+          <span className="w-7 h-7 rounded-md bg-sidebar text-sidebar-foreground flex items-center justify-center text-xs font-bold">
+            {initial}
+          </span>
+          <span className="hidden lg:block text-left leading-tight">
+            <span className="block text-xs font-semibold text-foreground max-w-32 truncate">
+              {user?.name || "Admin"}
+            </span>
+            <span className="block text-[11px] text-muted-foreground">
+              {ROLE_LABELS[user?.role ?? ""] ?? "Team member"}
+            </span>
+          </span>
         </button>
 
-        {/* View Live Store */}
-        <Link
-          href="/"
-          target="_blank"
-          className="p-2 rounded-2xl border border-border/80 text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200 hidden md:inline-flex shadow-2xs"
-          title="Open Storefront in New Tab"
-        >
-          <ExternalLink className="w-4 h-4" />
-        </Link>
-
-        {/* Notification Center Trigger */}
-        <button
-          onClick={onOpenNotifications}
-          className="p-2 rounded-2xl border border-border/80 text-muted-foreground hover:text-foreground hover:bg-secondary relative transition-all duration-200 shadow-2xs"
-          aria-label="Notifications"
-          title="Notification Center"
-        >
-          <Bell className="w-4 h-4" />
-          {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 w-4.5 h-4.5 bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center animate-pulse shadow-sm">
-              {unreadCount}
-            </span>
-          )}
-        </button>
-
-        {/* User Profile Badge */}
-        <div className="relative">
-          <button
-            onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-            className="flex items-center gap-2.5 p-1.5 sm:px-3 sm:py-1.5 rounded-2xl border border-border/80 bg-card hover:bg-secondary transition-all duration-200 shadow-2xs"
+        {menuOpen && (
+          <div
+            role="menu"
+            className="absolute right-0 mt-2 w-60 rounded-xl border border-border bg-popover p-1.5 shadow-lg z-50"
           >
-            <div className="w-7 h-7 rounded-xl bg-primary text-primary-foreground flex items-center justify-center font-bold text-xs shadow-xs">
-              {user?.name ? user.name.charAt(0).toUpperCase() : "A"}
+            <div className="px-3 py-2 border-b border-border mb-1">
+              <p className="text-xs font-semibold text-foreground truncate">{user?.name}</p>
+              <p className="text-[11px] text-muted-foreground truncate">{user?.email}</p>
             </div>
-            <div className="hidden lg:block text-left">
-              <div className="text-xs font-semibold leading-none text-foreground">
-                {user?.name || "Admin"}
-              </div>
-              <span className="text-[10px] text-muted-foreground font-medium capitalize">
-                {user?.role?.replace("_", " ") || "Super Admin"}
-              </span>
-            </div>
-          </button>
-
-          {userDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-56 glass-card border border-border/80 rounded-2xl p-2 shadow-2xl z-50 animate-in fade-in zoom-in-95">
-              <div className="px-3 py-2 border-b border-border/60">
-                <p className="text-xs font-bold text-foreground">{user?.name || "Admin User"}</p>
-                <p className="text-[11px] text-muted-foreground truncate">
-                  {user?.email || "admin@koreanskincare.bd"}
-                </p>
-              </div>
-              <button
-                onClick={() => {
-                  setActiveTab("security_rbac");
-                  setUserDropdownOpen(false);
-                }}
-                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-foreground hover:bg-secondary rounded-xl transition mt-1"
-              >
-                <Key className="w-3.5 h-3.5 text-primary" />
-                <span>Change Password</span>
-              </button>
-              <button
-                onClick={() => {
-                  setActiveTab("security_rbac");
-                  setUserDropdownOpen(false);
-                }}
-                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-foreground hover:bg-secondary rounded-xl transition"
-              >
-                <ShieldCheck className="w-3.5 h-3.5 text-primary" />
-                <span>Security & Permissions</span>
-              </button>
-              <button
-                onClick={() => {
-                  setActiveTab("settings");
-                  setUserDropdownOpen(false);
-                }}
-                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-foreground hover:bg-secondary rounded-xl transition"
-              >
-                <span>Store Settings</span>
-              </button>
-              <div className="border-t border-border my-1" />
-              <button
-                onClick={() => {
-                  logout();
-                  setUserDropdownOpen(false);
-                }}
-                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-rose-600 hover:bg-rose-500/10 rounded-xl transition font-medium"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                <span>Sign Out</span>
-              </button>
-            </div>
-          )}
-        </div>
+            <button
+              role="menuitem"
+              onClick={() => {
+                setMenuOpen(false);
+                onChangePassword();
+              }}
+              className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-foreground hover:bg-secondary rounded-lg"
+            >
+              <Key className="w-3.5 h-3.5 text-muted-foreground" />
+              Change password
+            </button>
+            <button
+              role="menuitem"
+              onClick={() => {
+                setMenuOpen(false);
+                setActiveTab("security_rbac");
+              }}
+              className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-foreground hover:bg-secondary rounded-lg"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-muted-foreground" />
+              Team & security
+            </button>
+            <div className="border-t border-border my-1" />
+            <button
+              role="menuitem"
+              onClick={handleSignOut}
+              className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-destructive hover:bg-destructive/10 rounded-lg font-medium"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              Sign out
+            </button>
+          </div>
+        )}
       </div>
     </header>
   );

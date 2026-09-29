@@ -1,31 +1,10 @@
 "use client";
 
-import React from "react";
-import {
-  LayoutDashboard,
-  BarChart3,
-  ShoppingBag,
-  Package,
-  Layers,
-  Boxes,
-  Users,
-  Store,
-  RotateCcw,
-  Truck,
-  Sparkles,
-  DollarSign,
-  FileText,
-  MessageSquare,
-  Image as ImageIcon,
-  Shield,
-  Activity,
-  Settings,
-  ChevronRight,
-  X,
-  BadgeAlert,
-  Flame,
-} from "lucide-react";
+import React, { useEffect } from "react";
+import Link from "next/link";
+import { ExternalLink, X } from "lucide-react";
 import type { AdminTab } from "./types";
+import { ADMIN_NAV } from "./nav";
 import { Logo } from "@/components/Logo";
 
 interface AdminSidebarProps {
@@ -35,20 +14,9 @@ interface AdminSidebarProps {
   onClose: () => void;
   pendingOrdersCount?: number;
   lowStockCount?: number;
-  returnsCount?: number;
+  /** Vendor products + vendor stores waiting for review */
+  vendorsCount?: number;
 }
-
-type NavGroup = {
-  title: string;
-  items: Array<{
-    tab: AdminTab;
-    label: string;
-    icon: React.ElementType;
-    badge?: number;
-    badgeColor?: string;
-    isHot?: boolean;
-  }>;
-};
 
 export function AdminSidebar({
   activeTab,
@@ -57,196 +25,109 @@ export function AdminSidebar({
   onClose,
   pendingOrdersCount = 0,
   lowStockCount = 0,
-  returnsCount = 2,
+  vendorsCount = 0,
 }: AdminSidebarProps) {
-  const navGroups: NavGroup[] = [
-    {
-      title: "Core & Intelligence",
-      items: [
-        { tab: "overview", label: "Executive Overview", icon: LayoutDashboard },
-        { tab: "analytics", label: "Sales & BI Analytics", icon: BarChart3 },
-        { tab: "finance", label: "Finance & Profit (P&L)", icon: DollarSign },
-      ],
-    },
-    {
-      title: "Catalog & Warehouses",
-      items: [
-        { tab: "products", label: "Products & Variants", icon: Package },
-        { tab: "categories", label: "Categories & Badges", icon: Layers },
-        {
-          tab: "inventory",
-          label: "Multi-Warehouse & Stock",
-          icon: Boxes,
-          badge: lowStockCount > 0 ? lowStockCount : undefined,
-          badgeColor: "bg-amber-500",
-        },
-        { tab: "media", label: "Media Library (CDN)", icon: ImageIcon },
-      ],
-    },
-    {
-      title: "Orders & Logistics BD",
-      items: [
-        {
-          tab: "orders",
-          label: "Order Pipeline & POS",
-          icon: ShoppingBag,
-          badge: pendingOrdersCount > 0 ? pendingOrdersCount : undefined,
-          badgeColor: "bg-primary",
-        },
-        {
-          tab: "returns",
-          label: "Returns & Exchanges",
-          icon: RotateCcw,
-          badge: returnsCount > 0 ? returnsCount : undefined,
-          badgeColor: "bg-rose-500",
-        },
-        { tab: "couriers_payments", label: "Couriers & Payments BD", icon: Truck },
-      ],
-    },
-    {
-      title: "Customers & Marketplace",
-      items: [
-        { tab: "customers", label: "Customers CRM & RFM", icon: Users },
-        { tab: "vendors", label: "Multi-Vendor Hub", icon: Store },
-        { tab: "reviews_abandoned", label: "Reviews & Abandoned Carts", icon: MessageSquare },
-      ],
-    },
-    {
-      title: "Growth & Automation",
-      items: [
-        { tab: "marketing", label: "Campaigns, Eid & SMS", icon: Flame, isHot: true },
-        { tab: "ai_studio", label: "AI Studio (Copy & Image)", icon: Sparkles, isHot: true },
-        { tab: "cms_blog", label: "CMS Pages & SEO", icon: FileText },
-      ],
-    },
-    {
-      title: "System & Governance",
-      items: [
-        { tab: "security_rbac", label: "RBAC, 2FA & Audit Logs", icon: Shield },
-        { tab: "api_health", label: "API, Webhooks & Health", icon: Activity },
-        { tab: "settings", label: "Store Settings", icon: Settings },
-      ],
-    },
-  ];
+  // Counts shown next to a nav item only when there is something to act on
+  const counts: Partial<Record<AdminTab, number>> = {
+    orders: pendingOrdersCount,
+    inventory: lowStockCount,
+    vendors: vendorsCount,
+  };
+
+  // Close the mobile drawer with Escape and stop the page scrolling behind it
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    document.addEventListener("keydown", onKey);
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = previous;
+    };
+  }, [isOpen, onClose]);
 
   return (
     <>
-      {/* Mobile Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 lg:hidden transition-opacity"
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
           onClick={onClose}
+          aria-hidden="true"
         />
       )}
 
-      {/* Sidebar Container */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 w-72 bg-card border-r border-border flex flex-col transition-transform duration-200 ease-in-out lg:static lg:translate-x-0 ${
+        id="admin-sidebar"
+        aria-label="Dashboard sections"
+        className={`fixed inset-y-0 left-0 z-50 w-72 bg-sidebar text-sidebar-foreground flex flex-col transition-transform duration-200 ease-out lg:sticky lg:top-0 lg:z-auto lg:h-screen lg:w-auto lg:translate-x-0 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        {/* Brand Header */}
-        <div className="h-16 border-b border-border px-5 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Logo variant="admin" size="sm" />
-            <span className="px-2 py-0.5 rounded-full text-[9px] uppercase tracking-wider font-bold bg-primary/10 text-primary border border-primary/20 ml-1">
-              Admin
-            </span>
-          </div>
+        <div className="h-14 shrink-0 px-5 flex items-center justify-between border-b border-sidebar-border">
+          <Logo variant="footer" size="sm" />
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-muted-foreground hover:bg-secondary lg:hidden"
-            aria-label="Close Sidebar"
+            className="p-1.5 rounded-lg text-sidebar-muted hover:text-sidebar-foreground hover:bg-sidebar-accent lg:hidden focus-visible:outline-2 focus-visible:outline-sidebar-foreground"
+            aria-label="Close menu"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Navigation List */}
-        <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6 scrollbar-thin">
-          {navGroups.map((group) => (
-            <div key={group.title} className="space-y-1">
-              <div className="px-3 py-1 text-[10px] uppercase tracking-wider font-bold text-muted-foreground/60 flex items-center justify-between">
-                <span>{group.title}</span>
-              </div>
-              {group.items.map((item) => {
-                const Icon = item.icon;
-                const isActive = activeTab === item.tab;
-                return (
-                  <button
-                    key={item.tab}
-                    onClick={() => {
-                      setActiveTab(item.tab);
-                      onClose();
-                    }}
-                    className={`w-full relative group flex items-center justify-between px-3 py-2.5 rounded-2xl text-xs font-medium transition-all duration-200 ${
-                      isActive
-                        ? "bg-primary text-primary-foreground font-semibold shadow-md shadow-primary/20"
-                        : "text-muted-foreground hover:text-foreground hover:bg-secondary/80"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div
-                        className={`p-1 rounded-lg transition-colors ${
+        <nav className="flex-1 overflow-y-auto overscroll-contain px-3 py-4 space-y-5">
+          {ADMIN_NAV.map((group) => (
+            <div key={group.title}>
+              <p className="px-3 pb-1.5 text-[11px] font-medium text-sidebar-muted">
+                {group.title}
+              </p>
+              <ul className="space-y-0.5">
+                {group.items.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeTab === item.tab;
+                  const count = counts[item.tab];
+                  return (
+                    <li key={item.tab}>
+                      <button
+                        onClick={() => {
+                          setActiveTab(item.tab);
+                          onClose();
+                        }}
+                        aria-current={isActive ? "page" : undefined}
+                        className={`relative w-full flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] transition-colors focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-sidebar-foreground ${
                           isActive
-                            ? "bg-white/15 text-primary-foreground"
-                            : "group-hover:bg-primary/10 group-hover:text-primary"
+                            ? "bg-sidebar-accent text-sidebar-foreground font-semibold before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-[3px] before:rounded-r before:bg-rose"
+                            : "text-sidebar-muted hover:text-sidebar-foreground hover:bg-sidebar-accent/60"
                         }`}
                       >
-                        <Icon className="w-4 h-4 shrink-0" />
-                      </div>
-                      <span className="truncate tracking-tight">{item.label}</span>
-                    </div>
-
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      {item.isHot && !isActive && (
-                        <span className="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                          AI / Eid
-                        </span>
-                      )}
-                      {item.badge !== undefined && (
-                        <span
-                          className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold text-white shadow-xs ${
-                            isActive ? "bg-white/25 text-white" : item.badgeColor || "bg-primary"
-                          }`}
-                        >
-                          {item.badge}
-                        </span>
-                      )}
-                      <ChevronRight
-                        className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                          isActive
-                            ? "translate-x-0.5 text-primary-foreground opacity-100"
-                            : "opacity-30 group-hover:opacity-75 group-hover:translate-x-0.5"
-                        }`}
-                      />
-                    </div>
-                  </button>
-                );
-              })}
+                        <Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
+                        <span className="truncate">{item.label}</span>
+                        {count ? (
+                          <span
+                            className="ml-auto min-w-5 px-1.5 rounded-full bg-rose text-sidebar text-[11px] font-bold leading-5 text-center tabular-nums"
+                            aria-label={`${count} need attention`}
+                          >
+                            {count}
+                          </span>
+                        ) : null}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
             </div>
           ))}
-        </div>
+        </nav>
 
-        {/* Footer Quick Status */}
-        <div className="p-3 border-t border-border bg-secondary/20 backdrop-blur-xs">
-          <div className="flex items-center justify-between p-2.5 rounded-2xl bg-card border border-border/80 shadow-xs text-xs">
-            <div className="flex items-center gap-2">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-              </span>
-              <div>
-                <p className="text-[11px] font-semibold text-foreground leading-tight">
-                  Store Active
-                </p>
-                <p className="text-[9px] text-muted-foreground">MongoDB Connected</p>
-              </div>
-            </div>
-            <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
-              v2.4 Pro
-            </span>
-          </div>
+        <div className="shrink-0 p-3 border-t border-sidebar-border">
+          <Link
+            href="/"
+            target="_blank"
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] text-sidebar-muted hover:text-sidebar-foreground hover:bg-sidebar-accent/60 transition-colors"
+          >
+            <ExternalLink className="w-4 h-4" aria-hidden="true" />
+            <span>View shop</span>
+          </Link>
         </div>
       </aside>
     </>

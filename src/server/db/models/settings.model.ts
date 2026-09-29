@@ -12,6 +12,9 @@ const settingsSchema = new Schema<SettingsDocument>(
     },
     logo: { type: String },
     favicon: { type: String },
+    // Website design edited in the admin "Website design" tab; shape and validation live in
+    // src/lib/storefront.ts (normalizeStorefront), so the schema stays flexible
+    storefront: { type: Schema.Types.Mixed },
     contactEmail: { type: String, default: "hello@koreanskincare.bd" },
     contactPhone: { type: String, default: "+880 1711-223344" },
     address: {

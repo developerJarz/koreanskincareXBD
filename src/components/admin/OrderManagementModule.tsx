@@ -234,8 +234,8 @@ export function OrderManagementModule({
                         className="rounded border-border"
                       />
                     </td>
-                    <td className="p-4 font-mono font-bold text-foreground">
-                      {ord.orderNumber || "ORD-2026-8801"}
+                    <td className="p-4 font-mono font-bold text-foreground whitespace-nowrap">
+                      {ord.orderNumber || "—"}
                       <div className="text-[10px] text-muted-foreground font-sans font-normal">
                         {new Date(ord.createdAt || Date.now()).toLocaleDateString("en-GB", {
                           day: "numeric",

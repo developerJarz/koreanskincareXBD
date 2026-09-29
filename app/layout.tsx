@@ -1,54 +1,69 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import { Toaster } from "sonner";
 
-import { AnnouncementBar } from "@/components/AnnouncementBar";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
-import { SearchDialog } from "@/components/SearchDialog";
-import { CartSheet } from "@/components/CartSheet";
+import { SITE_URL } from "@/lib/site";
+import { optimizedImageUrl } from "@/lib/image";
+import { getStorefront } from "@/server/storefront";
 
 import "../src/styles.css";
 
-export const metadata: Metadata = {
-  title: "KoreanSkincare.bd — Premium Korean Skincare & Beauty in Bangladesh",
-  description:
-    "Discover KoreanSkincare.bd — 100% authentic Korean skincare, clinically-proven formulas, and glass skin essentials with Cash on Delivery all over Bangladesh.",
-  icons: {
-    icon: [
-      { url: "/favicon.svg", type: "image/svg+xml" },
-      { url: "/logo.svg", type: "image/svg+xml" },
-      { url: "/favicon.ico" },
-    ],
-    shortcut: "/favicon.svg",
-    apple: "/favicon.svg",
-  },
-};
+// Font files live in the repo (variable fonts, latin subset), so dev and builds never
+// need to reach Google — a flaky connection can't slow down or break the site
+const serif = localFont({
+  src: [
+    { path: "../src/assets/fonts/playfair-display-latin.woff2", style: "normal" },
+    { path: "../src/assets/fonts/playfair-display-italic-latin.woff2", style: "italic" },
+  ],
+  weight: "400 900",
+  display: "swap",
+  variable: "--font-playfair",
+  fallback: ["Georgia", "serif"],
+});
+
+const sans = localFont({
+  src: "../src/assets/fonts/plus-jakarta-sans-latin.woff2",
+  weight: "200 800",
+  display: "swap",
+  variable: "--font-jakarta",
+  fallback: ["-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
+});
+
+export async function generateMetadata(): Promise<Metadata> {
+  // A favicon uploaded in "Website design" replaces the built-in one
+  const { branding } = await getStorefront();
+  const favicon = branding.faviconUrl;
+  return {
+    // Resolves relative canonical and Open Graph URLs on every page
+    metadataBase: new URL(SITE_URL),
+    title: "KoreanSkincare.bd — Premium Korean Skincare & Beauty in Bangladesh",
+    description:
+      "Discover KoreanSkincare.bd — 100% authentic Korean skincare, clinically-proven formulas, and glass skin essentials with Cash on Delivery all over Bangladesh.",
+    icons: favicon
+      ? {
+          icon: [{ url: optimizedImageUrl(favicon, 64) }],
+          shortcut: optimizedImageUrl(favicon, 64),
+          apple: optimizedImageUrl(favicon, 180),
+        }
+      : // The default icon (moved from app/icon.png, which would override an uploaded favicon)
+        { icon: [{ url: "/icon.png", type: "image/png" }], shortcut: "/icon.png" },
+  };
+}
 
 export const viewport = {
   themeColor: "#f7e8e3",
 };
 
+// Storefront chrome (header, footer, cart) lives in app/(store)/layout.tsx;
+// the admin dashboard has its own shell and does not load it.
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
-      <head>
-        <link rel="icon" href="/favicon.png" type="image/png" />
-        <link rel="shortcut icon" href="/favicon.png" type="image/png" />
-        <link rel="apple-touch-icon" href="/favicon.png" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
-        />
-      </head>
-      <body className="min-h-screen bg-background text-foreground">
-        <AnnouncementBar />
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <SearchDialog />
-        <CartSheet />
+    // suppressHydrationWarning: browser extensions (Grammarly, ColorZilla, password managers…)
+    // add attributes to <html>/<body> before React loads. This only ignores attribute
+    // differences on these two tags — mismatches anywhere inside the page are still reported.
+    <html lang="en" className={`${serif.variable} ${sans.variable}`} suppressHydrationWarning>
+      <body className="min-h-screen bg-background text-foreground" suppressHydrationWarning>
+        {children}
         <Toaster position="bottom-right" richColors />
       </body>
     </html>

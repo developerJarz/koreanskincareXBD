@@ -1,120 +1,134 @@
 "use client";
 
 import Link from "next/link";
-import { Heart, ShoppingBag } from "lucide-react";
-import { useState, useEffect } from "react";
-import type { ProductDisplay } from "@/lib/product-utils";
-import { toCartItem } from "@/lib/product-utils";
-import { getImageSrc } from "@/lib/image";
-import { useCartStore } from "@/store/cart.store";
-import { useUIStore } from "@/store/ui.store";
+import { ShoppingBag, Star } from "lucide-react";
 import { toast } from "sonner";
 
-const FALLBACK_KBEAUTY_IMAGE = "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=800";
+import type { CardProduct } from "@/lib/catalog-shared";
+import { getResponsiveImage } from "@/lib/image";
+import { useCartStore } from "@/store/cart.store";
+import { useUIStore } from "@/store/ui.store";
 
-export function ProductCard({ p }: { p: ProductDisplay }) {
+const BADGE_STYLE: Record<CardProduct["badges"][number], string> = {
+  Bestseller: "bg-foreground text-background",
+  New: "bg-emerald-700 text-white",
+  Sale: "bg-primary text-primary-foreground",
+  Trending: "bg-amber-600 text-white",
+};
+
+const taka = (n: number) => `৳${new Intl.NumberFormat("en-US").format(n)}`;
+
+export function ProductCard({ p, priority = false }: { p: CardProduct; priority?: boolean }) {
   const addItem = useCartStore((s) => s.addItem);
   const openCart = useUIStore((s) => s.openCart);
+  const image = getResponsiveImage(p.img);
+  // The discount badge already says "sale", so show at most one other badge
+  const badge = p.badges.find((b) => b !== "Sale");
+  const href = `/product/${encodeURIComponent(p.slug)}`;
 
-  const initialSrc = getImageSrc(p.img) || FALLBACK_KBEAUTY_IMAGE;
-  const [imgSrc, setImgSrc] = useState(initialSrc);
-  const [imgLoaded, setImgLoaded] = useState(false);
-
-  useEffect(() => {
-    setImgSrc(getImageSrc(p.img) || FALLBACK_KBEAUTY_IMAGE);
-  }, [p.img]);
-
-  const handleQuickAdd = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    addItem(toCartItem(p));
-    openCart();
-    toast.success(`${p.name} added to cart`, {
-      description: "Item successfully added to your shopping bag.",
+  const addToCart = () => {
+    addItem({
+      productId: p.id,
+      name: p.name,
+      image: p.img,
+      price: p.price,
+      compareAtPrice: p.was ?? undefined,
+      quantity: 1,
+      category: p.categorySlug ?? p.category,
+      slug: p.slug,
     });
+    openCart();
+    toast.success(`${p.name} added to your bag`);
   };
 
-  const discountPercent = p.was ? Math.round(((p.was - p.price) / p.was) * 100) : 0;
-
   return (
-    <Link
-      href={`/product/${encodeURIComponent(p.slug)}`}
-      className="group block card-interactive p-3 rounded-3xl bg-card border border-border/70 hover:border-primary/40 shadow-xs hover:shadow-xl transition-all duration-300"
-    >
-      <div className="relative overflow-hidden rounded-2xl bg-secondary/70 aspect-[4/5]">
+    <article className="group flex flex-col rounded-2xl bg-card border border-border/70 hover:border-primary/40 hover:shadow-lg transition-[border-color,box-shadow] duration-200 overflow-hidden">
+      <Link
+        href={href}
+        className="block relative bg-secondary/60 aspect-square overflow-hidden"
+        tabIndex={-1}
+        aria-hidden="true"
+      >
         <img
-          src={imgSrc}
-          alt={p.name}
-          width={800}
-          height={1000}
-          loading="lazy"
-          onLoad={() => setImgLoaded(true)}
-          onError={() => {
-            if (imgSrc !== FALLBACK_KBEAUTY_IMAGE) {
-              setImgSrc(FALLBACK_KBEAUTY_IMAGE);
-            }
-          }}
-          className={`w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-108 ${
-            imgLoaded ? "opacity-100" : "opacity-90"
-          }`}
+          {...image}
+          sizes="(min-width: 1280px) 300px, (min-width: 768px) 33vw, 50vw"
+          alt=""
+          width={600}
+          height={600}
+          loading={priority ? "eager" : "lazy"}
+          decoding="async"
+          className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-
-        {/* Tags */}
-        <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5 items-start">
-          {p.tag && (
-            <span className="glass-card text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full text-foreground border border-white/30 shadow-xs">
-              {p.tag}
+        <span className="absolute top-2 left-2 flex flex-col gap-1 items-start">
+          {p.discountPercent > 0 && (
+            <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-primary text-primary-foreground">
+              -{p.discountPercent}%
             </span>
           )}
-          {discountPercent > 0 && (
-            <span className="bg-rose-500/90 backdrop-blur-xs text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-xs">
-              -{discountPercent}%
+          {badge && (
+            <span
+              className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${BADGE_STYLE[badge]}`}
+            >
+              {badge}
             </span>
           )}
-        </div>
-
-        {/* Wishlist Button */}
-        <button
-          className="absolute top-2.5 right-2.5 w-8.5 h-8.5 rounded-full glass-card flex items-center justify-center text-foreground/80 hover:text-rose-500 hover:scale-110 active:scale-95 transition-all shadow-xs"
-          aria-label="Add to Wishlist"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            toast.info(`${p.name} saved to your wishlist!`);
-          }}
-        >
-          <Heart className="w-4 h-4 transition-transform group-hover:fill-rose-500/20" />
-        </button>
-
-        {/* Quick Add Button */}
-        <button
-          className="absolute inset-x-2.5 bottom-2.5 py-2.5 px-4 rounded-xl bg-primary text-primary-foreground text-xs font-semibold flex items-center justify-center gap-2 opacity-0 translate-y-3 group-hover:opacity-100 group-hover:translate-y-0 hover:bg-primary/95 shadow-lg shadow-primary/25 transition-all duration-300"
-          onClick={handleQuickAdd}
-        >
-          <ShoppingBag className="w-3.5 h-3.5" />
-          <span>Quick Add</span>
-        </button>
-      </div>
-
-      <div className="pt-3 px-1 pb-0.5">
-        <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">
-          {p.category}
-        </p>
-        <p className="text-sm font-semibold text-foreground mt-0.5 line-clamp-1 group-hover:text-primary transition-colors">
-          {p.name}
-        </p>
-        <div className="mt-1.5 flex items-baseline gap-2">
-          <span className="font-sans font-bold text-base tracking-tight text-foreground">
-            ৳{p.price.toLocaleString()}
+        </span>
+        {!p.inStock && (
+          <span className="absolute inset-x-0 bottom-0 py-1.5 text-center text-xs font-semibold bg-background/85 text-foreground">
+            Out of stock
           </span>
+        )}
+      </Link>
+
+      <div className="flex flex-col flex-1 p-3">
+        {p.brand && (
+          <Link
+            href={`/brand/${p.brandSlug}`}
+            className="text-[11px] font-semibold text-muted-foreground hover:text-primary truncate"
+          >
+            {p.brand}
+          </Link>
+        )}
+        <Link
+          href={href}
+          className="mt-0.5 text-sm font-medium text-foreground leading-snug line-clamp-2 hover:text-primary min-h-[2.5rem]"
+        >
+          {p.name}
+        </Link>
+
+        {p.reviewCount > 0 && (
+          <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" aria-hidden="true" />
+            <span className="sr-only">Rated</span>
+            <span className="font-medium text-foreground">{p.rating.toFixed(1)}</span>
+            <span>
+              ({p.reviewCount}
+              <span className="sr-only"> reviews</span>)
+            </span>
+          </p>
+        )}
+
+        <p className="mt-auto pt-2 flex items-baseline gap-2 flex-wrap">
+          <span className="font-bold text-base text-foreground tabular-nums">{taka(p.price)}</span>
           {p.was && (
-            <span className="font-sans text-xs text-muted-foreground line-through opacity-75">
-              ৳{p.was.toLocaleString()}
+            <span className="text-xs text-muted-foreground line-through tabular-nums">
+              <span className="sr-only">was </span>
+              {taka(p.was)}
             </span>
           )}
-        </div>
+        </p>
+
+        <button
+          type="button"
+          onClick={addToCart}
+          disabled={!p.inStock}
+          aria-label={p.inStock ? `Add ${p.name} to bag` : `${p.name} is out of stock`}
+          className="mt-2.5 w-full h-9 inline-flex items-center justify-center gap-1.5 rounded-lg border border-primary/40 text-primary text-xs font-semibold hover:bg-primary hover:text-primary-foreground transition-colors disabled:border-border disabled:text-muted-foreground disabled:hover:bg-transparent disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-ring"
+        >
+          <ShoppingBag className="w-3.5 h-3.5" aria-hidden="true" />
+          {p.inStock ? "Add to bag" : "Out of stock"}
+        </button>
       </div>
-    </Link>
+    </article>
   );
 }

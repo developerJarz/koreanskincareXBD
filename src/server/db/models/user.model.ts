@@ -19,7 +19,7 @@ const userSchema = new Schema<UserDocument>(
     avatar: { type: String },
     role: {
       type: String,
-      enum: ["super_admin", "admin", "staff", "customer"] as UserRole[],
+      enum: ["super_admin", "admin", "staff", "customer", "vendor"] as UserRole[],
       default: "customer",
     },
     provider: {
@@ -33,6 +33,9 @@ const userSchema = new Schema<UserDocument>(
     rewardPoints: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },
     lastLoginAt: { type: Date },
+    sessionVersion: { type: Number, default: 0 },
+    failedLoginAttempts: { type: Number, default: 0, select: false },
+    lockUntil: { type: Date, select: false },
   },
   {
     timestamps: true,
@@ -40,6 +43,9 @@ const userSchema = new Schema<UserDocument>(
       transform(_doc, ret: Record<string, any>) {
         ret._id = ret._id.toString();
         delete ret.password;
+        delete ret.sessionVersion;
+        delete ret.failedLoginAttempts;
+        delete ret.lockUntil;
         delete ret.__v;
         return ret;
       },

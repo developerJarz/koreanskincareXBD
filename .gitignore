@@ -12,6 +12,7 @@ dist
 dist-ssr
 .output
 .next
+.next-verify
 .vinxi
 .tanstack/**
 .nitro
@@ -31,3 +32,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Locally stored product/brand images (development only; production uses Cloudinary)
+/uploads

@@ -31,11 +31,20 @@ const productSchema = new Schema<ProductDocument>(
       ref: "Category",
       required: true,
     },
-    subcategory: { type: String },
+    // Child category; its parent must be `category`
+    subcategory: { type: Schema.Types.ObjectId, ref: "Category" },
     brand: { type: Schema.Types.ObjectId, ref: "Brand" },
     collections: [{ type: String }],
     tags: [{ type: String }],
+    // Derived from `media` in the pre-validate hook below (kept for cart/orders/older code)
     images: [{ type: String }],
+    media: [
+      {
+        _id: false,
+        url: { type: String, required: true },
+        alt: { type: String, default: "" },
+      },
+    ],
     variants: [productVariantSchema],
 
     // Default pricing
@@ -67,9 +76,27 @@ const productSchema = new Schema<ProductDocument>(
       enum: ["draft", "active", "archived"],
       default: "active",
     },
+    // Marketplace
+    vendor: { type: Schema.Types.ObjectId, ref: "Vendor" },
+    approvalStatus: {
+      type: String,
+      enum: ["approved", "pending", "rejected"],
+      default: "approved",
+    },
+    reviewNote: { type: String },
+    vendorActive: { type: Boolean, default: true },
+
     isFeatured: { type: Boolean, default: false },
     isNewArrival: { type: Boolean, default: false },
     isBestseller: { type: Boolean, default: false },
+    isOnSale: { type: Boolean, default: false },
+    isTrending: { type: Boolean, default: false },
+    allowBackorders: { type: Boolean, default: false },
+
+    // Extra details shown on the product page
+    ingredients: { type: String },
+    howToUse: { type: String },
+    canonicalUrl: { type: String },
 
     // SEO
     seoTitle: { type: String },
@@ -99,14 +126,46 @@ const productSchema = new Schema<ProductDocument>(
 );
 
 // Indexes for efficient queries
-productSchema.index({ slug: 1 }, { unique: true });
 productSchema.index({ category: 1, status: 1 });
 productSchema.index({ status: 1, isFeatured: 1 });
 productSchema.index({ status: 1, isBestseller: 1 });
 productSchema.index({ status: 1, isNewArrival: 1 });
 productSchema.index({ price: 1 });
+productSchema.index({ brand: 1, status: 1 });
+productSchema.index({ subcategory: 1, status: 1 });
+productSchema.index({ createdAt: -1 });
+productSchema.index({ status: 1, isOnSale: 1 });
+productSchema.index({ status: 1, isTrending: 1 });
+// SKU is unique when set; empty/missing SKUs are allowed on many products
+productSchema.index(
+  { sku: 1 },
+  { unique: true, partialFilterExpression: { sku: { $type: "string", $gt: "" } } },
+);
+productSchema.index(
+  { barcode: 1 },
+  { unique: true, partialFilterExpression: { barcode: { $type: "string", $gt: "" } } },
+);
+productSchema.index({ vendor: 1, status: 1 });
+productSchema.index({ approvalStatus: 1, createdAt: -1 });
 productSchema.index({ tags: 1 });
 productSchema.index({ name: "text", description: "text", tags: "text" });
+
+/**
+ * Keeps derived fields consistent on every save:
+ *  - `media` (url + alt, ordered) is the source of truth; `images` mirrors its URLs so the cart,
+ *    orders and older code keep working. Older writers that only set `images` still work: `media`
+ *    is rebuilt from them, keeping any alt text already stored for the same URL.
+ *  - `isOnSale` is true exactly when a sale price is set (price below compareAtPrice).
+ */
+productSchema.pre("validate", function () {
+  if (this.isModified("media")) {
+    this.images = (this.media ?? []).map((m) => m.url);
+  } else if (this.isModified("images") || (!this.media?.length && this.images?.length)) {
+    const altByUrl = new Map((this.media ?? []).map((m) => [m.url, m.alt ?? ""]));
+    this.media = (this.images ?? []).map((url) => ({ url, alt: altByUrl.get(url) ?? "" }));
+  }
+  this.isOnSale = Boolean(this.compareAtPrice && this.compareAtPrice > this.price);
+});
 
 export const Product: Model<ProductDocument> =
   mongoose.models.Product || mongoose.model<ProductDocument>("Product", productSchema);

@@ -4,11 +4,13 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "seed": "node scripts/seed-catalog.mjs",
+    "images:migrate": "node scripts/migrate-images-to-cloudinary.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -55,8 +57,9 @@
     "input-otp": "^1.4.2",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.575.0",
-    "next": "^15.4.6",
     "mongoose": "^9.8.1",
+    "next": "^15.4.6",
+    "nodemailer": "^7.0.13",
     "react": "^19.2.0",
     "react-day-picker": "^9.14.0",
     "react-dom": "^19.2.0",
@@ -75,12 +78,13 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.2.1",
     "@eslint/js": "^9.32.0",
     "@lovable.dev/vite-tanstack-config": "^2.7.7",
+    "@tailwindcss/postcss": "^4.2.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^22.16.5",
+    "@types/nodemailer": "^8.0.2",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@types/sanitize-html": "^2.16.1",

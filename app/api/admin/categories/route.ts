@@ -1,113 +1,76 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectDB } from "@/server/db/connection";
-import { Category } from "@/server/db/models";
-import slugify from "slugify";
+import type { Types } from "mongoose";
 
-// GET — List categories
-export async function GET() {
+import { connectDB } from "@/server/db/connection";
+import { Category, Product } from "@/server/db/models";
+import { ADMIN_ROLES, requireAuth, serverError, STAFF_ROLES } from "@/server/auth/session";
+import { validateCategory } from "@/server/category-admin";
+import { revalidateCatalog } from "@/server/catalog";
+
+// GET — all categories (flat, with parent ids) and product counts. The UI builds the tree.
+export async function GET(request: NextRequest) {
   try {
+    const auth = await requireAuth(request, STAFF_ROLES);
+    if (!auth.ok) return auth.response;
+
     await connectDB();
-    const categories = await Category.find().sort({ sortOrder: 1, createdAt: -1 }).lean();
-    return NextResponse.json(JSON.parse(JSON.stringify(categories)));
-  } catch (err: any) {
+    const [cats, direct, sub] = await Promise.all([
+      Category.find().sort({ sortOrder: 1, name: 1 }).limit(2000).lean(),
+      Product.aggregate<{ _id: Types.ObjectId; n: number }>([
+        { $match: { status: { $ne: "archived" } } },
+        { $group: { _id: "$category", n: { $sum: 1 } } },
+      ]),
+      Product.aggregate<{ _id: Types.ObjectId; n: number }>([
+        { $match: { status: { $ne: "archived" }, subcategory: { $ne: null } } },
+        { $group: { _id: "$subcategory", n: { $sum: 1 } } },
+      ]),
+    ]);
+    const count = new Map<string, number>();
+    for (const r of [...direct, ...sub])
+      count.set(String(r._id), (count.get(String(r._id)) ?? 0) + r.n);
+
     return NextResponse.json(
-      { error: err.message || "Failed to fetch categories" },
-      { status: 500 },
+      cats.map((c) => ({
+        ...JSON.parse(JSON.stringify(c)),
+        parent: c.parent ? String(c.parent) : null,
+        productCount: count.get(String(c._id)) ?? 0,
+      })),
     );
+  } catch (err) {
+    return serverError("List categories error", err, "Couldn't load categories.");
   }
 }
 
-// POST — Create new category
+// POST — create a category or subcategory (admins)
 export async function POST(request: NextRequest) {
   try {
-    const data = await request.json();
+    const auth = await requireAuth(request, ADMIN_ROLES);
+    if (!auth.ok) return auth.response;
+
     await connectDB();
-
-    if (!data.name) {
-      return NextResponse.json({ error: "Category name is required" }, { status: 400 });
-    }
-
-    const slug = data.slug
-      ? slugify(data.slug, { lower: true, strict: true })
-      : slugify(data.name, { lower: true, strict: true });
-
-    const existing = await Category.findOne({ slug });
-    if (existing) {
+    const checked = await validateCategory(await request.json().catch(() => ({})));
+    if ("errors" in checked) {
       return NextResponse.json(
-        { error: "A category with this slug already exists" },
+        { error: "Please fix the highlighted fields.", fields: checked.errors },
         { status: 400 },
       );
     }
 
+    // New categories go to the end of their list
+    const last = await Category.findOne({ parent: checked.value.parent ?? null })
+      .sort({ sortOrder: -1 })
+      .select("sortOrder")
+      .lean();
     const category = await Category.create({
-      name: data.name,
-      slug,
-      description: data.description || `${data.name} collection`,
-      image: data.image || "",
-      productCount: Number(data.productCount || 0),
-      sortOrder: Number(data.sortOrder || 0),
-      isFeatured: Boolean(data.isFeatured ?? true),
-      isActive: Boolean(data.isActive ?? true),
+      ...checked.value,
+      sortOrder: (last?.sortOrder ?? -1) + 1,
     });
-
-    return NextResponse.json(JSON.parse(JSON.stringify(category)), { status: 201 });
-  } catch (err: any) {
-    console.error("Create category error:", err);
+    revalidateCatalog();
     return NextResponse.json(
-      { error: err.message || "Failed to create category" },
-      { status: 500 },
+      { ...category.toJSON(), parent: checked.value.parent, productCount: 0 },
+      { status: 201 },
     );
-  }
-}
-
-// PUT — Edit category
-export async function PUT(request: NextRequest) {
-  try {
-    const data = await request.json();
-    await connectDB();
-
-    if (!data.id) {
-      return NextResponse.json({ error: "Category ID is required" }, { status: 400 });
-    }
-
-    const updates: Record<string, any> = {};
-    if (data.name) updates.name = data.name;
-    if (data.slug) updates.slug = slugify(data.slug, { lower: true, strict: true });
-    if (data.description !== undefined) updates.description = data.description;
-    if (data.image !== undefined) updates.image = data.image;
-    if (data.sortOrder !== undefined) updates.sortOrder = Number(data.sortOrder);
-    if (data.isFeatured !== undefined) updates.isFeatured = Boolean(data.isFeatured);
-    if (data.isActive !== undefined) updates.isActive = Boolean(data.isActive);
-
-    const category = await Category.findByIdAndUpdate(data.id, updates, { new: true }).lean();
-    if (!category) {
-      return NextResponse.json({ error: "Category not found" }, { status: 404 });
-    }
-
-    return NextResponse.json(JSON.parse(JSON.stringify(category)));
-  } catch (err: any) {
-    console.error("Update category error:", err);
-    return NextResponse.json(
-      { error: err.message || "Failed to update category" },
-      { status: 500 },
-    );
-  }
-}
-
-// DELETE — Delete category
-export async function DELETE(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get("id");
-    if (!id) return NextResponse.json({ error: "Category ID is required" }, { status: 400 });
-
-    await connectDB();
-    await Category.findByIdAndDelete(id);
-    return NextResponse.json({ message: "Category deleted successfully" });
-  } catch (err: any) {
-    return NextResponse.json(
-      { error: err.message || "Failed to delete category" },
-      { status: 500 },
-    );
+  } catch (err) {
+    return serverError("Create category error", err, "Couldn't create the category.");
   }
 }

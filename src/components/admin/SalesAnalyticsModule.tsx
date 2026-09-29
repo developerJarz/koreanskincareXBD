@@ -174,7 +174,7 @@ export function SalesAnalyticsModule({
               <DollarSign className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl lg:text-3xl font-serif font-bold text-foreground mt-2.5 tracking-tight">
+          <div className="text-xl sm:text-2xl lg:text-3xl font-serif font-bold tabular-nums text-foreground mt-2.5 tracking-tight">
             ৳{totalRevenue.toLocaleString()}
           </div>
           <div className="mt-3 flex items-center justify-between">
@@ -193,7 +193,7 @@ export function SalesAnalyticsModule({
               <TrendingUp className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl lg:text-3xl font-serif font-bold text-foreground mt-2.5 tracking-tight">
+          <div className="text-xl sm:text-2xl lg:text-3xl font-serif font-bold tabular-nums text-foreground mt-2.5 tracking-tight">
             ৳{estimatedGrossProfit.toLocaleString()}
           </div>
           <div className="mt-3 flex items-center justify-between">
@@ -212,7 +212,7 @@ export function SalesAnalyticsModule({
               <ShoppingBag className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl lg:text-3xl font-serif font-bold text-foreground mt-2.5 tracking-tight">
+          <div className="text-xl sm:text-2xl lg:text-3xl font-serif font-bold tabular-nums text-foreground mt-2.5 tracking-tight">
             ৳{avgOrderValue.toLocaleString()}
           </div>
           <div className="mt-3 flex items-center justify-between">
@@ -231,7 +231,7 @@ export function SalesAnalyticsModule({
               <Percent className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl lg:text-3xl font-serif font-bold text-foreground mt-2.5 tracking-tight">
+          <div className="text-xl sm:text-2xl lg:text-3xl font-serif font-bold tabular-nums text-foreground mt-2.5 tracking-tight">
             {conversionRate}%{" "}
             <span className="text-sm text-muted-foreground font-sans font-semibold">
               / {roas}x ROAS

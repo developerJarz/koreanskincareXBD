@@ -1,5 +1,5 @@
 // ─── User Types ───
-export type UserRole = "super_admin" | "admin" | "staff" | "customer";
+export type UserRole = "super_admin" | "admin" | "staff" | "customer" | "vendor";
 
 export interface AuthUser {
   id: string;
@@ -27,6 +27,10 @@ export interface IUser {
   rewardPoints: number;
   isActive: boolean;
   lastLoginAt?: Date;
+  /** Incremented to invalidate every existing session (password change, role change, deactivation). */
+  sessionVersion?: number;
+  failedLoginAttempts?: number;
+  lockUntil?: Date;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -70,11 +74,15 @@ export interface IProduct {
   description: string;
   shortDescription?: string;
   category: any;
-  subcategory?: string;
+  /** Child category (its parent is `category`) */
+  subcategory?: any;
   brand?: any;
   collections: string[];
   tags: string[];
+  /** Derived from `media` (kept for cart, orders and older code). First image = main image. */
   images: string[];
+  /** Ordered gallery with alt text. First entry is the main image. */
+  media?: IProductMedia[];
   variants: IProductVariant[];
   price: number;
   compareAtPrice?: number;
@@ -90,9 +98,23 @@ export interface IProduct {
   weight?: number;
   dimensions?: { length: number; width: number; height: number };
   status: "draft" | "active" | "archived";
+  /** Set when a marketplace vendor owns the product; absent for the store's own products */
+  vendor?: any;
+  /** Vendor products may need a review by the shop team before they go live */
+  approvalStatus?: ProductApprovalStatus;
+  reviewNote?: string;
+  /** False while the owning vendor is suspended — hides the product without touching its own status */
+  vendorActive?: boolean;
   isFeatured: boolean;
   isNewArrival: boolean;
   isBestseller: boolean;
+  /** True when a sale price is set (price < compareAtPrice); kept in sync by the server */
+  isOnSale?: boolean;
+  isTrending?: boolean;
+  allowBackorders?: boolean;
+  ingredients?: string;
+  howToUse?: string;
+  canonicalUrl?: string;
   seoTitle?: string;
   seoDescription?: string;
   seoKeywords?: string[];
@@ -119,11 +141,17 @@ export interface ICategory {
   productCount: number;
   sortOrder: number;
   isActive: boolean;
+  /** Shown in the homepage "Shop by category" section */
   isFeatured: boolean;
   seoTitle?: string;
   seoDescription?: string;
   createdAt?: Date;
   updatedAt?: Date;
+}
+
+export interface IProductMedia {
+  url: string;
+  alt?: string;
 }
 
 // ─── Brand Types ───
@@ -135,6 +163,11 @@ export interface IBrand {
   logo?: string;
   website?: string;
   isActive: boolean;
+  /** Shown in the homepage "Shop by brand" section */
+  showOnHomepage?: boolean;
+  sortOrder?: number;
+  seoTitle?: string;
+  seoDescription?: string;
   productCount: number;
   createdAt?: Date;
   updatedAt?: Date;
@@ -165,6 +198,8 @@ export interface IOrderItem {
   price: number;
   quantity: number;
   total: number;
+  /** Vendor that owned the product when the order was placed (marketplace items only) */
+  vendor?: any;
 }
 
 export interface IOrder {
@@ -205,6 +240,7 @@ export interface IOrder {
   cancelReason?: string;
   invoiceUrl?: string;
   notes?: string;
+  accessTokenHash?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -380,6 +416,8 @@ export interface IBanner {
 // ─── Settings Types ───
 export interface ISiteSettings {
   _id?: any;
+  /** Website design (see src/lib/storefront.ts) — validated with normalizeStorefront() */
+  storefront?: unknown;
   siteName: string;
   siteDescription: string;
   logo?: string;
@@ -444,4 +482,40 @@ export interface IAnalyticsEvent {
   sessionId: string;
   data: Record<string, unknown>;
   createdAt?: Date;
+}
+
+// ─── Marketplace Vendor Types ───
+export type VendorStatus = "pending" | "approved" | "suspended";
+export type ProductApprovalStatus = "approved" | "pending" | "rejected";
+
+export interface IVendorLimits {
+  /** Maximum products the vendor may have (drafts included, archived excluded) */
+  maxProducts: number;
+  /** Largest allowed gap between "was" price and selling price, in % */
+  maxDiscountPercent: number;
+  /** New or materially edited products wait for review before going live */
+  requireProductApproval: boolean;
+  /** Category ids the vendor may list in; empty means every category */
+  allowedCategories: any[];
+}
+
+export interface IVendor {
+  _id?: any;
+  user: any;
+  storeName: string;
+  slug: string;
+  contactName: string;
+  email: string;
+  phone?: string;
+  district?: string;
+  pickupAddress?: string;
+  description?: string;
+  status: VendorStatus;
+  commissionRate: number;
+  limits: IVendorLimits;
+  adminNotes?: string;
+  suspendedReason?: string;
+  approvedAt?: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }

@@ -11,46 +11,40 @@ export const seedDatabase = createServerFn({ method: "POST" }).handler(async () 
     return { message: "Database already seeded", skipped: true };
   }
 
-  // ─── 1. Create Role-Based Demo Users ───
-  const superAdminPasswordHash = await bcryptjs.hash("Shajgoj#SuperAdmin!2026$X9", 12);
-  const adminPasswordHash = await bcryptjs.hash("Shajgoj#Admin!9982*Secure", 12);
-  const staffPasswordHash = await bcryptjs.hash("Staff#Mod@Shajgoj8821$", 12);
-  const customerPasswordHash = await bcryptjs.hash("Customer#Lux!Nusrat2026@", 12);
-
-  await User.create([
+  // ─── 1. Create Role-Based Users (passwords only from env vars, never hard-coded) ───
+  const seedAccounts = [
     {
       name: "Super Admin",
       email: "superadmin@koreanskincare.bd",
-      password: superAdminPasswordHash,
       role: "super_admin",
-      emailVerified: true,
-      provider: "credentials",
+      env: "SEED_SUPER_ADMIN_PASSWORD",
     },
     {
       name: "koreanskincare.bd Admin",
       email: "admin@koreanskincare.bd",
-      password: adminPasswordHash,
       role: "admin",
-      emailVerified: true,
-      provider: "credentials",
+      env: "SEED_ADMIN_PASSWORD",
     },
     {
       name: "Store Staff",
       email: "staff@koreanskincare.bd",
-      password: staffPasswordHash,
       role: "staff",
+      env: "SEED_STAFF_PASSWORD",
+    },
+  ] as const;
+
+  for (const account of seedAccounts) {
+    const password = process.env[account.env];
+    if (!password || password.length < 12) continue;
+    await User.create({
+      name: account.name,
+      email: account.email,
+      password: await bcryptjs.hash(password, 12),
+      role: account.role,
       emailVerified: true,
       provider: "credentials",
-    },
-    {
-      name: "Nusrat Jahan",
-      email: "customer@koreanskincare.bd",
-      password: customerPasswordHash,
-      role: "customer",
-      emailVerified: true,
-      provider: "credentials",
-    },
-  ]);
+    });
+  }
 
   // ─── 2. Create Categories ───
   const categoryData = [
@@ -477,14 +471,12 @@ export const seedDatabase = createServerFn({ method: "POST" }).handler(async () 
   return {
     message: "Database seeded successfully!",
     skipped: false,
-    roles: {
-      super_admin: {
-        email: "superadmin@koreanskincare.bd",
-        password: "Shajgoj#SuperAdmin!2026$X9",
-      },
-      admin: { email: "admin@koreanskincare.bd", password: "Shajgoj#Admin!9982*Secure" },
-      staff: { email: "staff@koreanskincare.bd", password: "Staff#Mod@Shajgoj8821$" },
-      customer: { email: "customer@koreanskincare.bd", password: "Customer#Lux!Nusrat2026@" },
+    accounts: {
+      super_admin: { email: "superadmin@koreanskincare.bd" },
+      admin: { email: "admin@koreanskincare.bd" },
+      staff: { email: "staff@koreanskincare.bd" },
+      customer: { email: "customer@koreanskincare.bd" },
     },
+    note: "Passwords are set from SEED_*_PASSWORD environment variables. Never exposed in responses.",
   };
 });

@@ -31,9 +31,7 @@ const categorySchema = new Schema<CategoryDocument>(
   },
 );
 
-categorySchema.index({ slug: 1 }, { unique: true });
-categorySchema.index({ parent: 1 });
-categorySchema.index({ sortOrder: 1 });
+categorySchema.index({ parent: 1, sortOrder: 1 });
 categorySchema.index({ isActive: 1, isFeatured: 1 });
 
 export const Category: Model<CategoryDocument> =

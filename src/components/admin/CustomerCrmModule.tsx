@@ -79,8 +79,8 @@ export function CustomerCrmModule({ users, onToggleUserStatus }: CustomerCrmModu
 
   const handleResetCustomerPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!customerNewPassword || customerNewPassword.length < 6) {
-      toast.error("Password must be at least 6 characters long.");
+    if (!customerNewPassword || customerNewPassword.length < 10) {
+      toast.error("Password must be at least 10 characters long.");
       return;
     }
     if (!resetPassModalCustomer) return;
@@ -415,7 +415,7 @@ export function CustomerCrmModule({ users, onToggleUserStatus }: CustomerCrmModu
                 <input
                   type="text"
                   required
-                  placeholder="Enter new password (min 6 chars)"
+                  placeholder="Min 10 chars: upper, lower, number, symbol"
                   value={customerNewPassword}
                   onChange={(e) => setCustomerNewPassword(e.target.value)}
                   className="w-full p-2.5 rounded-xl border border-border bg-background focus:outline-hidden font-mono text-xs"

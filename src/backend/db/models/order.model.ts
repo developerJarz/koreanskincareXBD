@@ -30,6 +30,17 @@ const addressSubSchema = {
   postalCode: { type: String },
 };
 
+// Billing address is optional — fields are not individually required
+const optionalAddressSubSchema = {
+  fullName: { type: String },
+  phone: { type: String },
+  division: { type: String },
+  district: { type: String },
+  area: { type: String },
+  streetAddress: { type: String },
+  postalCode: { type: String },
+};
+
 const orderSchema = new Schema<OrderDocument>(
   {
     orderNumber: { type: String, required: true, unique: true },
@@ -65,7 +76,7 @@ const orderSchema = new Schema<OrderDocument>(
     paymentMethod: { type: String, required: true },
     paymentTransactionId: { type: String },
     shippingAddress: addressSubSchema,
-    billingAddress: addressSubSchema,
+    billingAddress: optionalAddressSubSchema,
     deliveryNotes: { type: String },
     shippingMethod: { type: String },
     courierName: { type: String },

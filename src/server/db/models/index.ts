@@ -16,3 +16,5 @@ export { Banner, type BannerDocument } from "./banner.model";
 export { Settings, type SettingsDocument } from "./settings.model";
 export { Payment, type PaymentDocument } from "./payment.model";
 export { Analytics, type AnalyticsDocument } from "./analytics.model";
+export { Vendor, type VendorDocument } from "./vendor.model";
+export { EmailOtp, type EmailOtpDocument, type OtpPurpose } from "./email-otp.model";

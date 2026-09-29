@@ -19,6 +19,7 @@ export type AdminTab =
   | "analytics"
   | "orders"
   | "products"
+  | "brands"
   | "categories"
   | "inventory"
   | "customers"
@@ -33,6 +34,7 @@ export type AdminTab =
   | "media"
   | "security_rbac"
   | "api_health"
+  | "storefront"
   | "settings";
 
 export type BDSeasonalTheme = "standard" | "ramadan" | "eid" | "boishakh";

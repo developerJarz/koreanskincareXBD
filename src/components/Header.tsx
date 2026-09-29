@@ -2,49 +2,49 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, ShoppingBag, Heart, User, Menu, X, ChevronRight, Flame } from "lucide-react";
+import {
+  Search,
+  ShoppingBag,
+  Heart,
+  User,
+  Menu,
+  X,
+  ChevronRight,
+  LayoutDashboard,
+} from "lucide-react";
 import { useState, useEffect } from "react";
 import { useUIStore } from "@/store/ui.store";
 import { useCartStore } from "@/store/cart.store";
 import { useAuthStore } from "@/store/auth.store";
-import { SiteLogoLink } from "@/components/Logo";
+import { SiteLogoLink, type LogoBranding } from "@/components/Logo";
+import { dashboardFor } from "@/lib/dashboard";
+import type { NavData } from "@/lib/catalog-shared";
+import { DesktopMegaMenu } from "@/components/navigation/DesktopMegaMenu";
+import { MobileNavMenu } from "@/components/navigation/MobileNavMenu";
 
-interface NavCategoryItem {
-  to: string;
-  label: string;
-  icon?: typeof Flame;
-  isHighlight?: boolean;
-  isSpecial?: boolean;
-}
-
-const CATEGORY_NAV: NavCategoryItem[] = [
-  { to: "/shop", label: "All Products" },
-  { to: "/shop?tag=Bestseller", label: "Best Sellers", icon: Flame, isHighlight: true },
-  { to: "/shop?category=toners", label: "Toners & Essences" },
-  { to: "/shop?category=serums", label: "Serums & Ampoules" },
-  { to: "/shop?category=sunscreens", label: "Sun Care & SPF" },
-  { to: "/shop?category=cleansers", label: "Cleansers & Washes" },
-  { to: "/shop?category=moisturizers", label: "Moisturizers & Creams" },
-  { to: "/shop?category=masks", label: "Sheet Masks" },
-  { to: "/shop?category=eye-lip-care", label: "Eye & Lip" },
-  { to: "/shop?category=sets", label: "Routine Sets" },
-  { to: "/shop?tag=Sale", label: "Deals & Offers", isSpecial: true },
-];
-
-export function Header() {
+/** Categories and brands come from the database (see app/(store)/layout.tsx) */
+export function Header({ nav, branding }: { nav: NavData; branding?: LogoBranding }) {
   const [menu, setMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { openCart, openSearch } = useUIStore();
   const itemCount = useCartStore((s) => s.getItemCount());
   const cartTotal = useCartStore((s) => s.getSubtotal());
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated: storedSignedIn, user } = useAuthStore();
   const [mounted, setMounted] = useState(false);
+  // The signed-in state lives in browser storage, which the server can't see. Use it only after
+  // mounting so the first client render matches the server HTML (avoids a hydration mismatch).
+  const isAuthenticated = mounted && storedSignedIn;
+  // Admins/staff (and vendors) get a direct button to their dashboard
+  const dashboard = isAuthenticated ? dashboardFor(user?.role) : null;
   const pathname = usePathname();
 
   useEffect(() => {
     setMounted(true);
+    // Two thresholds so the header does not flicker between states when the
+    // page sits right at the boundary (collapsing it changes the page height)
     const handleScroll = () => {
-      setScrolled(window.scrollY > 25);
+      const y = window.scrollY;
+      setScrolled((prev) => (prev ? y > 8 : y > 80));
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
@@ -60,7 +60,7 @@ export function Header() {
         }`}
       >
         <div
-          className={`container-x flex items-center justify-between gap-3 sm:gap-4 transition-all duration-300 ${
+          className={`container-x flex items-center justify-between gap-2 sm:gap-4 transition-all duration-300 ${
             scrolled ? "h-13 sm:h-14" : "h-16 lg:h-18"
           }`}
         >
@@ -73,7 +73,7 @@ export function Header() {
             >
               <Menu className="w-5 h-5" />
             </button>
-            <SiteLogoLink variant="header" />
+            <SiteLogoLink variant="header" branding={branding} />
           </div>
 
           {/* E-Commerce Search Bar (Adapts smoothly when scrolled) */}
@@ -110,6 +110,17 @@ export function Header() {
               <Search className="w-4.5 h-4.5" />
             </button>
 
+            {dashboard && (
+              <Link
+                href={dashboard.href}
+                className="hidden sm:inline-flex items-center gap-1.5 h-9 px-3 rounded-full border border-primary/40 text-primary text-xs font-semibold hover:bg-primary hover:text-primary-foreground transition-colors"
+              >
+                <LayoutDashboard className="w-4 h-4" aria-hidden="true" />
+                <span className="hidden lg:inline">{dashboard.label}</span>
+                <span className="lg:hidden">Dashboard</span>
+              </Link>
+            )}
+
             {/* Account Link */}
             <Link
               href={isAuthenticated ? "/account" : "/auth/login"}
@@ -135,10 +146,10 @@ export function Header() {
               )}
             </Link>
 
-            {/* Wishlist Link */}
+            {/* Wishlist Link (in the menu drawer on phones, to keep the header one line) */}
             <Link
               href="/wishlist"
-              className={`flex items-center gap-2 rounded-xl hover:bg-secondary/60 transition-colors text-xs font-semibold ${
+              className={`hidden sm:flex items-center gap-2 rounded-xl hover:bg-secondary/60 transition-colors text-xs font-semibold ${
                 scrolled
                   ? "p-2 text-foreground hover:text-primary rounded-full"
                   : "px-2.5 py-1.5 text-foreground hover:text-primary"
@@ -177,43 +188,15 @@ export function Header() {
           </div>
         </div>
 
-        {/* Secondary Category Navigation Bar (Collapses smoothly on scroll) */}
-        <nav
-          className={`hidden lg:block transition-all duration-300 ease-in-out border-t border-border/60 bg-card/60 overflow-hidden ${
-            scrolled
-              ? "max-h-0 opacity-0 border-transparent pointer-events-none py-0"
-              : "max-h-12 opacity-100 py-1.5"
-          }`}
-        >
-          <div className="container-x flex items-center gap-1 overflow-x-auto scrollbar-none text-xs font-medium">
-            {CATEGORY_NAV.map((c) => {
-              const Icon = c.icon;
-              return (
-                <Link
-                  key={c.label}
-                  href={c.to}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-colors ${
-                    c.isHighlight
-                      ? "text-amber-700 dark:text-amber-400 font-bold hover:bg-amber-500/10"
-                      : c.isSpecial
-                        ? "text-rose-600 dark:text-rose-400 font-bold hover:bg-rose-500/10"
-                        : "text-foreground/80 hover:text-primary hover:bg-secondary/60"
-                  }`}
-                >
-                  {Icon && <Icon className="w-3.5 h-3.5 text-amber-500" />}
-                  {c.label}
-                </Link>
-              );
-            })}
-          </div>
-        </nav>
+        {/* Category & brand mega menu (collapses on scroll) */}
+        <DesktopMegaMenu nav={nav} collapsed={scrolled} />
       </header>
 
       {/* Mobile Navigation Drawer */}
       {menu && (
         <div className="fixed inset-0 z-50 bg-background lg:hidden animate-fade-up flex flex-col">
           <div className="flex items-center justify-between h-15 px-5 border-b border-border bg-card">
-            <SiteLogoLink variant="header" />
+            <SiteLogoLink variant="header" branding={branding} />
             <button
               onClick={() => setMenu(false)}
               className="p-2 text-foreground hover:text-primary transition rounded-lg"
@@ -236,27 +219,21 @@ export function Header() {
             </button>
           </div>
 
-          <nav className="flex-1 overflow-y-auto p-4 space-y-1">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground px-3 py-1.5">
-              K-Beauty Categories
-            </p>
-            {CATEGORY_NAV.map((c) => (
+          {dashboard && (
+            <div className="px-4 pt-4">
               <Link
-                key={c.label}
-                href={c.to}
+                href={dashboard.href}
                 onClick={() => setMenu(false)}
-                className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition ${
-                  c.isHighlight
-                    ? "text-amber-700 dark:text-amber-400 font-bold bg-amber-500/10"
-                    : c.isSpecial
-                      ? "text-rose-600 dark:text-rose-400 font-bold bg-rose-500/10"
-                      : "text-foreground hover:bg-secondary/60"
-                }`}
+                className="flex items-center justify-center gap-2 h-11 rounded-xl bg-primary text-primary-foreground text-sm font-semibold"
               >
-                <span>{c.label}</span>
-                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                <LayoutDashboard className="w-4 h-4" aria-hidden="true" />
+                Open {dashboard.label.toLowerCase()}
               </Link>
-            ))}
+            </div>
+          )}
+
+          <nav className="flex-1 overflow-y-auto p-4 space-y-1">
+            <MobileNavMenu nav={nav} onNavigate={() => setMenu(false)} />
 
             <div className="pt-4 border-t border-border mt-4">
               <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground px-3 py-1.5">

@@ -1,65 +1,87 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectDB } from "@/server/db/connection";
-import { User } from "@/server/db/models";
 import bcryptjs from "bcryptjs";
 
+import { User } from "@/server/db/models";
+import {
+  requireAuth,
+  roleRank,
+  serverError,
+  setSessionCookie,
+  STAFF_ROLES,
+} from "@/server/auth/session";
+import { rateLimit } from "@/server/security/rate-limit";
+import { isEmail, isObjectId, passwordStrengthError } from "@/server/security/validation";
+
+/**
+ * POST — Set a password from the admin panel.
+ *  - Own account (any staff role): the current password is required.
+ *  - Another account: admins only, and only for accounts with a lower role
+ *    (a super admin may reset anyone else).
+ */
 export async function POST(request: NextRequest) {
   try {
-    const { userId, email, currentPassword, newPassword } = await request.json();
+    const auth = await requireAuth(request, STAFF_ROLES);
+    if (!auth.ok) return auth.response;
+    const actor = auth.user;
 
-    if (!newPassword || typeof newPassword !== "string" || newPassword.trim().length < 6) {
-      return NextResponse.json(
-        { error: "New password must be at least 6 characters long." },
-        { status: 400 },
-      );
+    const limited = rateLimit(`admin-password:${actor._id}`, 10, 15 * 60_000);
+    if (limited) return limited;
+
+    const { userId, email, currentPassword, newPassword } = await request.json().catch(() => ({}));
+
+    const weak = passwordStrengthError(newPassword);
+    if (weak) {
+      return NextResponse.json({ error: weak }, { status: 400 });
     }
 
-    if (!userId && !email) {
-      return NextResponse.json({ error: "User ID or email is required." }, { status: 400 });
+    let target = null;
+    if (isObjectId(userId)) {
+      target = await User.findById(userId).select("+password");
+    } else if (isEmail(email)) {
+      target = await User.findOne({ email: email.toLowerCase().trim() }).select("+password");
     }
-
-    await connectDB();
-
-    let userDoc: any = null;
-    if (userId && /^[0-9a-fA-F]{24}$/.test(userId)) {
-      userDoc = await User.findById(userId).select("+password");
-    }
-
-    if (!userDoc && (email || (userId && userId.includes("@")))) {
-      const searchEmail = (email || userId).toLowerCase().trim();
-      userDoc = await User.findOne({ email: searchEmail }).select("+password");
-    }
-
-    if (!userDoc) {
+    if (!target) {
       return NextResponse.json({ error: "User account not found." }, { status: 404 });
     }
 
-    // Verify current password if provided
-    if (currentPassword && userDoc.password) {
-      const isMatch = await bcryptjs.compare(currentPassword, userDoc.password);
-      if (!isMatch) {
+    const isSelf = target._id.equals(actor._id);
+
+    if (isSelf) {
+      if (
+        typeof currentPassword !== "string" ||
+        !target.password ||
+        !(await bcryptjs.compare(currentPassword, target.password))
+      ) {
         return NextResponse.json(
           { error: "The current password you entered is incorrect." },
           { status: 400 },
         );
       }
+    } else {
+      const canReset =
+        actor.role === "super_admin" ||
+        (actor.role === "admin" && roleRank(target.role) < roleRank(actor.role));
+      if (!canReset) {
+        return NextResponse.json(
+          { error: "You do not have permission to reset this account's password." },
+          { status: 403 },
+        );
+      }
     }
 
-    // Hash new password and update
-    const hashed = await bcryptjs.hash(newPassword.trim(), 12);
-    userDoc.password = hashed;
-    await userDoc.save();
+    target.password = await bcryptjs.hash(newPassword, 12);
+    target.sessionVersion = (target.sessionVersion ?? 0) + 1;
+    await target.save();
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
-      message: `Password updated successfully for ${userDoc.name || userDoc.email}!`,
+      message: `Password updated successfully for ${target.name || target.email}!`,
     });
-  } catch (err: any) {
-    console.error("Change password error:", err);
-    return NextResponse.json(
-      { error: err.message || "Failed to update password." },
-      { status: 500 },
-    );
+    // Keep the admin signed in on this device after changing their own password
+    if (isSelf) setSessionCookie(response, target);
+    return response;
+  } catch (err) {
+    return serverError("Admin password change error", err, "Failed to update password.");
   }
 }
 

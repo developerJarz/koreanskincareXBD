@@ -1,18 +1,15 @@
-import catBags from "@/assets/cat-bags.jpg";
-import catRings from "@/assets/cat-rings.jpg";
-import catEarrings from "@/assets/cat-earrings.jpg";
-import catNecklaces from "@/assets/cat-necklaces.jpg";
-import catSunglasses from "@/assets/cat-sunglasses.jpg";
-import catWatches from "@/assets/cat-watches.jpg";
-
-import prBag1 from "@/assets/pr-bag1.jpg";
-import prBag2 from "@/assets/pr-bag2.jpg";
-import prRing1 from "@/assets/pr-ring1.jpg";
-import prEar1 from "@/assets/pr-ear1.jpg";
-import prNeck1 from "@/assets/pr-neck1.jpg";
-import prWatch1 from "@/assets/pr-watch1.jpg";
-import prScarf1 from "@/assets/pr-scarf1.jpg";
 import type { ImageSource } from "@/lib/image";
+
+// Demo images hosted on Cloudinary (uploaded by scripts/migrate-images-to-cloudinary.mjs)
+const CDN = "https://res.cloudinary.com/jxbnangy/image/upload";
+const catBags = `${CDN}/v1790700913/koreanskincare/categories/cat-bags.jpg`;
+const catRings = `${CDN}/v1790700917/koreanskincare/categories/cat-rings.jpg`;
+const catEarrings = `${CDN}/v1790700914/koreanskincare/categories/cat-earrings.jpg`;
+const catWatches = `${CDN}/v1790700918/koreanskincare/categories/cat-watches.jpg`;
+const prBag1 = `${CDN}/v1790700921/koreanskincare/products/pr-bag1.jpg`;
+const prBag2 = `${CDN}/v1790700922/koreanskincare/products/pr-bag2.jpg`;
+const prRing1 = `${CDN}/v1790700925/koreanskincare/products/pr-ring1.jpg`;
+const prEar1 = `${CDN}/v1790700922/koreanskincare/products/pr-ear1.jpg`;
 
 export type Category = {
   slug: string;

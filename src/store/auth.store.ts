@@ -33,12 +33,17 @@ export const useAuthStore = create<AuthState>()(
 
       setLoading: (isLoading) => set({ isLoading }),
 
-      logout: () =>
+      logout: () => {
+        // Clears the HttpOnly session cookie on the server
+        if (typeof window !== "undefined") {
+          fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
+        }
         set({
           user: null,
           isAuthenticated: false,
           isLoading: false,
-        }),
+        });
+      },
 
       isAdmin: () => {
         const role = get().user?.role;
@@ -59,6 +64,12 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: "koreanskincare-auth",
+      // Only persist who is signed in; "loading" must never be restored from storage,
+      // otherwise first-time visitors stay stuck on a loading screen
+      partialize: (state) => ({ user: state.user, isAuthenticated: state.isAuthenticated }),
+      onRehydrateStorage: () => (state) => {
+        state?.setLoading(false);
+      },
       storage: createJSONStorage(() => {
         if (typeof window !== "undefined") {
           return localStorage;

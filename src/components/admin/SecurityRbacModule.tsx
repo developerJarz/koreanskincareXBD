@@ -148,8 +148,8 @@ export function SecurityRbacModule() {
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!newPassword || newPassword.length < 6) {
-      toast.error("New password must be at least 6 characters long.");
+    if (!newPassword || newPassword.length < 10) {
+      toast.error("New password must be at least 10 characters long.");
       return;
     }
 
@@ -164,9 +164,8 @@ export function SecurityRbacModule() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId: user?.id || user?.email || "admin@koreanskincare.bd",
-          email: user?.email || "admin@koreanskincare.bd",
-          currentPassword: currentPassword || undefined,
+          userId: user?.id,
+          currentPassword,
           newPassword,
         }),
       });

@@ -1,65 +1,62 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectDB } from "@/server/db/connection";
-import { User } from "@/server/db/models";
 import bcryptjs from "bcryptjs";
 
+import { User } from "@/server/db/models";
+import { requireAuth, serverError, setSessionCookie } from "@/server/auth/session";
+import { rateLimit } from "@/server/security/rate-limit";
+import { passwordStrengthError } from "@/server/security/validation";
+
+// POST — Change the signed-in user's own password
 export async function POST(request: NextRequest) {
   try {
-    const { userId, email, currentPassword, newPassword } = await request.json();
+    const auth = await requireAuth(request);
+    if (!auth.ok) return auth.response;
 
-    if (!newPassword || typeof newPassword !== "string" || newPassword.trim().length < 6) {
+    const limited = rateLimit(`change-password:${auth.user._id}`, 5, 15 * 60_000);
+    if (limited) return limited;
+
+    const { currentPassword, newPassword } = await request.json().catch(() => ({}));
+
+    if (!currentPassword || typeof currentPassword !== "string") {
       return NextResponse.json(
-        { error: "New password must be at least 6 characters long." },
+        { error: "Current password is required to change your password." },
         { status: 400 },
       );
     }
 
-    if (!userId && !email) {
-      return NextResponse.json({ error: "User ID or email is required." }, { status: 400 });
+    const weak = passwordStrengthError(newPassword);
+    if (weak) {
+      return NextResponse.json({ error: weak }, { status: 400 });
     }
 
-    await connectDB();
-
-    let userDoc: any = null;
-    if (userId && /^[0-9a-fA-F]{24}$/.test(userId)) {
-      userDoc = await User.findById(userId).select("+password");
+    if (newPassword === currentPassword) {
+      return NextResponse.json(
+        { error: "New password must be different from your current password." },
+        { status: 400 },
+      );
     }
 
-    if (!userDoc && (email || (userId && userId.includes("@")))) {
-      const searchEmail = (email || userId).toLowerCase().trim();
-      userDoc = await User.findOne({ email: searchEmail }).select("+password");
+    const userDoc = await User.findById(auth.user._id).select("+password");
+    if (!userDoc?.password || !(await bcryptjs.compare(currentPassword, userDoc.password))) {
+      return NextResponse.json(
+        { error: "The current password you entered is incorrect." },
+        { status: 400 },
+      );
     }
 
-    if (!userDoc) {
-      return NextResponse.json({ error: "User account not found." }, { status: 404 });
-    }
-
-    // Verify current password if provided
-    if (currentPassword && userDoc.password) {
-      const isMatch = await bcryptjs.compare(currentPassword, userDoc.password);
-      if (!isMatch) {
-        return NextResponse.json(
-          { error: "The current password you entered is incorrect." },
-          { status: 400 },
-        );
-      }
-    }
-
-    // Hash new password and update
-    const hashed = await bcryptjs.hash(newPassword.trim(), 12);
-    userDoc.password = hashed;
+    userDoc.password = await bcryptjs.hash(newPassword, 12);
+    // Signs out every other device; this device gets a fresh cookie below
+    userDoc.sessionVersion = (userDoc.sessionVersion ?? 0) + 1;
     await userDoc.save();
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
-      message: `Password updated successfully for ${userDoc.name || userDoc.email}!`,
+      message: "Password updated successfully!",
     });
-  } catch (err: any) {
-    console.error("Change password error:", err);
-    return NextResponse.json(
-      { error: err.message || "Failed to update password." },
-      { status: 500 },
-    );
+    setSessionCookie(response, userDoc);
+    return response;
+  } catch (err) {
+    return serverError("Change password error", err, "Failed to update password.");
   }
 }
 

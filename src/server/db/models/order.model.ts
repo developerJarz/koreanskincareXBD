@@ -16,6 +16,7 @@ const orderItemSchema = new Schema<IOrderItem>(
     price: { type: Number, required: true, min: 0 },
     quantity: { type: Number, required: true, min: 1 },
     total: { type: Number, required: true, min: 0 },
+    vendor: { type: Schema.Types.ObjectId, ref: "Vendor" },
   },
   { _id: false },
 );
@@ -27,6 +28,17 @@ const addressSubSchema = {
   district: { type: String, required: true },
   area: { type: String, required: true },
   streetAddress: { type: String, required: true },
+  postalCode: { type: String },
+};
+
+// Billing address is optional — fields are not individually required
+const optionalAddressSubSchema = {
+  fullName: { type: String },
+  phone: { type: String },
+  division: { type: String },
+  district: { type: String },
+  area: { type: String },
+  streetAddress: { type: String },
   postalCode: { type: String },
 };
 
@@ -65,7 +77,7 @@ const orderSchema = new Schema<OrderDocument>(
     paymentMethod: { type: String, required: true },
     paymentTransactionId: { type: String },
     shippingAddress: addressSubSchema,
-    billingAddress: addressSubSchema,
+    billingAddress: optionalAddressSubSchema,
     deliveryNotes: { type: String },
     shippingMethod: { type: String },
     courierName: { type: String },
@@ -77,12 +89,15 @@ const orderSchema = new Schema<OrderDocument>(
     cancelReason: { type: String },
     invoiceUrl: { type: String },
     notes: { type: String },
+    // SHA-256 of the secret given to the buyer at checkout; lets guests view only their own order
+    accessTokenHash: { type: String, select: false },
   },
   {
     timestamps: true,
     toJSON: {
       transform(_doc, ret: Record<string, any>) {
         ret._id = ret._id.toString();
+        delete ret.accessTokenHash;
         delete ret.__v;
         return ret;
       },
@@ -96,6 +111,7 @@ orderSchema.index({ status: 1 });
 orderSchema.index({ paymentStatus: 1 });
 orderSchema.index({ createdAt: -1 });
 orderSchema.index({ trackingId: 1 });
+orderSchema.index({ "items.vendor": 1, createdAt: -1 });
 
 // Auto-generate order number
 orderSchema.pre("validate", async function () {

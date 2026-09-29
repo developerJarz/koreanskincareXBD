@@ -4,6 +4,7 @@ import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useUIStore } from "@/store/ui.store";
 import { useCartStore } from "@/store/cart.store";
+import { optimizedImageUrl } from "@/lib/image";
 
 export function CartSheet() {
   const { isCartOpen, closeCart } = useUIStore();
@@ -96,7 +97,7 @@ export function CartSheet() {
                   className="flex gap-4 p-4 rounded-2xl border border-border bg-background"
                 >
                   <img
-                    src={item.image}
+                    src={optimizedImageUrl(item.image, 160)}
                     alt={item.name}
                     className="w-20 h-24 object-cover rounded-xl shrink-0"
                   />

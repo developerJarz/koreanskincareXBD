@@ -19,8 +19,12 @@ export const seedDatabase = createServerFn({ method: "POST" }).handler(async () 
     return { message: "Database already seeded", skipped: true };
   }
 
-  // ─── 1. Create Super Admin ───
-  const hashedPassword = await bcryptjs.hash("Shajgoj#SuperAdmin!2026$X9", 12);
+  // ─── 1. Create Super Admin (password from environment variable) ───
+  const seedPassword = process.env.SEED_SUPER_ADMIN_PASSWORD;
+  if (!seedPassword || seedPassword.length < 12) {
+    throw new Error("Set a strong SEED_SUPER_ADMIN_PASSWORD (12+ chars) before seeding.");
+  }
+  const hashedPassword = await bcryptjs.hash(seedPassword, 12);
   const admin = await User.create({
     name: "koreanskincare.bd Admin",
     email: "admin@koreanskincare.bd",
@@ -456,10 +460,11 @@ export const seedDatabase = createServerFn({ method: "POST" }).handler(async () 
     message: "Database seeded successfully!",
     skipped: false,
     data: {
-      admin: { email: "admin@koreanskincare.bd", password: "Shajgoj#SuperAdmin!2026$X9" },
+      admin: { email: "admin@koreanskincare.bd", role: "super_admin" },
       categories: categories.length,
       products: productData.length,
       homepageSections: 8,
     },
+    note: "Password is set from SEED_SUPER_ADMIN_PASSWORD environment variable. Never exposed in responses.",
   };
 });

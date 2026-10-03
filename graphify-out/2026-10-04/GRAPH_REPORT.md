@@ -1,50 +1,50 @@
-# Graph Report - noors-elegance-main  (2026-10-04)
+# Graph Report - noors-elegance-main  (2026-09-30)
 
 ## Corpus Check
-- 376 files · ~451,578 words
+- 376 files · ~451,486 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 66 file(s) not represented in the graph (top: .csv 53, (none) 4, .woff2 3)
 
 ## Summary
-- 3125 nodes · 6789 edges · 162 communities (134 shown, 28 thin omitted)
+- 3126 nodes · 6790 edges · 172 communities (133 shown, 39 thin omitted)
 - Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 172 edges (avg confidence: 0.86)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `346dff5b`
+- Built from commit: `37d87abd`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- DesignSystemGenerator
+- test_data_contracts.py
 - scripts/core.py
 - validate_data.py
 - dependencies
 - cn
 - connectDB
-- test_validate_tokens.py
-- react
+- pathlib
+- AdminDashboardClient.tsx
 - site-data.ts
 - gray
 - sidebar.tsx
-- StorefrontModule.tsx
+- optimizedImageUrl
 - serverError
-- server/db/models/index.ts
+- vendors/route.ts
 - package.json
 - icon/generate.py
 - button
 - next
-- AdminHeader.tsx
+- lucide-react
 - carousel.tsx
-- pathlib
+- cip/generate.py
 - design_system.py
-- test_design_system_mode.py
+- DesignSystemGenerator
 - slide_search_core.py
 - spacing
 - validation.ts
-- utils.ts
+- react
 - color
-- optimizedImageUrl
+- Header.tsx
 - (store)/layout.tsx
 - catalog.ts
 - html-token-validator.py
@@ -53,40 +53,40 @@
 - cip/core.py
 - types/index.ts
 - compilerOptions
-- test_style_taxonomy.py
-- session.ts
+- test_design_system_mode.py
+- admin/page.tsx
 - backend/db/models/index.ts
 - Brand Skill
-- ProductListing.tsx
+- brand/[slug]/page.tsx
 - Design System Skill
 - radius
 - TailwindConfigGenerator
 - constants.ts
 - product/[slug]/page.tsx
 - devDependencies
-- Slides Skill (SKILL.md)
-- Design Skill (SKILL.md)
+- generate-slide.py
+- Slides Reference (design)
 - command.tsx
-- logo/generate.py
+- Logo Design Reference
 - fetch-background.py
 - components.json
 - class-variance-authority
 - validate-asset.cjs
 - Social Photos Design Guide
-- embed-tokens.cjs
+- ref_fs
 - uploads/route.ts
 - Droplet & Sparkle Emblem (gold #C59B6D)
 - VendorDashboardClient.tsx
 - account/page.tsx
-- sync-brand-to-tokens.cjs
+- StorefrontModule.tsx
 - form.tsx
 - backend/db/models/order.model.ts
 - Banner Sizes & Art Direction Styles Reference
-- Logo AI Prompt Engineering
+- Design Skill (SKILL.md)
 - fontSize
-- ShadcnInstaller
-- test_relevance_evaluator.py
-- generate_cip_set
+- TestShadcnInstaller
+- TestThresholdGate
+- server/db/models/index.ts
 - Slides Copywriting Formulas
 - CatalogRefreshTest
 - MultiVendorModule.tsx
@@ -101,33 +101,33 @@
 - inject-brand-context.cjs
 - validate-tokens.cjs
 - UI Styling Skill (SKILL.md)
-- vendors/route.ts
+- ShadcnInstaller
 - .check_shadcn_config
 - .generate_config_string
-- csv
+- test_core_data_quality.py
 - chart.tsx
 - backend/db/models/cart.model.ts
 - backend/db/models/wishlist.model.ts
 - Banner Sizes & Art Direction Styles
 - shadcn/ui Accessibility Patterns Reference
-- brand/[slug]/page.tsx
-- mongoose
+- TestNativeDesktopStackFreshness
+- UserRole
 - backend/db/models/product.model.ts
 - generate-tokens.cjs
 - duration
 - ._base_config
 - update-passwords.mjs
 - backend/db/models/notification.model.ts
-- logo/search.py
-- sync-full-catalog.mjs
+- BM25
+- BM25
 - DesktopMegaMenu.tsx
 - ui-ux-pro-max Skill (SKILL.md)
 - .test_add_all_components_success
-- test_tailwind_config_gen.py
+- TestGeneratedConfigIsValidJs
 - search.py (design intelligence search CLI)
 - navigation-menu.tsx
 - select.tsx
-- resizable.tsx
+- breadcrumb.tsx
 - drawer.tsx
 - seed-catalog.mjs
 - lib/storefront.ts
@@ -143,7 +143,7 @@
 - test_core.py
 - Soft Neutral/Blush Product Photography Style (warm light, cream and pink backdrops, rose-gold accents)
 - lovable-error-reporting.ts
-- backend/db/models/brand.model.ts
+- mongoose
 - xl
 - none
 - Tailwind CSS Responsive Design Reference
@@ -151,27 +151,37 @@
 - next.config.mjs
 - primary-hover
 - ring
-- .test_add_color_palette
-- .test_add_spacing
-- .test_generate_config_with_colors
-- .test_generate_config_with_plugins
-- .test_write_config_creates_content
-- .test_full_configuration_typescript
-- .test_default_output_path_typescript
-- .test_base_config_structure
-- .test_default_content_paths_react
+- .temp_project
+- .test_add_components_no_config
+- .test_add_components_already_installed
+- .test_add_components_dry_run
+- .test_add_all_components_dry_run
+- .test_list_installed_no_config
+- .test_list_installed_with_components
+- .test_init_default_project_root
+- .test_get_installed_components_empty
+- .test_add_fonts
+- .test_add_breakpoints
 - .test_add_plugins_no_duplicates
+- .test_recommend_plugins
 - .test_recommend_plugins_nextjs
+- .test_generate_typescript_config
 - .test_init_default_typescript
+- .test_validate_config_valid
+- .test_validate_config_empty_theme
 - .test_write_config
+- .test_write_config_invalid_path
 - .test_init_framework
+- .test_full_configuration_javascript
 - .test_default_output_path_javascript
 - .test_default_content_paths_nextjs
+- .test_add_colors
 - next-env.d.ts
 - AGENTS.md (empty)
-- ref_fs
+- migrate-images-to-cloudinary.mjs
 - backend/db/models/blog.model.ts
 - backend/db/models/settings.model.ts
+- input-otp.tsx
 - server/db/models/banner.model.ts
 
 ## God Nodes (most connected - your core abstractions)
@@ -191,12 +201,12 @@
   README.md → .agents/skills/ui-styling/references/shadcn-components.md
 - `cleanLimits()` --indirect_call--> `isObjectId()`  [INFERRED]
   app/api/admin/vendors/route.ts → src/server/security/validation.ts
-- `Typography Tailwind Config` --semantically_similar_to--> `Tailwind Integration`  [INFERRED] [semantically similar]
-  .agents/skills/brand/references/typography-specifications.md → .agents/skills/design-system/references/tailwind-integration.md
 - `Crawler Allow-All Policy (Googlebot, Bingbot, Twitterbot, facebookexternalhit, *)` --conceptually_related_to--> `Enterprise Admin Operations Hub (/admin)`  [AMBIGUOUS]
   public/robots.txt → README.md
-- `Design Sub-skill Routing Table` --semantically_similar_to--> `Routing by Question Type`  [INFERRED] [semantically similar]
-  .agents/skills/design/SKILL.md → .agents/skills/design/references/design-routing.md
+- `AboutPage()` --calls--> `getResponsiveImage()`  [EXTRACTED]
+  app/(store)/[slug]/page.tsx → src/lib/image.ts
+- `AccountPage()` --calls--> `useRequireAuth()`  [EXTRACTED]
+  app/(store)/account/page.tsx → src/hooks/use-require-auth.ts
 
 ## Import Cycles
 - None detected.
@@ -217,19 +227,19 @@
 - **Noor's Elegance Product Category Taxonomy** — src_assets_cat_bags_bags_category, src_assets_cat_earrings_earrings_category, src_assets_cat_necklaces_necklaces_category, src_assets_cat_rings_rings_category, src_assets_cat_sunglasses_sunglasses_category, src_assets_cat_watches_watches_category [INFERRED 0.85]
 - **Theming, Dark Mode & Contrast Guidance Across UI Skills** — agents_skills_ui_styling_references_shadcn_theming_dark_mode_next_themes, agents_skills_ui_styling_references_shadcn_theming_css_variable_system, agents_skills_ui_styling_references_tailwind_customization_dark_mode_configuration, agents_skills_ui_styling_references_shadcn_accessibility_color_contrast, agents_skills_ui_ux_pro_max_skill_light_dark_mode_contrast [INFERRED 0.85]
 
-## Communities (162 total, 28 thin omitted)
+## Communities (172 total, 39 thin omitted)
 
-### Community 0 - "DesignSystemGenerator"
-Cohesion: 0.05
-Nodes (29): DesignSystemGenerator, Generates design system recommendations from aggregated searches., Load reasoning rules from CSV., Execute searches across multiple domains., Find matching reasoning rule for a category., Apply reasoning rules to search results., Select best matching result based on priority keywords., Extract results list from search result dict. (+21 more)
+### Community 0 - "test_data_contracts.py"
+Cohesion: 0.06
+Nodes (19): Find matching reasoning rule for a category., Apply reasoning rules to search results., apply_decision_rules(), _object_without_duplicates(), parse_decision_rules(), Return deterministic mutations and an audit trail; never execute data., Closed, non-executable grammar for design-system decision rules., Parse the canonical condition -> action-array representation. (+11 more)
 
 ### Community 1 - "scripts/core.py"
 Cohesion: 0.06
 Nodes (60): BM25, _contains_phrase(), detect_domain(), _domain_keywords(), _exact_match_diagnostic(), _exact_row_identity(), _exact_stack_identifier(), _file_signature() (+52 more)
 
 ### Community 2 - "validate_data.py"
-Cohesion: 0.07
-Nodes (51): Semantic quality contracts for the core UI/UX datasets., read_rows(), TestAccessibilityGuidance, TestChartsTypographyAndIcons, TestCurrentReactGuidance, TestSemanticColors, _catalog_date(), _check_app_interface_contract() (+43 more)
+Cohesion: 0.06
+Nodes (50): read_rows(), TestAccessibilityGuidance, TestChartsTypographyAndIcons, TestCurrentReactGuidance, TestSemanticColors, _catalog_date(), _check_app_interface_contract(), _check_catalog_contract() (+42 more)
 
 ### Community 3 - "dependencies"
 Cohesion: 0.03
@@ -237,23 +247,23 @@ Nodes (64): dependencies, bcryptjs, better-auth, class-variance-authority, cloud
 
 ### Community 4 - "cn"
 Cohesion: 0.05
-Nodes (59): @radix-ui/react-accordion, @radix-ui/react-avatar, @radix-ui/react-dropdown-menu, @radix-ui/react-menubar, @radix-ui/react-tabs, AccordionContent, AccordionItem, AccordionTrigger (+51 more)
+Nodes (53): @radix-ui/react-accordion, @radix-ui/react-dropdown-menu, @radix-ui/react-menubar, react-resizable-panels, AccordionContent, AccordionItem, AccordionTrigger, Card (+45 more)
 
 ### Community 5 - "connectDB"
-Cohesion: 0.06
-Nodes (57): PUT(), SHIPPING_KEYS, SOCIAL_KEYS, GET(), PUT(), warmUpDatabase(), register(), @tanstack/react-start (+49 more)
-
-### Community 6 - "test_validate_tokens.py"
-Cohesion: 0.18
-Nodes (11): Regression test for sync-brand-to-tokens.cjs. The color parser required a…, Path, Regression tests for validate-tokens.cjs. The validator used to skip any line…, A hardcoded hex on the same line as a var() token is still a violation., A line that references only tokens produces no false positives., _run(), test_flags_hardcoded_hex_sharing_line_with_token(), test_token_only_line_reports_no_violation() (+3 more)
-
-### Community 7 - "react"
 Cohesion: 0.05
-Nodes (46): AdminDashboardClient(), AdminDashboardClientProps, AdminOrderStats, AdminProductStats, AdminSummary, AdminUserRow, AiStudioModule, ApiWebhooksHealthModule (+38 more)
+Nodes (60): PUT(), SHIPPING_KEYS, SOCIAL_KEYS, PUT(), handleSeed(), POST(), SEED_USERS, warmUpDatabase() (+52 more)
+
+### Community 6 - "pathlib"
+Cohesion: 0.06
+Nodes (42): Regression test for sync-brand-to-tokens.cjs. The color parser required a…, format_brief(), format_results(), main(), Format search results for display, CIP Design Search CLI - Search corporate identity design guidelines, Format CIP brief for display, main() (+34 more)
+
+### Community 7 - "AdminDashboardClient.tsx"
+Cohesion: 0.05
+Nodes (42): AdminDashboardClient(), AdminDashboardClientProps, AdminOrderStats, AdminProductStats, AdminSummary, AdminUserRow, AiStudioModule, ApiWebhooksHealthModule (+34 more)
 
 ### Community 8 - "site-data.ts"
-Cohesion: 0.08
-Nodes (26): AboutPage(), RouteParams, SingleSegmentPage(), TrackOrderPage(), WishlistPage(), ImageSource, ADMIN_MODULES, AdminModule (+18 more)
+Cohesion: 0.09
+Nodes (25): AboutPage(), RouteParams, SingleSegmentPage(), TrackOrderPage(), WishlistPage(), ADMIN_MODULES, AdminModule, AUTH_PROVIDERS (+17 more)
 
 ### Community 9 - "gray"
 Cohesion: 0.05
@@ -263,53 +273,53 @@ Nodes (53): $type, $value, $type, $value, $type, $value, $type, $value (+45 more
 Cohesion: 0.06
 Nodes (46): @radix-ui/react-separator, @radix-ui/react-tooltip, Input, Separator, src_components_ui_sheet_sheet, SheetContent, SheetContentProps, SheetDescription (+38 more)
 
-### Community 11 - "StorefrontModule.tsx"
-Cohesion: 0.08
-Nodes (60): ProductManagerModule, Brand, BrandForm(), BrandManagerModule(), EMPTY, FormState, Category, CategoryForm() (+52 more)
+### Community 11 - "optimizedImageUrl"
+Cohesion: 0.11
+Nodes (40): ProductManagerModule, Brand, BrandForm(), BrandManagerModule(), EMPTY, FormState, Category, CategoryForm() (+32 more)
 
 ### Community 12 - "serverError"
-Cohesion: 0.10
-Nodes (51): DELETE(), GET(), keepOneDefault(), POST(), PUT(), readAddress(), GET(), ACTIVE (+43 more)
+Cohesion: 0.11
+Nodes (45): DELETE(), GET(), keepOneDefault(), POST(), PUT(), readAddress(), GET(), ACTIVE (+37 more)
 
-### Community 13 - "server/db/models/index.ts"
+### Community 13 - "vendors/route.ts"
 Cohesion: 0.10
-Nodes (30): GET(), DELETE(), GET(), POST(), PUT(), PUT(), dynamic, metadata (+22 more)
+Nodes (34): cleanLimits(), GET(), PATCH(), POST(), STATUSES, GET(), DELETE(), GET() (+26 more)
 
 ### Community 14 - "package.json"
 Cohesion: 0.05
 Nodes (44): name, private, sideEffects, type, better-auth, date-fns, eslint, eslint-config-prettier (+36 more)
 
 ### Community 15 - "icon/generate.py"
-Cohesion: 0.16
-Nodes (18): apply_color(), apply_viewbox_size(), extract_svgs(), generate_batch(), generate_icon(), generate_sizes(), load_env(), main() (+10 more)
+Cohesion: 0.09
+Nodes (30): apply_color(), apply_viewbox_size(), extract_svgs(), generate_batch(), generate_icon(), generate_sizes(), load_env(), main() (+22 more)
 
 ### Community 16 - "button"
 Cohesion: 0.06
 Nodes (45): $type, $value, $type, $value, bg, fg, font-size, hover-bg (+37 more)
 
 ### Community 17 - "next"
-Cohesion: 0.14
-Nodes (38): PATCH(), POST(), PATCH(), POST(), POST(), POST(), PUT(), POST() (+30 more)
+Cohesion: 0.12
+Nodes (45): PATCH(), POST(), PATCH(), POST(), POST(), POST(), POST(), GET() (+37 more)
 
-### Community 18 - "AdminHeader.tsx"
-Cohesion: 0.18
-Nodes (15): AdminHeader(), AdminHeaderProps, ROLE_LABELS, AdminSidebar(), AdminSidebarProps, ADMIN_NAV, getNavItem(), NAV_BY_TAB (+7 more)
+### Community 18 - "lucide-react"
+Cohesion: 0.11
+Nodes (20): posts, POSTS, lucide-react, AdminHeader(), AdminHeaderProps, ROLE_LABELS, AdminSidebar(), AdminSidebarProps (+12 more)
 
 ### Community 19 - "carousel.tsx"
 Cohesion: 0.07
 Nodes (37): embla-carousel-react, @radix-ui/react-alert-dialog, react-day-picker, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter() (+29 more)
 
-### Community 20 - "pathlib"
-Cohesion: 0.05
-Nodes (60): CIP HTML Presentation (base64 single-file, dark theme), CIP Workflow (brief -> mockups -> HTML presentation), CIP Design Reference, gemini-2.5-flash-image (flash, default), gemini-3-pro-image-preview (pro, 4K text), Generate Logo First If None Exists, load_env(), CIP Design Generator - Generate corporate identity mockups using Gemini Nano… (+52 more)
+### Community 20 - "cip/generate.py"
+Cohesion: 0.09
+Nodes (31): CIP Workflow (brief -> mockups -> HTML presentation), CIP Design Reference, gemini-2.5-flash-image (flash, default), gemini-3-pro-image-preview (pro, 4K text), Generate Logo First If None Exists, build_cip_prompt(), check_logo_required(), generate_cip_set() (+23 more)
 
 ### Community 21 - "design_system.py"
-Cohesion: 0.08
-Nodes (30): ansi_ljust(), _detect_page_type(), format_ascii_box(), format_master_md(), format_page_override_md(), _generate_intelligent_overrides(), hex_to_ansi(), persist_design_system() (+22 more)
+Cohesion: 0.10
+Nodes (25): ansi_ljust(), _detect_page_type(), format_ascii_box(), format_master_md(), format_page_override_md(), _generate_intelligent_overrides(), hex_to_ansi(), persist_design_system() (+17 more)
 
-### Community 22 - "test_design_system_mode.py"
-Cohesion: 0.09
-Nodes (18): _contrast_ratio(), _derive_dark_palette(), _filter_anti_patterns_for_mode(), _palette_is_dark(), WCAG relative luminance of a #RRGGBB string, or None if unparseable., True when a colors.csv row's Background is a dark surface., WCAG contrast ratio for two hex colors, or None if either is invalid., Keep product brand tokens while deriving accessible dark surfaces. (+10 more)
+### Community 22 - "DesignSystemGenerator"
+Cohesion: 0.06
+Nodes (24): _contrast_ratio(), _derive_dark_palette(), DesignSystemGenerator, _palette_is_dark(), WCAG relative luminance of a #RRGGBB string, or None if unparseable., True when a colors.csv row's Background is a dark surface., WCAG contrast ratio for two hex colors, or None if either is invalid., Keep product brand tokens while deriving accessible dark surfaces. (+16 more)
 
 ### Community 23 - "slide_search_core.py"
 Cohesion: 0.08
@@ -320,28 +330,28 @@ Cohesion: 0.06
 Nodes (34): $type, $value, $type, $value, $type, $value, $type, $value (+26 more)
 
 ### Community 25 - "validation.ts"
-Cohesion: 0.15
-Nodes (30): Ctx, GET(), MISSING(), POST(), SORTS, ref_crypto, ADMIN_ROLES, STAFF_ROLES (+22 more)
+Cohesion: 0.13
+Nodes (37): GET(), MISSING(), POST(), POST(), Ctx, GET(), notFound(), PATCH() (+29 more)
 
-### Community 26 - "utils.ts"
+### Community 26 - "react"
 Cohesion: 0.06
-Nodes (25): clsx, input-otp, @radix-ui/react-checkbox, @radix-ui/react-hover-card, @radix-ui/react-popover, @radix-ui/react-progress, @radix-ui/react-radio-group, @radix-ui/react-scroll-area (+17 more)
+Nodes (30): clsx, @radix-ui/react-avatar, @radix-ui/react-checkbox, @radix-ui/react-hover-card, @radix-ui/react-popover, @radix-ui/react-progress, @radix-ui/react-radio-group, @radix-ui/react-scroll-area (+22 more)
 
 ### Community 27 - "color"
 Cohesion: 0.06
 Nodes (31): $type, $value, background, destructive, destructive-foreground, foreground, muted, muted-foreground (+23 more)
 
-### Community 28 - "optimizedImageUrl"
-Cohesion: 0.14
-Nodes (23): AuthHeading(), AuthPage(), CodeField(), ForgotPasswordPage(), LoginPage(), postJson(), RegisterPage(), RouteParams (+15 more)
+### Community 28 - "Header.tsx"
+Cohesion: 0.19
+Nodes (17): AuthHeading(), AuthPage(), CodeField(), ForgotPasswordPage(), LoginPage(), postJson(), RegisterPage(), RouteParams (+9 more)
 
 ### Community 29 - "(store)/layout.tsx"
-Cohesion: 0.18
-Nodes (19): NotFound(), ContactPage(), generateMetadata(), revalidate, StoreLayout(), AnnouncementBar(), CartSheet(), Footer() (+11 more)
+Cohesion: 0.12
+Nodes (28): NotFound(), CartPage(), ContactPage(), generateMetadata(), revalidate, StoreLayout(), zustand, AnnouncementBar() (+20 more)
 
 ### Community 30 - "catalog.ts"
-Cohesion: 0.13
-Nodes (24): GET(), GET(), GET(), BrandInfo, CategoryNode, NavData, ProductFlag, SORT_OPTIONS (+16 more)
+Cohesion: 0.12
+Nodes (25): GET(), GET(), GET(), BrandsPage(), BrandInfo, CardProduct, CategoryNode, NavData (+17 more)
 
 ### Community 31 - "html-token-validator.py"
 Cohesion: 0.12
@@ -349,15 +359,15 @@ Nodes (25): get_context(), is_allowed_exception(), is_allowed_rgba(), is_inside_
 
 ### Community 32 - "TestTailwindConfigGenerator"
 Cohesion: 0.07
-Nodes (15): Test adding custom fonts., Test adding custom breakpoints., Test TailwindConfigGenerator class., Test plugin recommendations., Test generating TypeScript configuration., Test generating JavaScript configuration., Test validating valid configuration., Test validating config with no content paths. (+7 more)
+Nodes (15): Test adding colors multiple times., Test adding full color palette., Test adding custom spacing., Test TailwindConfigGenerator class., Test generating JavaScript configuration., Test generating config with custom colors., Test generating config with plugins., Test validating config with no content paths. (+7 more)
 
 ### Community 33 - "(store)/page.tsx"
-Cohesion: 0.18
-Nodes (17): CategoryCard(), HeroSection(), HomePage(), LARGE_IMAGE_WIDTHS, ProductSection(), revalidate, SectionHeading(), TRUST_ICON_COMPONENTS (+9 more)
+Cohesion: 0.15
+Nodes (21): CategoryCard(), HeroSection(), HomePage(), LARGE_IMAGE_WIDTHS, ProductSection(), revalidate, SectionHeading(), TRUST_ICON_COMPONENTS (+13 more)
 
 ### Community 34 - "cip/core.py"
-Cohesion: 0.06
-Nodes (37): BM25, detect_domain(), get_cip_brief(), _load_csv(), Load CSV and return list of dicts, Core search function using BM25, Auto-detect the most relevant domain from query, Main search function with auto-domain detection (+29 more)
+Cohesion: 0.10
+Nodes (27): detect_domain(), get_cip_brief(), _load_csv(), Load CSV and return list of dicts, Core search function using BM25, Auto-detect the most relevant domain from query, Main search function with auto-domain detection, Search across all domains and combine results (+19 more)
 
 ### Community 35 - "types/index.ts"
 Cohesion: 0.09
@@ -367,29 +377,29 @@ Nodes (20): AddressDocument, addressSchema, Analytics, AnalyticsDocument, analyt
 Cohesion: 0.08
 Nodes (25): compilerOptions, allowImportingTsExtensions, allowJs, esModuleInterop, incremental, isolatedModules, jsx, lib (+17 more)
 
-### Community 37 - "test_style_taxonomy.py"
-Cohesion: 0.09
-Nodes (12): _query_wants_dark(), True when a styles.csv row describes itself as dark-first., True when the query explicitly asks for a dark theme., Resolve the mode the rest of the output has to agree with., _resolve_color_mode(), _style_is_dark_primary(), TestModeResolution, Regression tests for the public style taxonomy and search contract. (+4 more)
+### Community 37 - "test_design_system_mode.py"
+Cohesion: 0.08
+Nodes (15): _filter_anti_patterns_for_mode(), _query_wants_dark(), True when a styles.csv row describes itself as dark-first., True when the query explicitly asks for a dark theme., Resolve the mode the rest of the output has to agree with., Drop "avoid dark mode" advice once dark mode is the resolved answer., _resolve_color_mode(), _style_is_dark_primary() (+7 more)
 
-### Community 38 - "session.ts"
-Cohesion: 0.09
-Nodes (26): AdminPage(), allowedRoles, dynamic, LeanUserRecord, metadata, serializeUsers(), POST(), GET() (+18 more)
+### Community 38 - "admin/page.tsx"
+Cohesion: 0.16
+Nodes (13): AdminPage(), allowedRoles, dynamic, LeanUserRecord, metadata, serializeUsers(), GET(), ORDER_STATUSES (+5 more)
 
 ### Community 39 - "backend/db/models/index.ts"
 Cohesion: 0.12
 Nodes (18): Address, AddressDocument, addressSchema, Analytics, AnalyticsDocument, analyticsSchema, Banner, BannerDocument (+10 more)
 
 ### Community 40 - "Brand Skill"
-Cohesion: 0.10
-Nodes (28): 22 Art Direction Styles, Banner Design Skill, AI-Generated Banner Visuals (ai-artist, ai-multimodal/Gemini), Banner Design 5-Step Workflow, Banner Export via chrome-devtools screenshot.js, Asset Approval Checklist, Asset Approval Review & Sign-off, Brand Guidelines Template (+20 more)
+Cohesion: 0.09
+Nodes (36): Asset Approval Checklist, Asset Approval Review & Sign-off, Brand Guidelines Template, Brand Consistency Checklist, Brand Channel Audit, Logo Usage Rules, Logo Clear Space & Minimum Size, Co-branding Guidelines (+28 more)
 
-### Community 41 - "ProductListing.tsx"
-Cohesion: 0.14
-Nodes (25): CategoryPage(), generateMetadata(), Params, SP, FLAG_TITLES, generateMetadata(), pageTitle(), ProductsPage() (+17 more)
+### Community 41 - "brand/[slug]/page.tsx"
+Cohesion: 0.11
+Nodes (33): GET(), BrandPage(), findBrand(), generateMetadata(), Params, SP, CategoryPage(), generateMetadata() (+25 more)
 
 ### Community 42 - "Design System Skill"
-Cohesion: 0.15
-Nodes (21): Design Components (Buttons, Spacing, Radius), Component Specifications, Component Tokens, Primitive Tokens, Semantic Tokens, Dark Mode Overrides, Semantic Interactive States, States and Variants (+13 more)
+Cohesion: 0.14
+Nodes (22): Typography Tailwind Config, Design Components (Buttons, Spacing, Radius), Component Specifications, Component Tokens, Primitive Tokens, Semantic Tokens, Dark Mode Overrides, Semantic Interactive States (+14 more)
 
 ### Community 43 - "radius"
 Cohesion: 0.12
@@ -397,11 +407,11 @@ Nodes (23): $type, $value, lg, sm, $type, $value, $type, $value (+15 more)
 
 ### Community 44 - "TailwindConfigGenerator"
 Cohesion: 0.09
-Nodes (12): Add custom font families. Args: fonts: Dict of font_type: [font_names] e.g.,…, Add custom spacing values. Args: spacing: Dict of name: value e.g., {'18':…, Add custom breakpoints. Args: breakpoints: Dict of name: width e.g., {'3xl':…, Add plugin requirements. Args: plugins: List of plugin names e.g.,…, Get plugin recommendations based on configuration. Returns: List of recommended…, Generate Tailwind CSS configuration files., Validate configuration. Returns: Tuple of (valid, message), Add custom colors to theme. Args: colors: Dict of color_name: color_value Value… (+4 more)
+Nodes (13): main(), Add custom font families. Args: fonts: Dict of font_type: [font_names] e.g.,…, Add custom spacing values. Args: spacing: Dict of name: value e.g., {'18':…, Add custom breakpoints. Args: breakpoints: Dict of name: width e.g., {'3xl':…, Add plugin requirements. Args: plugins: List of plugin names e.g.,…, Get plugin recommendations based on configuration. Returns: List of recommended…, Generate Tailwind CSS configuration files., Validate configuration. Returns: Tuple of (valid, message) (+5 more)
 
 ### Community 45 - "constants.ts"
-Cohesion: 0.11
-Nodes (15): OrderManagementModule, SalesAnalyticsModule, OrderManagementModuleProps, SalesAnalyticsModuleProps, ADMIN_PAGE_SIZE, BD_DIVISIONS, CLOUDINARY_FOLDERS, COMMON_COLORS (+7 more)
+Cohesion: 0.13
+Nodes (14): SalesAnalyticsModule, CheckoutPage(), SalesAnalyticsModuleProps, ADMIN_PAGE_SIZE, BD_DISTRICTS, BD_DIVISIONS, CLOUDINARY_FOLDERS, COMMON_COLORS (+6 more)
 
 ### Community 46 - "product/[slug]/page.tsx"
 Cohesion: 0.14
@@ -411,21 +421,21 @@ Nodes (20): generateMetadata(), sans, serif, viewport, metadata, generateMetadat
 Cohesion: 0.09
 Nodes (23): devDependencies, eslint, eslint-config-prettier, @eslint/js, eslint-plugin-prettier, eslint-plugin-react-hooks, eslint-plugin-react-refresh, globals (+15 more)
 
-### Community 48 - "Slides Skill (SKILL.md)"
+### Community 48 - "generate-slide.py"
 Cohesion: 0.13
-Nodes (17): 22 Art Direction Styles, Design Routing Guide, Multi-Skill Workflows (setup, migration, component creation), Routing by Question Type, Three-Layer Token Architecture (primitive, semantic, component), Icon Design Reference, gemini-3.1-pro-preview, 12 Icon Categories (+9 more)
+Nodes (21): _e(), generate_chart_slide(), generate_cta_slide(), generate_deck(), generate_metrics_slide(), generate_problem_slide(), generate_solution_slide(), generate_testimonial_slide() (+13 more)
 
-### Community 49 - "Design Skill (SKILL.md)"
-Cohesion: 0.21
-Nodes (16): Slides Create (design), Slides Reference (design), Slide Animation Classes (fade-up, scale, stagger, count), Chart.js 4.4.1 Integration, Slide CSS Token Variables (--color-primary, etc.), HTML Slide Template (design), embed-tokens.cjs output, Slide Navigation Script (showSlide/nextSlide/prevSlide, keyboard) (+8 more)
+### Community 49 - "Slides Reference (design)"
+Cohesion: 0.17
+Nodes (19): CIP HTML Presentation (base64 single-file, dark theme), Slides Create (design), Slides Reference (design), Slide Animation Classes (fade-up, scale, stagger, count), Chart.js 4.4.1 Integration, Slide CSS Token Variables (--color-primary, etc.), HTML Slide Template (design), embed-tokens.cjs output (+11 more)
 
 ### Community 50 - "command.tsx"
 Cohesion: 0.13
 Nodes (18): cmdk, @radix-ui/react-dialog, Command, CommandDialog(), CommandEmpty, CommandGroup, CommandInput, CommandItem (+10 more)
 
-### Community 51 - "logo/generate.py"
-Cohesion: 0.11
-Nodes (22): Logo Design Reference, Gemini Nano Banana Models, Logo Industry Defaults, Logo Styles Catalog (55+ styles), Logo Workflow (brief -> generate -> HTML preview), Logo Technical Requirements (scalability, versatility, quality), 7 Core Logo Types (wordmark, lettermark, pictorial, abstract, mascot, emblem, combination), Logo Style Guide (+14 more)
+### Community 51 - "Logo Design Reference"
+Cohesion: 0.12
+Nodes (18): Logo Design Reference, Gemini Nano Banana Models, Logo Industry Defaults, Logo Styles Catalog (55+ styles), Logo Workflow (brief -> generate -> HTML preview), Logo Technical Requirements (scalability, versatility, quality), 7 Core Logo Types (wordmark, lettermark, pictorial, abstract, mascot, emblem, combination), Logo Style Guide (+10 more)
 
 ### Community 52 - "fetch-background.py"
 Cohesion: 0.16
@@ -444,72 +454,68 @@ Cohesion: 0.18
 Nodes (17): Asset Organization Guide, Asset Naming Convention, Asset Metadata Schema (manifest.json), Asset Tagging System, checkManifest(), formatBytes(), formatOutput(), fs (+9 more)
 
 ### Community 56 - "Social Photos Design Guide"
-Cohesion: 0.26
-Nodes (16): Skill Dependency Chain (brand -> design-system -> ui-styling -> app code), assets-organizing skill, Social Photos Design Guide, Social Platform Sizes (13 formats), project-management skill, Screenshot Export Options (Chrome headless, chrome-devtools, Playwright, Puppeteer), Visual QA Verify & Fix Loop, brand (external skill) (+8 more)
+Cohesion: 0.22
+Nodes (17): Social/Web/Print Banner Size Table, Routing by Question Type, Skill Dependency Chain (brand -> design-system -> ui-styling -> app code), assets-organizing skill, Social Photos Design Guide, Social HTML Design Rules (exact viewport, self-contained, no scroll), Social Platform Sizes (13 formats), project-management skill (+9 more)
 
-### Community 57 - "embed-tokens.cjs"
-Cohesion: 0.18
-Nodes (8): args, fs, minimal, MINIMAL_TOKENS, path, projectRoot, tokensPath, wrapStyle
+### Community 57 - "ref_fs"
+Cohesion: 0.07
+Nodes (19): args, fs, minimal, MINIMAL_TOKENS, path, projectRoot, tokensPath, wrapStyle (+11 more)
 
 ### Community 58 - "uploads/route.ts"
-Cohesion: 0.09
-Nodes (30): authorizeUpload(), folderFrom(), GET(), POST(), ref_dns, ref_net, nodemailer, ref_sharp (+22 more)
+Cohesion: 0.16
+Nodes (20): authorizeUpload(), folderFrom(), GET(), POST(), ref_net, ref_path, ref_sharp, ALLOWED_TYPES (+12 more)
 
 ### Community 59 - "Droplet & Sparkle Emblem (gold #C59B6D)"
 Cohesion: 0.17
 Nodes (16): favicon.png - Shajgoj.bd stacked logo (S emblem over wordmark), favicon.svg - gold droplet favicon (legacy Korean Skincare), Tagline: AUTHENTIC SEOUL BEAUTY, Droplet & Sparkle Emblem (gold #C59B6D), Korean Skincare .bd Brand (legacy identity), logo.png - SHAJGOJ.bd magenta wordmark, SHAJGOJ.bd Wordmark (magenta-to-orchid gradient, bold geometric sans), logo shajgojbd.png - SHAJGOJ.bd magenta wordmark (+8 more)
 
 ### Community 60 - "VendorDashboardClient.tsx"
-Cohesion: 0.14
-Nodes (23): date(), NAV, number(), ORDER_STATUS_LABEL, OrdersTab(), Overview(), ProductDialog(), ProductsTab() (+15 more)
+Cohesion: 0.16
+Nodes (20): date(), NAV, number(), ORDER_STATUS_LABEL, OrdersTab(), Overview(), ProductDialog(), ProductsTab() (+12 more)
 
 ### Community 61 - "account/page.tsx"
-Cohesion: 0.09
-Nodes (36): AccountPage(), Address, AddressesTab(), dateLabel(), EMPTY_ADDRESS, EmptyOrders(), Order, ORDER_FILTERS (+28 more)
+Cohesion: 0.15
+Nodes (23): AccountPage(), Address, AddressesTab(), dateLabel(), EMPTY_ADDRESS, EmptyOrders(), Order, ORDER_FILTERS (+15 more)
 
-### Community 62 - "sync-brand-to-tokens.cjs"
-Cohesion: 0.19
-Nodes (15): Brand Update Subcommand, Brand Color Presets, Always Sync All Three Brand Files, adjustBrightness(), { execFileSync }, extractColorsFromMarkdown(), fs, generateColorScale() (+7 more)
+### Community 62 - "StorefrontModule.tsx"
+Cohesion: 0.17
+Nodes (21): Folder, ImageUploader(), parseImageUrl(), prepareFile(), sendUpload(), SignResponse, signUpload(), uploadImage() (+13 more)
 
 ### Community 63 - "form.tsx"
-Cohesion: 0.10
-Nodes (22): @radix-ui/react-label, @radix-ui/react-slot, react-hook-form, Breadcrumb, BreadcrumbEllipsis(), BreadcrumbItem, BreadcrumbLink, BreadcrumbList (+14 more)
+Cohesion: 0.18
+Nodes (14): @radix-ui/react-label, react-hook-form, FormControl, FormDescription, FormFieldContext, FormFieldContextValue, FormItem, FormItemContext (+6 more)
 
 ### Community 64 - "backend/db/models/order.model.ts"
 Cohesion: 0.14
 Nodes (15): addressSubSchema, optionalAddressSubSchema, Order, OrderDocument, orderItemSchema, orderSchema, addressSubSchema, optionalAddressSubSchema (+7 more)
 
 ### Community 65 - "Banner Sizes & Art Direction Styles Reference"
-Cohesion: 0.24
-Nodes (10): Banner Sizes & Art Direction Styles Reference, Complete Banner Sizes (Social, Display, Website, Print), CTA Rules, Pinterest Research Queries, Print Specs (300 DPI, CMYK, bleed), Safe Zones, Text-to-Image Ratio, Visual Hierarchy 3-Zone Rule (+2 more)
+Cohesion: 0.17
+Nodes (16): Banner Sizes & Art Direction Styles Reference, 22 Art Direction Styles, Complete Banner Sizes (Social, Display, Website, Print), CTA Rules, Pinterest Research Queries, Print Specs (300 DPI, CMYK, bleed), Safe Zones, Text-to-Image Ratio (+8 more)
 
-### Community 66 - "Logo AI Prompt Engineering"
-Cohesion: 0.25
-Nodes (9): CIP Mockup Base Prompt Structure, CIP Mockup Prompt Engineering, CIP Negative Prompts, CIP Deliverable/Style/Lighting/Context Modifiers, Logo AI Common Pitfalls, Logo Core Prompt Structure, Logo AI Prompt Engineering, Logo Negative Prompts (+1 more)
+### Community 66 - "Design Skill (SKILL.md)"
+Cohesion: 0.15
+Nodes (18): CIP Mockup Base Prompt Structure, CIP Mockup Prompt Engineering, CIP Negative Prompts, CIP Deliverable/Style/Lighting/Context Modifiers, Design Routing Guide, Multi-Skill Workflows (setup, migration, component creation), Three-Layer Token Architecture (primitive, semantic, component), Icon Design Reference (+10 more)
 
 ### Community 67 - "fontSize"
 Cohesion: 0.12
 Nodes (16): $type, $value, $type, $value, $type, $value, $type, $value (+8 more)
 
-### Community 68 - "ShadcnInstaller"
-Cohesion: 0.06
-Nodes (27): main(), Handle shadcn/ui component installation., shadcn/ui Component Installer Add shadcn/ui components to project with…, ShadcnInstaller, Test adding components without shadcn config., Test adding components that are already installed., Test adding components with overwrite flag., Test adding components in dry run mode. (+19 more)
+### Community 68 - "TestShadcnInstaller"
+Cohesion: 0.12
+Nodes (9): Test adding components with overwrite flag., Test ShadcnInstaller class., Test listing installed components when none exist., Test initialization with custom project root., Test initialization with dry run mode., Test checking for existing shadcn config., Test checking for non-existent shadcn config., Test getting installed components when files exist. (+1 more)
 
-### Community 69 - "test_relevance_evaluator.py"
-Cohesion: 0.11
-Nodes (6): Unit tests for metric math and relevance fixture validation., TestFixtureValidation, TestMetricMath, TestThresholdGate, importlib_util, tempfile
-
-### Community 70 - "generate_cip_set"
-Cohesion: 0.24
-Nodes (11): build_cip_prompt(), check_logo_required(), generate_cip_set(), generate_with_nano_banana(), load_logo_image(), main(), Generate image using Gemini Nano Banana (native image generation) Supports two…, Generate a complete CIP set for a brand Args: brand_name: Brand name to… (+3 more)
+### Community 70 - "server/db/models/index.ts"
+Cohesion: 0.21
+Nodes (13): CODE_TTL_MINUTES, IssueResult, VerifyResult, EmailOtp, EmailOtpDocument, emailOtpSchema, OtpPurpose, codeEmail() (+5 more)
 
 ### Community 71 - "Slides Copywriting Formulas"
-Cohesion: 0.17
-Nodes (15): AIDA (Attention-Interest-Desire-Action), Before-After-Bridge, Cost of Inaction, Slides Copywriting Formulas, FAB (Features-Advantages-Benefits), Formula-to-Slide Mapping (with emotions), PAS (Problem-Agitate-Solution), Layout Decision Flow (layout/color/typography CSVs) (+7 more)
+Cohesion: 0.15
+Nodes (17): AIDA (Attention-Interest-Desire-Action), Before-After-Bridge, Cost of Inaction, Slides Copywriting Formulas, FAB (Features-Advantages-Benefits), Formula-to-Slide Mapping (with emotions), PAS (Problem-Agitate-Solution), Layout Decision Flow (layout/color/typography CSVs) (+9 more)
 
 ### Community 73 - "MultiVendorModule.tsx"
-Cohesion: 0.26
-Nodes (13): api(), Category, CreateVendorDialog(), date(), discountOf(), MultiVendorModule(), ReviewProduct, ReviewRow() (+5 more)
+Cohesion: 0.24
+Nodes (14): MultiVendorModule, api(), Category, CreateVendorDialog(), date(), discountOf(), MultiVendorModule(), ReviewProduct (+6 more)
 
 ### Community 74 - "hero.jpg (Homepage hero flat-lay: rose-gold watch, flower pendant necklace, pearl earrings, stacked rings, cuff bangle, pink chain bag, perfume, lipstick)"
 Cohesion: 0.18
@@ -543,21 +549,21 @@ Nodes (11): extensions, formatReport(), fs, getFiles(), main(), parseArgs(), pat
 Cohesion: 0.20
 Nodes (12): UI Styling Skill LICENSE (Apache 2.0), Apache License 2.0, Canvas Design System Reference, Design Movement Examples (Concrete Poetry, Chromatic Language, Geometric Silence...), Design Philosophy Approach (two-phase: philosophy then visual expression), Tailwind CSS Customization Reference, Layer Organization (@layer base/components/utilities, @apply), Tailwind Plugins (official and custom) (+4 more)
 
-### Community 85 - "vendors/route.ts"
-Cohesion: 0.36
-Nodes (9): cleanLimits(), GET(), PATCH(), POST(), STATUSES, slugify, getVendorProductCounts(), generateStrongPassword() (+1 more)
+### Community 85 - "ShadcnInstaller"
+Cohesion: 0.17
+Nodes (8): main(), Path, Handle shadcn/ui component installation., Initialize installer. Args: project_root: Project root directory (default:…, ShadcnInstaller, Test adding all components without config., Test getting installed components without config., Test adding components with empty list.
 
 ### Community 86 - ".check_shadcn_config"
-Cohesion: 0.15
-Nodes (8): Path, Add all available shadcn/ui components. Args: overwrite: If True, overwrite…, List installed components. Returns: Tuple of (success, message with component…, Initialize installer. Args: project_root: Project root directory (default:…, Check if shadcn is initialized in project. Returns: True if components.json…, Get list of already installed components. Returns: List of installed component…, Read shadcn version from project package.json; fall back to a pinned default., Add shadcn/ui components. Args: components: List of component names to add…
+Cohesion: 0.21
+Nodes (6): Add all available shadcn/ui components. Args: overwrite: If True, overwrite…, List installed components. Returns: Tuple of (success, message with component…, Check if shadcn is initialized in project. Returns: True if components.json…, Get list of already installed components. Returns: List of installed component…, Read shadcn version from project package.json; fall back to a pinned default., Add shadcn/ui components. Args: components: List of component names to add…
 
 ### Community 87 - ".generate_config_string"
 Cohesion: 0.20
 Nodes (6): Generate configuration file content. Returns: Configuration file as string, Generate TypeScript configuration., Generate JavaScript configuration., Format plugins array for config. Validates each plugin name against a strict…, Add indentation to JSON string., Write configuration to file. Returns: Tuple of (success, message)
 
-### Community 88 - "csv"
-Cohesion: 0.08
-Nodes (14): Freshness and migration contracts for native, desktop, and 3D stacks., _rows(), TestNativeDesktopStackFreshness, Canonical regression contracts for resilient UI text layouts., read_rows(), TestTextLayoutDataContracts, TestTextLayoutRetrieval, Freshness and generation-isolation contracts for web stack guidance. (+6 more)
+### Community 88 - "test_core_data_quality.py"
+Cohesion: 0.07
+Nodes (16): Offline contract tests for deterministic upstream catalog refreshes., Semantic quality contracts for the core UI/UX datasets., Unit tests for metric math and relevance fixture validation., TestFixtureValidation, TestMetricMath, Canonical regression contracts for resilient UI text layouts., read_rows(), TestTextLayoutDataContracts (+8 more)
 
 ### Community 89 - "chart.tsx"
 Cohesion: 0.24
@@ -572,20 +578,16 @@ Cohesion: 0.18
 Nodes (10): Wishlist, WishlistDocument, wishlistItemSchema, wishlistSchema, Wishlist, WishlistDocument, wishlistItemSchema, wishlistSchema (+2 more)
 
 ### Community 92 - "Banner Sizes & Art Direction Styles"
-Cohesion: 0.17
-Nodes (15): Social/Web/Print Banner Size Table, Banner CTA Rules (one CTA, bottom-right, 44px min), Banner Sizes & Art Direction Styles, Google Display Network Ad Sizes, Pinterest Research Queries, Print Specs (300 DPI, CMYK, 3-5mm bleed), Safe Zones (central 70-80% of canvas), Text-to-Image Ratio (ads under 20% text) (+7 more)
+Cohesion: 0.15
+Nodes (17): 22 Art Direction Styles, Banner CTA Rules (one CTA, bottom-right, 44px min), Banner Sizes & Art Direction Styles, Google Display Network Ad Sizes, Pinterest Research Queries, Print Specs (300 DPI, CMYK, 3-5mm bleed), Safe Zones (central 70-80% of canvas), Text-to-Image Ratio (ads under 20% text) (+9 more)
 
 ### Community 93 - "shadcn/ui Accessibility Patterns Reference"
 Cohesion: 0.22
 Nodes (11): shadcn/ui Accessibility Patterns Reference, Form Accessibility (labels, error handling, required fields), Keyboard Navigation & Focus Management, shadcn/ui Component Reference, Command Palette Component, Dialog / Overlay Components, Form Component (React Hook Form + Zod), Table / Data Table Component (+3 more)
 
-### Community 94 - "brand/[slug]/page.tsx"
-Cohesion: 0.29
-Nodes (8): GET(), BrandPage(), findBrand(), generateMetadata(), Params, SP, BrandsPage(), getBrands
-
-### Community 95 - "mongoose"
+### Community 95 - "UserRole"
 Cohesion: 0.22
-Nodes (7): mongoose, MongooseCache, User, UserDocument, userSchema, userSchema, IUser
+Nodes (8): User, UserDocument, userSchema, RequireAuthOptions, AuthUser, userSchema, IUser, UserRole
 
 ### Community 96 - "backend/db/models/product.model.ts"
 Cohesion: 0.20
@@ -611,13 +613,13 @@ Nodes (9): ACCOUNTS, DRY_RUN, env(), envVars, generatePassword(), LEGACY_DEMO_EM
 Cohesion: 0.22
 Nodes (8): Notification, NotificationDocument, notificationSchema, Notification, NotificationDocument, notificationSchema, INotification, NotificationType
 
-### Community 102 - "logo/search.py"
-Cohesion: 0.25
-Nodes (7): format_output(), generate_design_brief(), Format results for Claude consumption (token-optimized), Logo Design Search - CLI for searching logo design guidelines Usage: python…, Generate a comprehensive logo design brief based on query, BM25 Search Engine (logo/cip core.py), ambiguous_python_import_dbf105ef040d
+### Community 102 - "BM25"
+Cohesion: 0.28
+Nodes (5): BM25, BM25 ranking algorithm for text search, Lowercase, split, remove punctuation, filter short words, Build BM25 index from documents, Score all documents against query
 
-### Community 103 - "sync-full-catalog.mjs"
-Cohesion: 0.33
-Nodes (4): ref_populate_expanded_catalog_mjs, ACCESSORIES, CATEGORIES, PRODUCTS
+### Community 103 - "BM25"
+Cohesion: 0.28
+Nodes (5): BM25, BM25 ranking algorithm for text search, Lowercase, split, remove punctuation, filter short words, Build BM25 index from documents, Score all documents against query
 
 ### Community 104 - "DesktopMegaMenu.tsx"
 Cohesion: 0.27
@@ -631,9 +633,9 @@ Nodes (9): Screen Reader Support (ARIA labels, live regions, sr-only), Tailwind 
 Cohesion: 0.22
 Nodes (5): Test successful component addition., Test component addition with subprocess error., Test component addition when npx is not found., Test successful addition of all components., patch
 
-### Community 107 - "test_tailwind_config_gen.py"
-Cohesion: 0.16
-Nodes (10): main(), Tailwind CSS Configuration Generator Generate tailwind.config.js/ts with custom…, Tests for tailwind_config_gen.py, Reduce a generated TS/JS config to a bare assignable object so it can be handed…, Regression guard for the missing-comma bug between the ``theme`` block and…, The property preceding ``plugins`` must end with a comma (pure-Python check, so…, The emitted config parses as valid JS via ``node --check``., _strip_to_object() (+2 more)
+### Community 107 - "TestGeneratedConfigIsValidJs"
+Cohesion: 0.25
+Nodes (7): Reduce a generated TS/JS config to a bare assignable object so it can be handed…, Regression guard for the missing-comma bug between the ``theme`` block and…, The property preceding ``plugins`` must end with a comma (pure-Python check, so…, The emitted config parses as valid JS via ``node --check``., _strip_to_object(), TestGeneratedConfigIsValidJs, parametrize
 
 ### Community 108 - "search.py (design intelligence search CLI)"
 Cohesion: 0.22
@@ -647,9 +649,9 @@ Nodes (8): @radix-ui/react-navigation-menu, NavigationMenu, NavigationMenuConten
 Cohesion: 0.28
 Nodes (8): @radix-ui/react-select, SelectContent, SelectItem, SelectLabel, SelectScrollDownButton, SelectScrollUpButton, SelectSeparator, SelectTrigger
 
-### Community 111 - "resizable.tsx"
-Cohesion: 0.50
-Nodes (3): react-resizable-panels, ResizableHandle(), ResizablePanelGroup()
+### Community 111 - "breadcrumb.tsx"
+Cohesion: 0.22
+Nodes (8): @radix-ui/react-slot, Breadcrumb, BreadcrumbEllipsis(), BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator()
 
 ### Community 112 - "drawer.tsx"
 Cohesion: 0.25
@@ -660,8 +662,8 @@ Cohesion: 0.20
 Nodes (11): BRANDS, CATEGORIES, HOW_TO_USE, IMAGES, PRODUCTS, RETIRED_CATEGORY_SLUGS, SUBCATEGORY_OVERRIDES, DRY_RUN (+3 more)
 
 ### Community 114 - "lib/storefront.ts"
-Cohesion: 0.24
-Nodes (10): arr(), Errors, imageUrl(), isAllowedLink(), link(), NavLink, normalizeStorefront(), obj() (+2 more)
+Cohesion: 0.18
+Nodes (13): arr(), Errors, HOME_SECTIONS, HomeSectionId, imageUrl(), isAllowedLink(), link(), NavLink (+5 more)
 
 ### Community 115 - "backend/db/models/coupon.model.ts"
 Cohesion: 0.25
@@ -701,7 +703,7 @@ Nodes (6): Multi-Page Design Systems, Design Dials (--variance, --motion, --dens
 
 ### Community 124 - "test_core.py"
 Cohesion: 0.08
-Nodes (12): format_markdown(), generate_design_system(), Format design system as markdown., Main entry point for design system generation. Args: query: Search query (e.g.,…, Stdlib-only regression tests for core.py / design_system.py (unittest, not…, TestBm25CoreBehavior, TestDiagnosticsContracts, TestPersistence (+4 more)
+Nodes (11): format_markdown(), generate_design_system(), Format design system as markdown., Main entry point for design system generation. Args: query: Search query (e.g.,…, Stdlib-only regression tests for core.py / design_system.py (unittest, not…, TestBm25CoreBehavior, TestDiagnosticsContracts, TestPersistence (+3 more)
 
 ### Community 125 - "Soft Neutral/Blush Product Photography Style (warm light, cream and pink backdrops, rose-gold accents)"
 Cohesion: 0.21
@@ -711,9 +713,9 @@ Nodes (12): Handbags Product Category, Jewelry Product Category (Earrings, Neckl
 Cohesion: 0.40
 Nodes (3): LovableErrorOptions, LovableEvents, Window
 
-### Community 127 - "backend/db/models/brand.model.ts"
-Cohesion: 0.25
-Nodes (6): Brand, BrandDocument, brandSchema, BrandDocument, brandSchema, IBrand
+### Community 127 - "mongoose"
+Cohesion: 0.20
+Nodes (8): mongoose, MongooseCache, Brand, BrandDocument, brandSchema, BrandDocument, brandSchema, IBrand
 
 ### Community 128 - "xl"
 Cohesion: 0.67
@@ -739,9 +741,9 @@ Nodes (3): primary-hover, $type, $value
 Cohesion: 0.67
 Nodes (3): ring, $type, $value
 
-### Community 167 - "ref_fs"
-Cohesion: 0.20
-Nodes (10): cloudinary, ref_fs, ref_path, DRY_RUN, loadEnv(), localImages(), main(), publicIdFor() (+2 more)
+### Community 167 - "migrate-images-to-cloudinary.mjs"
+Cohesion: 0.33
+Nodes (7): cloudinary, DRY_RUN, loadEnv(), localImages(), main(), publicIdFor(), upload()
 
 ### Community 168 - "backend/db/models/blog.model.ts"
 Cohesion: 0.22
@@ -751,39 +753,43 @@ Nodes (7): Blog, BlogDocument, blogSchema, Blog, BlogDocument, blogSchema, IBlog
 Cohesion: 0.25
 Nodes (6): Settings, SettingsDocument, settingsSchema, SettingsDocument, settingsSchema, ISiteSettings
 
+### Community 170 - "input-otp.tsx"
+Cohesion: 0.33
+Nodes (5): input-otp, InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot
+
 ### Community 171 - "server/db/models/banner.model.ts"
 Cohesion: 0.40
 Nodes (4): Banner, BannerDocument, bannerSchema, IBanner
 
 ## Ambiguous Edges - Review These
-- `Crawler Allow-All Policy (Googlebot, Bingbot, Twitterbot, facebookexternalhit, *)` → `Enterprise Admin Operations Hub (/admin)`  [AMBIGUOUS]
-  public/robots.txt · relation: conceptually_related_to
-- `Apache License 2.0` → `UI Styling Skill (SKILL.md)`  [AMBIGUOUS]
+- `UI Styling Skill (SKILL.md)` → `Apache License 2.0`  [AMBIGUOUS]
   .agents/skills/ui-styling/SKILL.md · relation: conceptually_related_to
 - `UI Styling scripts requirements.txt` → `UI Styling tests requirements.txt`  [AMBIGUOUS]
   .agents/skills/ui-styling/scripts/tests/requirements.txt · relation: conceptually_related_to
 - `Droplet & Sparkle Emblem (gold #C59B6D)` → `Pink/Gold Offset Ring Emblem (pink upper arc, gold lower arc forming an S-like ring)`  [AMBIGUOUS]
   public/shajgoj.bd final.png · relation: conceptually_related_to
+- `Crawler Allow-All Policy (Googlebot, Bingbot, Twitterbot, facebookexternalhit, *)` → `Enterprise Admin Operations Hub (/admin)`  [AMBIGUOUS]
+  public/robots.txt · relation: conceptually_related_to
 
 ## Knowledge Gaps
-- **625 isolated node(s):** `serif`, `sans`, `viewport`, `SheetContentProps`, `SidebarContextProps` (+620 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1103 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **28 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **625 isolated node(s):** `RouteParams`, `Tab`, `OrderItem`, `Order`, `Summary` (+620 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1104 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **39 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **What is the exact relationship between `Crawler Allow-All Policy (Googlebot, Bingbot, Twitterbot, facebookexternalhit, *)` and `Enterprise Admin Operations Hub (/admin)`?**
-  _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
-- **What is the exact relationship between `Apache License 2.0` and `UI Styling Skill (SKILL.md)`?**
+- **What is the exact relationship between `UI Styling Skill (SKILL.md)` and `Apache License 2.0`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
 - **What is the exact relationship between `UI Styling scripts requirements.txt` and `UI Styling tests requirements.txt`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
 - **What is the exact relationship between `Droplet & Sparkle Emblem (gold #C59B6D)` and `Pink/Gold Offset Ring Emblem (pink upper arc, gold lower arc forming an S-like ring)`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
-- **Why does `react` connect `react` to `cn`, `site-data.ts`, `sidebar.tsx`, `StorefrontModule.tsx`, `package.json`, `AdminHeader.tsx`, `carousel.tsx`, `utils.ts`, `optimizedImageUrl`, `(store)/layout.tsx`, `(store)/page.tsx`, `ProductListing.tsx`, `constants.ts`, `product/[slug]/page.tsx`, `command.tsx`, `class-variance-authority`, `VendorDashboardClient.tsx`, `account/page.tsx`, `form.tsx`, `MultiVendorModule.tsx`, `chart.tsx`, `DesktopMegaMenu.tsx`, `navigation-menu.tsx`, `select.tsx`, `drawer.tsx`?**
-  _High betweenness centrality (0.071) - this node is a cross-community bridge._
-- **Why does `next` connect `next` to `connectDB`, `react`, `site-data.ts`, `serverError`, `server/db/models/index.ts`, `package.json`, `AdminHeader.tsx`, `validation.ts`, `optimizedImageUrl`, `(store)/layout.tsx`, `catalog.ts`, `(store)/page.tsx`, `session.ts`, `ref_fs`, `ProductListing.tsx`, `product/[slug]/page.tsx`, `uploads/route.ts`, `VendorDashboardClient.tsx`, `account/page.tsx`, `vendors/route.ts`, `brand/[slug]/page.tsx`, `DesktopMegaMenu.tsx`?**
-  _High betweenness centrality (0.069) - this node is a cross-community bridge._
-- **Why does `mongoose` connect `mongoose` to `connectDB`, `server/db/models/index.ts`, `package.json`, `next`, `validation.ts`, `catalog.ts`, `types/index.ts`, `ref_fs`, `backend/db/models/index.ts`, `backend/db/models/blog.model.ts`, `backend/db/models/settings.model.ts`, `server/db/models/banner.model.ts`, `backend/db/models/order.model.ts`, `backend/db/models/cart.model.ts`, `backend/db/models/wishlist.model.ts`, `backend/db/models/product.model.ts`, `update-passwords.mjs`, `backend/db/models/notification.model.ts`, `sync-full-catalog.mjs`, `seed-catalog.mjs`, `backend/db/models/coupon.model.ts`, `backend/db/models/homepage-section.model.ts`, `server/db/models/review.model.ts`, `backend/db/models/brand.model.ts`?**
-  _High betweenness centrality (0.045) - this node is a cross-community bridge._
+- **What is the exact relationship between `Crawler Allow-All Policy (Googlebot, Bingbot, Twitterbot, facebookexternalhit, *)` and `Enterprise Admin Operations Hub (/admin)`?**
+  _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
+- **Why does `next` connect `next` to `connectDB`, `AdminDashboardClient.tsx`, `site-data.ts`, `serverError`, `vendors/route.ts`, `package.json`, `lucide-react`, `validation.ts`, `Header.tsx`, `(store)/layout.tsx`, `catalog.ts`, `(store)/page.tsx`, `admin/page.tsx`, `brand/[slug]/page.tsx`, `constants.ts`, `product/[slug]/page.tsx`, `uploads/route.ts`, `VendorDashboardClient.tsx`, `account/page.tsx`, `DesktopMegaMenu.tsx`?**
+  _High betweenness centrality (0.064) - this node is a cross-community bridge._
+- **Why does `react` connect `react` to `cn`, `AdminDashboardClient.tsx`, `site-data.ts`, `sidebar.tsx`, `optimizedImageUrl`, `package.json`, `lucide-react`, `carousel.tsx`, `Header.tsx`, `(store)/layout.tsx`, `(store)/page.tsx`, `brand/[slug]/page.tsx`, `input-otp.tsx`, `constants.ts`, `product/[slug]/page.tsx`, `command.tsx`, `class-variance-authority`, `VendorDashboardClient.tsx`, `account/page.tsx`, `StorefrontModule.tsx`, `form.tsx`, `MultiVendorModule.tsx`, `chart.tsx`, `DesktopMegaMenu.tsx`, `navigation-menu.tsx`, `select.tsx`, `breadcrumb.tsx`, `drawer.tsx`?**
+  _High betweenness centrality (0.049) - this node is a cross-community bridge._
+- **Why does `mongoose` connect `mongoose` to `connectDB`, `serverError`, `vendors/route.ts`, `package.json`, `next`, `validation.ts`, `catalog.ts`, `types/index.ts`, `migrate-images-to-cloudinary.mjs`, `backend/db/models/index.ts`, `backend/db/models/blog.model.ts`, `backend/db/models/settings.model.ts`, `server/db/models/banner.model.ts`, `ref_fs`, `backend/db/models/order.model.ts`, `server/db/models/index.ts`, `backend/db/models/cart.model.ts`, `backend/db/models/wishlist.model.ts`, `UserRole`, `backend/db/models/product.model.ts`, `update-passwords.mjs`, `backend/db/models/notification.model.ts`, `seed-catalog.mjs`, `backend/db/models/coupon.model.ts`, `backend/db/models/homepage-section.model.ts`, `server/db/models/review.model.ts`?**
+  _High betweenness centrality (0.041) - this node is a cross-community bridge._

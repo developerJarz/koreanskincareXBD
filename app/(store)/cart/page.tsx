@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import { useCartStore } from "@/store/cart.store";
 import { optimizedImageUrl } from "@/lib/image";
+import { checkCoupon, useAppliedCoupon, useCheckoutConfig } from "@/hooks/use-checkout";
 
 export default function CartPage() {
   const {
@@ -22,6 +23,7 @@ export default function CartPage() {
   } = useCartStore();
 
   const [couponInput, setCouponInput] = useState("");
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -29,21 +31,39 @@ export default function CartPage() {
   }, []);
 
   const subtotal = getSubtotal();
-  const estimatedShipping = subtotal >= 2000 ? 0 : 70;
+  // Delivery estimate uses the inside-Dhaka charge from admin Settings; the exact charge is
+  // worked out at checkout once the address is known
+  const config = useCheckoutConfig();
+  const { freeShipping, removedReason } = useAppliedCoupon(subtotal);
+  const { freeShippingThreshold, insideDhakaCost } = config.shipping;
+  const qualifiesForFree =
+    freeShipping || (freeShippingThreshold > 0 && subtotal - couponDiscount >= freeShippingThreshold);
+  const estimatedShipping = qualifiesForFree ? 0 : insideDhakaCost;
+
+  useEffect(() => {
+    if (removedReason) toast.error(`Coupon removed: ${removedReason}`);
+  }, [removedReason]);
   const total = Math.max(0, subtotal - couponDiscount + estimatedShipping);
 
-  const handleApplyCoupon = (e: React.FormEvent) => {
+  // Coupons are the ones created in admin → Promotions, checked by the server
+  const handleApplyCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!couponInput.trim()) return;
-
-    const code = couponInput.trim().toUpperCase();
-    if (code === "KOREAN10" || code === "SHAJGOJ10" || code === "WELCOME10") {
-      const discount = Math.round(subtotal * 0.1);
-      setCoupon("KOREAN10", discount);
-      toast.success("Coupon KOREAN10 applied! (10% OFF)");
+    const code = couponInput.trim();
+    if (!code) return;
+    setApplyingCoupon(true);
+    try {
+      const result = await checkCoupon(code, subtotal);
+      setCoupon(result.code, result.discount);
+      toast.success(
+        result.freeShipping
+          ? `Coupon ${result.code} applied — free delivery!`
+          : `Coupon ${result.code} applied — ৳${result.discount.toLocaleString()} off`,
+      );
       setCouponInput("");
-    } else {
-      toast.error("Invalid coupon code. Try KOREAN10");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "This coupon code isn't valid.");
+    } finally {
+      setApplyingCoupon(false);
     }
   };
 
@@ -189,7 +209,7 @@ export default function CartPage() {
                 {couponCode ? (
                   <div className="flex items-center justify-between p-3 rounded-2xl bg-primary/10 border border-primary/20 text-xs">
                     <span className="flex items-center gap-1.5 font-medium text-primary">
-                      <Tag className="w-3.5 h-3.5" /> {couponCode} applied (-৳{couponDiscount})
+                      <Tag className="w-3.5 h-3.5" /> {couponCode} applied{couponDiscount > 0 ? ` (-৳${couponDiscount.toLocaleString()})` : freeShipping ? " (free delivery)" : ""}
                     </span>
                     <button
                       onClick={removeCoupon}
@@ -202,16 +222,17 @@ export default function CartPage() {
                   <form onSubmit={handleApplyCoupon} className="flex gap-2">
                     <input
                       type="text"
-                      placeholder="Promo Code (KOREAN10)"
+                      placeholder="Promo code"
                       value={couponInput}
                       onChange={(e) => setCouponInput(e.target.value)}
                       className="flex-1 px-4 py-2.5 rounded-xl border border-border bg-background text-xs focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
                     <button
                       type="submit"
-                      className="px-4 py-2.5 rounded-xl bg-secondary hover:bg-secondary/80 text-xs font-medium border border-border"
+                      disabled={applyingCoupon}
+                      className="px-4 py-2.5 rounded-xl bg-secondary hover:bg-secondary/80 text-xs font-medium border border-border disabled:opacity-50"
                     >
-                      Apply
+                      {applyingCoupon ? "Checking…" : "Apply"}
                     </button>
                   </form>
                 )}
@@ -235,7 +256,9 @@ export default function CartPage() {
                 <div className="flex justify-between text-muted-foreground">
                   <span>Estimated Delivery</span>
                   <span className="font-sans font-medium text-foreground">
-                    {estimatedShipping === 0 ? "FREE (Orders > ৳2,000)" : `৳${estimatedShipping}`}
+                    {estimatedShipping === 0
+                      ? "FREE"
+                      : `৳${estimatedShipping} inside Dhaka`}
                   </span>
                 </div>
 

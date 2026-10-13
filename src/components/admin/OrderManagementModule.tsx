@@ -1,575 +1,854 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  ShoppingBag,
-  Search,
-  Filter,
-  Truck,
-  CheckCircle,
-  Clock,
-  Printer,
-  FileText,
-  X,
-  ExternalLink,
-  ChevronDown,
-  RefreshCw,
-  Phone,
+  Download,
   MapPin,
-  Send,
-  PackageCheck,
-  AlertCircle,
-  Eye,
+  Phone,
+  ReceiptText,
+  RefreshCw,
+  Search,
+  ShoppingBag,
+  Truck,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
-import { ORDER_STATUS_CONFIG } from "@/lib/constants";
 
-interface OrderManagementModuleProps {
-  orders: any[];
-  onUpdateOrderStatus: (orderId: string, newStatus: string) => Promise<void>;
+import { ORDER_STATUS_CONFIG } from "@/lib/constants";
+import { COURIER_OPTIONS } from "@/lib/checkout";
+import { optimizedImageUrl } from "@/lib/image";
+import {
+  api,
+  Field,
+  iconButton,
+  inputClass,
+  Modal,
+  primaryButton,
+  secondaryButton,
+  textareaClass,
+} from "./catalog/ui";
+import {
+  downloadCsv,
+  EmptyState,
+  ErrorNotice,
+  fmtDateTime,
+  fmtRelative,
+  fmtTaka,
+  PageHeader,
+  Pagination,
+  Panel,
+  Pill,
+  qs,
+  rangeQuery,
+  RangePicker,
+  Segmented,
+  Skeleton,
+  useAccess,
+  useAdminData,
+  useDebounced,
+  type RangeValue,
+} from "./shared";
+
+type Order = {
+  _id: string;
+  orderNumber: string;
+  user?: { _id: string; name: string; email: string } | null;
+  guestEmail?: string;
+  guestPhone?: string;
+  items: {
+    product: string;
+    productName: string;
+    productImage?: string;
+    variant?: { sku?: string; color?: string; size?: string };
+    price: number;
+    quantity: number;
+    total: number;
+  }[];
+  subtotal: number;
+  shippingCost: number;
+  discount: number;
+  couponCode?: string;
+  total: number;
+  status: keyof typeof ORDER_STATUS_CONFIG;
+  paymentStatus: string;
+  paymentMethod: string;
+  paymentTransactionId?: string;
+  shippingAddress: {
+    fullName: string;
+    phone: string;
+    division: string;
+    district: string;
+    area: string;
+    streetAddress: string;
+    postalCode?: string;
+  };
+  deliveryNotes?: string;
+  courierName?: string;
+  trackingId?: string;
+  trackingUrl?: string;
+  notes?: string;
+  cancelReason?: string;
+  createdAt: string;
+  updatedAt: string;
+  deliveredAt?: string;
+};
+
+type ListResponse = {
+  items: Order[];
+  total: number;
+  totalPages: number;
+  statusCounts?: Record<string, number>;
+};
+
+const STATUSES = Object.keys(ORDER_STATUS_CONFIG) as Order["status"][];
+const PAYMENT_STATUSES = ["pending", "paid", "failed", "refunded", "partially_refunded"];
+const LEAVES_SALE = ["cancelled", "returned", "refunded"];
+
+function StatusBadge({ status }: { status: Order["status"] }) {
+  const cfg = ORDER_STATUS_CONFIG[status];
+  return (
+    <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-xs font-medium">
+      <span
+        className="h-2 w-2 rounded-full"
+        style={{ background: cfg?.color ?? "#6b7280" }}
+        aria-hidden="true"
+      />
+      {cfg?.label ?? status}
+    </span>
+  );
+}
+
+function PaymentBadge({ status }: { status: string }) {
+  const tone =
+    status === "paid"
+      ? "good"
+      : status === "failed"
+        ? "bad"
+        : status.includes("refund")
+          ? "info"
+          : "warn";
+  return <Pill tone={tone}>{status.replace("_", " ")}</Pill>;
 }
 
 export function OrderManagementModule({
-  orders: initialOrders,
-  onUpdateOrderStatus,
-}: OrderManagementModuleProps) {
-  const [orders, setOrders] = useState(initialOrders);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([]);
-  const [activeInvoiceOrder, setActiveInvoiceOrder] = useState<any | null>(null);
-  const [courierModalOrder, setCourierModalOrder] = useState<any | null>(null);
-  const [selectedCourier, setSelectedCourier] = useState<
-    "steadfast" | "pathao" | "redx" | "paperfly" | "ecourier"
-  >("steadfast");
-  const [courierNote, setCourierNote] = useState("");
-  const [isBookingCourier, setIsBookingCourier] = useState(false);
+  initialSearch = "",
+  onCreateInvoice,
+}: {
+  initialSearch?: string;
+  /** Opens the Invoices tab with an invoice for this order */
+  onCreateInvoice?: (orderId: string) => void;
+}) {
+  const { can } = useAccess();
+  const manage = can("orders.manage");
+  const [status, setStatus] = useState("all");
+  const [payment, setPayment] = useState("");
+  const [search, setSearch] = useState(initialSearch);
+  const [range, setRange] = useState<RangeValue>({ key: "all" });
+  const [sort, setSort] = useState("newest");
+  const [page, setPage] = useState(1);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [cancelTarget, setCancelTarget] = useState<{ ids: string[]; status: string } | null>(null);
+  const q = useDebounced(search);
+  useEffect(() => setSearch(initialSearch), [initialSearch]);
+  useEffect(() => {
+    setPage(1);
+    setSelected([]);
+  }, [status, payment, q, range, sort]);
 
-  // Filter orders
-  const filteredOrders = orders.filter((order) => {
-    const matchesStatus = statusFilter === "all" || order.status === statusFilter;
-    const matchesSearch =
-      !searchQuery ||
-      (order.orderNumber && order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (order.shippingAddress?.fullName &&
-        order.shippingAddress.fullName.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (order.shippingAddress?.phone && order.shippingAddress.phone.includes(searchQuery));
-    return matchesStatus && matchesSearch;
-  });
+  const url = `/api/orders${qs({
+    status: status === "all" ? "" : status,
+    payment,
+    q,
+    sort,
+    page,
+    pageSize: 25,
+    counts: 1,
+    ...(range.key === "all" ? {} : rangeQuery(range)),
+  })}`;
+  const { data, error, loading, reload, setData } = useAdminData<ListResponse>(url);
 
-  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.checked) {
-      setSelectedOrderIds(filteredOrders.map((o) => o._id || o.id));
-    } else {
-      setSelectedOrderIds([]);
-    }
-  };
-
-  const handleToggleSelect = (id: string) => {
-    setSelectedOrderIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
+  const patchOrder = async (id: string, body: Record<string, unknown>) => {
+    const updated = await api<Order>(`/api/orders/${id}`, { method: "PATCH", json: body });
+    setData((d) =>
+      d
+        ? {
+            ...d,
+            items: d.items.map((o) => (o._id === id ? { ...o, ...updated, user: o.user } : o)),
+          }
+        : d,
     );
+    return updated;
   };
 
-  const handleStatusChange = async (orderId: string, status: string) => {
-    try {
-      await onUpdateOrderStatus(orderId, status);
-      setOrders((prev) =>
-        prev.map((o) => (o._id === orderId || o.id === orderId ? { ...o, status } : o)),
-      );
-      toast.success(`Order status updated to "${status.toUpperCase()}"`);
-    } catch (err) {
-      toast.error("Failed to update status");
-    }
-  };
-
-  const handleBulkStatusChange = async (status: string) => {
-    if (selectedOrderIds.length === 0) return;
-    toast.loading(`Updating ${selectedOrderIds.length} orders to ${status}...`);
-    try {
-      for (const id of selectedOrderIds) {
-        await onUpdateOrderStatus(id, status);
+  const changeStatus = async (ids: string[], next: string, restock = false) => {
+    let ok = 0;
+    for (const id of ids) {
+      try {
+        await patchOrder(id, { status: next, restock });
+        ok += 1;
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Couldn't update an order.");
       }
-      setOrders((prev) =>
-        prev.map((o) => (selectedOrderIds.includes(o._id || o.id) ? { ...o, status } : o)),
-      );
-      setSelectedOrderIds([]);
-      toast.dismiss();
-      toast.success(`Successfully updated ${selectedOrderIds.length} orders!`);
-    } catch (err) {
-      toast.dismiss();
-      toast.error("Failed to update some orders");
     }
+    if (ok) toast.success(ok === 1 ? `Order marked ${next}.` : `${ok} orders marked ${next}.`);
+    setSelected([]);
+    reload();
   };
 
-  const handleBookCourier = () => {
-    if (!courierModalOrder) return;
-    setIsBookingCourier(true);
+  const requestStatus = (ids: string[], next: string) => {
+    if (LEAVES_SALE.includes(next)) setCancelTarget({ ids, status: next });
+    else changeStatus(ids, next);
+  };
 
-    setTimeout(() => {
-      setIsBookingCourier(false);
-      const trackingCode = `${selectedCourier.toUpperCase().slice(0, 3)}-${Math.floor(100000 + Math.random() * 900000)}`;
-      toast.success(
-        `Consignment created with ${selectedCourier.toUpperCase()}! Tracking: ${trackingCode}`,
-      );
+  const counts = data?.statusCounts ?? {};
+  // The drawer closes on its own if a filter change removes the order from the list
+  const openOrder = openId ? data?.items.find((o) => o._id === openId) : undefined;
+  const allCount = Object.values(counts).reduce((s, n) => s + n, 0);
+  const pageIds = data?.items.map((o) => o._id) ?? [];
+  const allSelected = pageIds.length > 0 && pageIds.every((id) => selected.includes(id));
 
-      // Auto update status to shipped
-      handleStatusChange(courierModalOrder._id || courierModalOrder.id, "shipped");
-      setCourierModalOrder(null);
-    }, 1000);
+  const exportCsv = () => {
+    if (!data) return;
+    downloadCsv(`orders-page-${page}.csv`, [
+      [
+        "Order",
+        "Date",
+        "Customer",
+        "Phone",
+        "District",
+        "Items",
+        "Total",
+        "Payment",
+        "Payment status",
+        "Status",
+        "Courier",
+        "Tracking",
+      ],
+      ...data.items.map((o) => [
+        o.orderNumber,
+        fmtDateTime(o.createdAt),
+        o.shippingAddress?.fullName,
+        o.shippingAddress?.phone,
+        o.shippingAddress?.district,
+        o.items.map((i) => `${i.quantity}× ${i.productName}`).join("; "),
+        o.total,
+        o.paymentMethod,
+        o.paymentStatus,
+        o.status,
+        o.courierName,
+        o.trackingId,
+      ]),
+    ]);
   };
 
   return (
-    <div className="space-y-6">
-      {/* Top Header & Search / Filters */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card border border-border p-4 rounded-3xl">
-        <div>
-          <h2 className="font-serif text-2xl font-bold">Order Workflow & Logistics</h2>
-          <p className="text-xs text-muted-foreground">
-            Manage orders, issue POS invoices & dispatch Bangladeshi couriers
-          </p>
-        </div>
+    <div className="space-y-5">
+      <PageHeader
+        title="Orders"
+        description="Every order in the database — search, filter, update status, book couriers and create invoices."
+        actions={
+          <>
+            <button type="button" className={secondaryButton} onClick={reload} disabled={loading}>
+              <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} /> Refresh
+            </button>
+            <button
+              type="button"
+              className={secondaryButton}
+              onClick={exportCsv}
+              disabled={!data?.items.length}
+            >
+              <Download className="h-4 w-4" /> Export
+            </button>
+          </>
+        }
+      />
 
-        <div className="flex flex-wrap items-center gap-2">
-          {selectedOrderIds.length > 0 && (
-            <div className="flex items-center gap-2 bg-primary/10 border border-primary/20 px-3 py-1.5 rounded-2xl animate-fade-in">
-              <span className="text-xs font-bold text-primary">
-                {selectedOrderIds.length} selected
-              </span>
-              <button
-                onClick={() => handleBulkStatusChange("confirmed")}
-                className="px-2 py-1 rounded-xl text-[11px] font-semibold bg-primary text-primary-foreground hover:opacity-90 transition"
-              >
-                Confirm
-              </button>
-              <button
-                onClick={() => handleBulkStatusChange("shipped")}
-                className="px-2 py-1 rounded-xl text-[11px] font-semibold bg-indigo-600 text-white hover:opacity-90 transition"
-              >
-                Dispatch
-              </button>
-              <button
-                onClick={() => window.print()}
-                className="p-1 rounded-xl text-primary hover:bg-primary/20"
-                title="Print Invoices"
-              >
-                <Printer className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          )}
+      <Segmented
+        label="Order status"
+        value={status}
+        onChange={setStatus}
+        options={[
+          { value: "all", label: `All (${allCount})` },
+          ...STATUSES.map((s) => ({
+            value: s,
+            label: `${ORDER_STATUS_CONFIG[s].label} (${counts[s] ?? 0})`,
+          })),
+        ]}
+      />
 
-          {/* Status Filter Tabs */}
+      <Panel>
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <div className="relative min-w-[14rem] flex-1">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Order number, name, phone, district, product, tracking or transaction ID"
+              aria-label="Search orders"
+              className={`${inputClass} h-9 pl-8`}
+            />
+          </div>
           <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 rounded-2xl border border-border bg-background text-xs font-semibold focus:outline-hidden"
+            aria-label="Payment method"
+            value={payment}
+            onChange={(e) => setPayment(e.target.value)}
+            className={`${inputClass} h-9 w-auto`}
           >
-            <option value="all">All Statuses ({orders.length})</option>
-            <option value="pending">Pending</option>
-            <option value="confirmed">Confirmed</option>
-            <option value="processing">Processing</option>
-            <option value="shipped">Shipped</option>
-            <option value="delivered">Delivered</option>
-            <option value="cancelled">Cancelled</option>
-            <option value="returned">Returned</option>
+            <option value="">All payments</option>
+            <option value="COD">Cash on delivery</option>
+            <option value="bKash">bKash</option>
+            <option value="Nagad">Nagad</option>
+            <option value="SSLCommerz">Card / SSLCommerz</option>
           </select>
+          <select
+            aria-label="Sort"
+            value={sort}
+            onChange={(e) => setSort(e.target.value)}
+            className={`${inputClass} h-9 w-auto`}
+          >
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+            <option value="total_desc">Highest total</option>
+            <option value="total_asc">Lowest total</option>
+          </select>
+          <RangePicker
+            value={range}
+            onChange={setRange}
+            options={["today", "7d", "30d", "90d", "all", "custom"]}
+          />
         </div>
-      </div>
 
-      {/* Search Bar */}
-      <div className="relative">
-        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <input
-          type="text"
-          placeholder="Filter by Order #, Customer Name, Phone number or District..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-border bg-card text-xs focus:outline-hidden focus:ring-2 focus:ring-primary/20"
-        />
-      </div>
+        {manage && selected.length > 0 && (
+          <div className="mb-3 flex flex-wrap items-center gap-2 rounded-xl bg-primary/8 p-2.5 text-xs">
+            <span className="font-semibold text-primary">{selected.length} selected</span>
+            {(["confirmed", "processing", "shipped", "delivered", "cancelled"] as const).map(
+              (s) => (
+                <button
+                  key={s}
+                  type="button"
+                  className={`${secondaryButton} h-8 px-3 text-xs`}
+                  onClick={() => requestStatus(selected, s)}
+                >
+                  Mark {ORDER_STATUS_CONFIG[s].label.toLowerCase()}
+                </button>
+              ),
+            )}
+            <button
+              type="button"
+              className="ml-auto text-muted-foreground hover:text-foreground"
+              onClick={() => setSelected([])}
+            >
+              Clear
+            </button>
+          </div>
+        )}
 
-      {/* Orders Table */}
-      <div className="bg-card border border-border rounded-3xl overflow-hidden shadow-xs">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr className="border-b border-border bg-secondary/40 text-muted-foreground font-bold uppercase tracking-wider text-[10px]">
-                <th className="p-4 w-10">
-                  <input
-                    type="checkbox"
-                    onChange={handleSelectAll}
-                    checked={
-                      selectedOrderIds.length > 0 &&
-                      selectedOrderIds.length === filteredOrders.length
-                    }
-                    className="rounded border-border"
-                  />
-                </th>
-                <th className="p-4">Order #</th>
-                <th className="p-4">Customer & District</th>
-                <th className="p-4">Items</th>
-                <th className="p-4">Amount (BDT)</th>
-                <th className="p-4">Payment</th>
-                <th className="p-4">Status</th>
-                <th className="p-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {filteredOrders.map((ord) => {
-                const isSelected = selectedOrderIds.includes(ord._id || ord.id);
-                const statusColor =
-                  ORDER_STATUS_CONFIG[ord.status as keyof typeof ORDER_STATUS_CONFIG]?.color ||
-                  "#6b7280";
-
-                return (
-                  <tr
-                    key={ord._id || ord.orderNumber}
-                    className={`hover:bg-secondary/30 transition ${isSelected ? "bg-primary/5" : ""}`}
-                  >
-                    <td className="p-4">
+        {error && <ErrorNotice message={error} onRetry={reload} />}
+        {!data && !error && <Skeleton className="h-80" />}
+        {data && data.items.length === 0 && (
+          <EmptyState icon={ShoppingBag} title="No orders match these filters." />
+        )}
+        {data && data.items.length > 0 && (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[60rem] text-left text-xs">
+              <thead className="text-muted-foreground">
+                <tr className="border-b border-border">
+                  {manage && (
+                    <th className="w-8 py-2 pr-2">
                       <input
                         type="checkbox"
-                        checked={isSelected}
-                        onChange={() => handleToggleSelect(ord._id || ord.id)}
-                        className="rounded border-border"
+                        aria-label="Select all on this page"
+                        checked={allSelected}
+                        onChange={(e) => setSelected(e.target.checked ? pageIds : [])}
                       />
-                    </td>
-                    <td className="p-4 font-mono font-bold text-foreground whitespace-nowrap">
-                      {ord.orderNumber || "—"}
-                      <div className="text-[10px] text-muted-foreground font-sans font-normal">
-                        {new Date(ord.createdAt || Date.now()).toLocaleDateString("en-GB", {
-                          day: "numeric",
-                          month: "short",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-primary/15 text-primary flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs border border-primary/20">
-                          {(ord.shippingAddress?.fullName || "N").charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                          <div className="font-semibold text-foreground">
-                            {ord.shippingAddress?.fullName || "Nusrat Jahan"}
-                          </div>
-                          <div className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
-                            <Phone className="w-3 h-3" />
-                            <span>{ord.shippingAddress?.phone || "+880 1711-223344"}</span>
-                          </div>
-                          <div className="text-[11px] text-muted-foreground flex items-center gap-1">
-                            <MapPin className="w-3 h-3" />
-                            <span>
-                              {ord.shippingAddress?.city || "Dhaka"},{" "}
-                              {ord.shippingAddress?.division || "Dhaka"}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <span className="font-semibold">{ord.items?.length || 1} items</span>
-                      <div className="text-[10px] text-muted-foreground truncate max-w-[150px]">
-                        {ord.items?.[0]?.product?.name ||
-                          ord.items?.[0]?.name ||
-                          "Blush Crossbody & Ring"}
-                      </div>
-                    </td>
-                    <td className="p-4 font-bold text-foreground text-sm font-sans">
-                      ৳{(ord.total || 3490).toLocaleString()}
-                    </td>
-                    <td className="p-4">
-                      <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-secondary/80 border border-border shadow-2xs">
-                        {ord.paymentMethod || "COD"}
-                      </span>
-                    </td>
-                    <td className="p-4">
-                      <select
-                        value={ord.status || "pending"}
-                        onChange={(e) => handleStatusChange(ord._id || ord.id, e.target.value)}
-                        className="px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase border border-border/80 bg-card shadow-2xs focus:outline-hidden cursor-pointer"
-                        style={{ color: statusColor }}
-                      >
-                        <option value="pending">Pending</option>
-                        <option value="confirmed">Confirmed</option>
-                        <option value="processing">Processing</option>
-                        <option value="shipped">Shipped</option>
-                        <option value="delivered">Delivered</option>
-                        <option value="cancelled">Cancelled</option>
-                        <option value="returned">Returned</option>
-                      </select>
-                    </td>
-                    <td className="p-4 text-right space-x-1">
-                      {/* Courier Dispatch Trigger */}
-                      <button
-                        onClick={() => setCourierModalOrder(ord)}
-                        className="p-1.5 rounded-xl border border-border hover:bg-secondary text-primary transition"
-                        title="Dispatch via Bangladeshi Courier"
-                      >
-                        <Truck className="w-4 h-4" />
-                      </button>
-
-                      {/* Invoice Print Trigger */}
-                      <button
-                        onClick={() => setActiveInvoiceOrder(ord)}
-                        className="p-1.5 rounded-xl border border-border hover:bg-secondary text-foreground transition"
-                        title="View & Print Tax Invoice"
-                      >
-                        <Printer className="w-4 h-4" />
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Bangladeshi Courier Dispatch Modal */}
-      {courierModalOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
-          <div className="bg-card border border-border rounded-3xl p-6 max-w-lg w-full shadow-2xl space-y-4 animate-scale-up">
-            <div className="flex items-center justify-between border-b border-border pb-3">
-              <div className="flex items-center gap-2">
-                <Truck className="w-5 h-5 text-primary" />
-                <h3 className="font-serif font-bold text-lg">Dispatch Bangladeshi Courier</h3>
-              </div>
-              <button
-                onClick={() => setCourierModalOrder(null)}
-                className="p-1 rounded-xl text-muted-foreground hover:bg-secondary"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="space-y-3 text-xs">
-              <div className="p-3 rounded-2xl bg-secondary/50 border border-border">
-                <p className="font-bold text-foreground">
-                  {courierModalOrder.shippingAddress?.fullName || "Nusrat Jahan"}
-                </p>
-                <p className="text-muted-foreground">
-                  {courierModalOrder.shippingAddress?.phone || "+880 1711-223344"}
-                </p>
-                <p className="text-muted-foreground">
-                  {courierModalOrder.shippingAddress?.address ||
-                    "House 12, Road 4, Dhanmondi, Dhaka"}
-                </p>
-                <div className="mt-2 text-primary font-bold">
-                  COD Amount to Collect: ৳{(courierModalOrder.total || 3490).toLocaleString()}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold mb-1">Select Courier Partner</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {(["steadfast", "pathao", "redx", "paperfly", "ecourier"] as const).map(
-                    (courier) => (
-                      <button
-                        key={courier}
-                        type="button"
-                        onClick={() => setSelectedCourier(courier)}
-                        className={`p-2.5 rounded-xl border text-center font-bold capitalize transition ${
-                          selectedCourier === courier
-                            ? "bg-primary text-primary-foreground border-primary"
-                            : "bg-background border-border text-foreground hover:bg-secondary"
-                        }`}
-                      >
-                        {courier}
-                      </button>
-                    ),
+                    </th>
                   )}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold mb-1">
-                  Delivery Instruction / Rider Note
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Call before delivery, allow open parcel check"
-                  value={courierNote}
-                  onChange={(e) => setCourierNote(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-border bg-background text-xs focus:outline-hidden"
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-2 pt-2 border-t border-border">
-              <button
-                type="button"
-                onClick={() => setCourierModalOrder(null)}
-                className="px-4 py-2 rounded-xl border border-border text-xs font-medium hover:bg-secondary"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleBookCourier}
-                disabled={isBookingCourier}
-                className="px-5 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 transition flex items-center gap-2"
-              >
-                {isBookingCourier ? (
-                  <>
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                    <span>Booking API...</span>
-                  </>
-                ) : (
-                  <>
-                    <Send className="w-3.5 h-3.5" />
-                    <span>Create Parcel Consignment</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Printable Enterprise POS Tax Invoice Modal */}
-      {activeInvoiceOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in print:p-0">
-          <div className="bg-white text-neutral-900 rounded-3xl max-w-2xl w-full shadow-2xl overflow-hidden p-8 space-y-6 print:shadow-none print:w-full print:max-w-none">
-            {/* Invoice Header */}
-            <div className="flex justify-between items-start border-b border-neutral-200 pb-5">
-              <div>
-                <h1 className="font-serif text-2xl font-bold tracking-tight">
-                  koreanskincare<span className="text-rose-600">.bd</span>
-                </h1>
-                <p className="text-xs text-neutral-500 mt-1">Official Tax Invoice & Packing Slip</p>
-                <p className="text-[11px] text-neutral-500">
-                  BIN / Tax ID: 004928192-0101 · Dhaka, Bangladesh
-                </p>
-              </div>
-              <div className="text-right">
-                <div className="font-mono font-bold text-sm">
-                  {activeInvoiceOrder.orderNumber || "ORD-2026-8801"}
-                </div>
-                <p className="text-xs text-neutral-500">
-                  {new Date().toLocaleDateString("en-GB", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </p>
-                <span className="inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-neutral-100 text-neutral-800 border border-neutral-300">
-                  {activeInvoiceOrder.paymentMethod || "Cash On Delivery"}
-                </span>
-              </div>
-            </div>
-
-            {/* Bill To & Ship To */}
-            <div className="grid grid-cols-2 gap-4 text-xs">
-              <div>
-                <span className="font-bold uppercase text-[10px] text-neutral-400">
-                  Customer Details:
-                </span>
-                <p className="font-bold text-neutral-900 mt-1">
-                  {activeInvoiceOrder.shippingAddress?.fullName || "Nusrat Jahan"}
-                </p>
-                <p className="text-neutral-600">
-                  {activeInvoiceOrder.shippingAddress?.phone || "+880 1711-223344"}
-                </p>
-                <p className="text-neutral-600">
-                  {activeInvoiceOrder.shippingAddress?.email || "customer@koreanskincare.bd"}
-                </p>
-              </div>
-              <div className="text-right">
-                <span className="font-bold uppercase text-[10px] text-neutral-400">
-                  Delivery Address:
-                </span>
-                <p className="text-neutral-700 mt-1">
-                  {activeInvoiceOrder.shippingAddress?.address || "House 42, Road 11, Banani"}
-                </p>
-                <p className="text-neutral-700">
-                  {activeInvoiceOrder.shippingAddress?.city || "Dhaka"} -{" "}
-                  {activeInvoiceOrder.shippingAddress?.postalCode || "1213"}, Bangladesh
-                </p>
-              </div>
-            </div>
-
-            {/* Line Items Table */}
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="border-b border-neutral-300 bg-neutral-50 text-neutral-600 font-bold text-[10px] uppercase">
-                  <th className="py-2.5 px-3">Item Description</th>
-                  <th className="py-2.5 px-3 text-center">Qty</th>
-                  <th className="py-2.5 px-3 text-right">Price (৳)</th>
-                  <th className="py-2.5 px-3 text-right">Total (৳)</th>
+                  <th className="py-2 pr-3 font-medium">Order</th>
+                  <th className="px-3 py-2 font-medium">Customer</th>
+                  <th className="px-3 py-2 font-medium">Items</th>
+                  <th className="px-3 py-2 text-right font-medium">Total</th>
+                  <th className="px-3 py-2 font-medium">Payment</th>
+                  <th className="px-3 py-2 font-medium">Status</th>
+                  <th className="py-2 pl-3 text-right font-medium">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-200">
-                {(
-                  activeInvoiceOrder.items || [
-                    { name: "Blush Mini Crossbody Bag", quantity: 1, price: 3490 },
-                  ]
-                ).map((it: any, i: number) => (
-                  <tr key={i}>
-                    <td className="py-3 px-3">
-                      <div className="font-semibold text-neutral-900">
-                        {it.product?.name || it.name || "Curated Accessory"}
-                      </div>
-                      <div className="text-[10px] text-neutral-500">
-                        SKU: SHJ-ACC-{100 + i} · Signature Pouch Packaging
-                      </div>
+              <tbody className="divide-y divide-border">
+                {data.items.map((o) => (
+                  <tr
+                    key={o._id}
+                    className={`align-top hover:bg-secondary/40 ${selected.includes(o._id) ? "bg-primary/5" : ""}`}
+                  >
+                    {manage && (
+                      <td className="py-3 pr-2">
+                        <input
+                          type="checkbox"
+                          aria-label={`Select ${o.orderNumber}`}
+                          checked={selected.includes(o._id)}
+                          onChange={() =>
+                            setSelected((s) =>
+                              s.includes(o._id) ? s.filter((x) => x !== o._id) : [...s, o._id],
+                            )
+                          }
+                        />
+                      </td>
+                    )}
+                    <td className="py-3 pr-3">
+                      <button
+                        type="button"
+                        onClick={() => setOpenId(o._id)}
+                        className="font-mono font-semibold text-foreground hover:text-primary"
+                      >
+                        {o.orderNumber}
+                      </button>
+                      <span
+                        className="block text-[11px] text-muted-foreground"
+                        title={fmtDateTime(o.createdAt)}
+                      >
+                        {fmtRelative(o.createdAt)}
+                      </span>
                     </td>
-                    <td className="py-3 px-3 text-center font-medium">{it.quantity || 1}</td>
-                    <td className="py-3 px-3 text-right">৳{(it.price || 3490).toLocaleString()}</td>
-                    <td className="py-3 px-3 text-right font-bold">
-                      ৳{((it.price || 3490) * (it.quantity || 1)).toLocaleString()}
+                    <td className="px-3 py-3">
+                      <span className="block font-medium text-foreground">
+                        {o.shippingAddress?.fullName ?? o.user?.name ?? "—"}
+                      </span>
+                      <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                        <Phone className="h-3 w-3" />{" "}
+                        {o.shippingAddress?.phone ?? o.guestPhone ?? "—"}
+                      </span>
+                      <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                        <MapPin className="h-3 w-3" />{" "}
+                        {[o.shippingAddress?.area, o.shippingAddress?.district]
+                          .filter(Boolean)
+                          .join(", ") || "—"}
+                      </span>
+                    </td>
+                    <td className="max-w-[14rem] px-3 py-3">
+                      <span className="font-medium">
+                        {o.items.reduce((s, i) => s + i.quantity, 0)} items
+                      </span>
+                      <span
+                        className="block truncate text-[11px] text-muted-foreground"
+                        title={o.items.map((i) => i.productName).join(", ")}
+                      >
+                        {o.items.map((i) => i.productName).join(", ")}
+                      </span>
+                    </td>
+                    <td className="px-3 py-3 text-right font-semibold tabular-nums">
+                      {fmtTaka(o.total)}
+                      {o.discount > 0 && (
+                        <span className="block text-[11px] font-normal text-muted-foreground">
+                          −{fmtTaka(o.discount)} {o.couponCode}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-3 py-3">
+                      <span className="block font-medium">{o.paymentMethod}</span>
+                      <PaymentBadge status={o.paymentStatus} />
+                    </td>
+                    <td className="px-3 py-3">
+                      {manage ? (
+                        <select
+                          aria-label={`Status of ${o.orderNumber}`}
+                          value={o.status}
+                          onChange={(e) => requestStatus([o._id], e.target.value)}
+                          className={`${inputClass} h-8 w-32 text-xs`}
+                          style={{ color: ORDER_STATUS_CONFIG[o.status]?.color }}
+                        >
+                          {STATUSES.map((s) => (
+                            <option
+                              key={s}
+                              value={s}
+                              disabled={
+                                (s === "returned" || s === "refunded") && !can("returns.manage")
+                              }
+                            >
+                              {ORDER_STATUS_CONFIG[s].label}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <StatusBadge status={o.status} />
+                      )}
+                      {o.trackingId && (
+                        <span className="mt-1 block text-[11px] text-muted-foreground">
+                          {o.courierName} · {o.trackingId}
+                        </span>
+                      )}
+                    </td>
+                    <td className="whitespace-nowrap py-3 pl-3 text-right">
+                      <button
+                        type="button"
+                        className={iconButton}
+                        title="Details & courier"
+                        aria-label={`Open ${o.orderNumber}`}
+                        onClick={() => setOpenId(o._id)}
+                      >
+                        <Truck className="h-4 w-4" />
+                      </button>
+                      {onCreateInvoice && can("invoices.manage") && (
+                        <button
+                          type="button"
+                          className={iconButton}
+                          title="Create invoice"
+                          aria-label={`Create invoice for ${o.orderNumber}`}
+                          onClick={() => onCreateInvoice(o._id)}
+                        >
+                          <ReceiptText className="h-4 w-4" />
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+        {data && (
+          <Pagination
+            page={page}
+            totalPages={data.totalPages}
+            total={data.total}
+            onPage={setPage}
+            label="orders"
+          />
+        )}
+      </Panel>
 
-            {/* Calculations Summary */}
-            <div className="flex justify-between items-center border-t border-neutral-300 pt-4 text-xs">
-              <div className="text-[11px] text-neutral-500 max-w-xs">
-                <p className="font-bold text-neutral-800">
-                  Thank you for choosing koreanskincare.bd!
-                </p>
-                <p>7-day hassle-free replacement guarantee on all eligible accessories.</p>
-              </div>
-              <div className="space-y-1 text-right w-48">
-                <div className="flex justify-between text-neutral-600">
-                  <span>Subtotal:</span>
-                  <span>৳{(activeInvoiceOrder.subtotal || 3490).toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between text-neutral-600">
-                  <span>Delivery Charge:</span>
-                  <span>৳{(activeInvoiceOrder.shippingCost ?? 70).toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between text-neutral-900 font-bold text-sm border-t border-neutral-300 pt-1 mt-1">
-                  <span>Grand Total:</span>
-                  <span className="text-rose-600">
-                    ৳{(activeInvoiceOrder.total || 3560).toLocaleString()}
-                  </span>
-                </div>
-              </div>
-            </div>
+      {openOrder && (
+        <OrderDrawer
+          order={openOrder}
+          canManage={manage}
+          canRefund={can("returns.manage")}
+          onClose={() => setOpenId(null)}
+          onPatch={(body) => patchOrder(openOrder._id, body)}
+          onStatus={(s) => requestStatus([openOrder._id], s)}
+          onCreateInvoice={
+            onCreateInvoice && can("invoices.manage")
+              ? () => onCreateInvoice(openOrder._id)
+              : undefined
+          }
+        />
+      )}
 
-            {/* Modal Actions (Hidden in Print) */}
-            <div className="flex justify-end gap-2 pt-4 border-t border-neutral-200 print:hidden">
+      {cancelTarget && (
+        <Modal
+          title={`Mark ${cancelTarget.ids.length > 1 ? `${cancelTarget.ids.length} orders` : "order"} ${cancelTarget.status}`}
+          onClose={() => setCancelTarget(null)}
+          footer={
+            <>
               <button
-                onClick={() => setActiveInvoiceOrder(null)}
-                className="px-4 py-2 rounded-xl border border-neutral-300 text-xs font-medium hover:bg-neutral-100"
+                type="button"
+                className={secondaryButton}
+                onClick={() => setCancelTarget(null)}
               >
-                Close
+                Cancel
               </button>
               <button
-                onClick={() => window.print()}
-                className="px-5 py-2 rounded-xl bg-neutral-900 text-white text-xs font-bold hover:bg-neutral-800 flex items-center gap-2"
+                type="button"
+                className={secondaryButton}
+                onClick={() => {
+                  changeStatus(cancelTarget.ids, cancelTarget.status, false);
+                  setCancelTarget(null);
+                }}
               >
-                <Printer className="w-3.5 h-3.5" />
-                <span>Print Invoice</span>
+                Don't restock
               </button>
-            </div>
+              <button
+                type="button"
+                className={primaryButton}
+                onClick={() => {
+                  changeStatus(cancelTarget.ids, cancelTarget.status, true);
+                  setCancelTarget(null);
+                }}
+              >
+                Put items back in stock
+              </button>
+            </>
+          }
+        >
+          <p className="text-sm">
+            These items were taken out of stock when the order was placed. Put them back so they can
+            be sold again?
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Choose “Don't restock” if the goods are damaged or were never returned.
+          </p>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+function OrderDrawer({
+  order,
+  canManage,
+  canRefund,
+  onClose,
+  onPatch,
+  onStatus,
+  onCreateInvoice,
+}: {
+  order: Order;
+  canManage: boolean;
+  canRefund: boolean;
+  onClose: () => void;
+  onPatch: (body: Record<string, unknown>) => Promise<Order>;
+  onStatus: (status: string) => void;
+  onCreateInvoice?: () => void;
+}) {
+  const [courierName, setCourierName] = useState(order.courierName ?? "");
+  const [trackingId, setTrackingId] = useState(order.trackingId ?? "");
+  const [trackingUrl, setTrackingUrl] = useState(order.trackingUrl ?? "");
+  const [transactionId, setTransactionId] = useState(order.paymentTransactionId ?? "");
+  const [notes, setNotes] = useState(order.notes ?? "");
+  const [markShipped, setMarkShipped] = useState(
+    ["pending", "confirmed", "processing"].includes(order.status),
+  );
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  const save = async () => {
+    setSaving(true);
+    try {
+      await onPatch({
+        courierName,
+        trackingId,
+        trackingUrl,
+        paymentTransactionId: transactionId,
+        notes,
+        ...(markShipped && trackingId ? { status: "shipped" } : {}),
+      });
+      toast.success("Order saved.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Couldn't save.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const a = order.shippingAddress;
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end bg-black/50" onClick={onClose}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Order ${order.orderNumber}`}
+        onClick={(e) => e.stopPropagation()}
+        className="flex h-full w-full max-w-xl flex-col border-l border-border bg-card shadow-2xl"
+      >
+        <div className="flex items-start justify-between gap-3 border-b border-border p-4">
+          <div>
+            <h3 className="font-mono text-lg font-semibold">{order.orderNumber}</h3>
+            <p className="text-xs text-muted-foreground">Placed {fmtDateTime(order.createdAt)}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            {onCreateInvoice && (
+              <button type="button" className={secondaryButton} onClick={onCreateInvoice}>
+                <ReceiptText className="h-4 w-4" /> Invoice
+              </button>
+            )}
+            <button type="button" className={iconButton} onClick={onClose} aria-label="Close">
+              <X className="h-5 w-5" />
+            </button>
           </div>
         </div>
-      )}
+        <div className="flex-1 space-y-5 overflow-y-auto p-4 text-xs">
+          <div className="flex flex-wrap items-center gap-3">
+            <StatusBadge status={order.status} />
+            <PaymentBadge status={order.paymentStatus} />
+            {canManage && (
+              <select
+                aria-label="Payment status"
+                value={order.paymentStatus}
+                onChange={(e) =>
+                  onPatch({ paymentStatus: e.target.value }).then(
+                    () => toast.success("Payment status saved."),
+                    (err) => toast.error(err.message),
+                  )
+                }
+                className={`${inputClass} ml-auto h-8 w-40 text-xs`}
+              >
+                {PAYMENT_STATUSES.map((s) => (
+                  <option key={s} value={s} disabled={s.includes("refund") && !canRefund}>
+                    Payment: {s.replace("_", " ")}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+
+          <section className="rounded-xl border border-border p-3">
+            <p className="mb-1 font-medium">Deliver to</p>
+            <p className="text-foreground">
+              {a?.fullName} · {a?.phone}
+            </p>
+            <p className="text-muted-foreground">
+              {[a?.streetAddress, a?.area, a?.district, a?.division, a?.postalCode]
+                .filter(Boolean)
+                .join(", ")}
+            </p>
+            {(order.user?.email || order.guestEmail) && (
+              <p className="text-muted-foreground">{order.user?.email ?? order.guestEmail}</p>
+            )}
+            {order.deliveryNotes && (
+              <p className="mt-1 rounded-md bg-secondary/60 p-2">
+                Customer note: {order.deliveryNotes}
+              </p>
+            )}
+          </section>
+
+          <section>
+            <p className="mb-2 font-medium">Items</p>
+            <ul className="divide-y divide-border rounded-xl border border-border">
+              {order.items.map((it, i) => (
+                <li key={i} className="flex items-center gap-3 p-2.5">
+                  {it.productImage && (
+                    <img
+                      src={optimizedImageUrl(it.productImage, 80)}
+                      alt=""
+                      className="h-10 w-10 rounded-md object-cover"
+                    />
+                  )}
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-medium">{it.productName}</span>
+                    <span className="text-muted-foreground">
+                      {[it.variant?.color, it.variant?.size, it.variant?.sku]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </span>
+                  </span>
+                  <span className="text-right tabular-nums">
+                    {it.quantity} × {fmtTaka(it.price)}
+                    <span className="block font-semibold">{fmtTaka(it.total)}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <dl className="mt-2 space-y-1">
+              {[
+                ["Subtotal", fmtTaka(order.subtotal)],
+                order.discount
+                  ? [`Discount ${order.couponCode ?? ""}`, `−${fmtTaka(order.discount)}`]
+                  : null,
+                ["Delivery", order.shippingCost ? fmtTaka(order.shippingCost) : "Free"],
+              ]
+                .filter(Boolean)
+                .map((r) => (
+                  <div key={r![0]} className="flex justify-between text-muted-foreground">
+                    <dt>{r![0]}</dt>
+                    <dd className="tabular-nums">{r![1]}</dd>
+                  </div>
+                ))}
+              <div className="flex justify-between border-t border-border pt-1 text-sm font-semibold">
+                <dt>Total ({order.paymentMethod})</dt>
+                <dd className="tabular-nums">{fmtTaka(order.total)}</dd>
+              </div>
+            </dl>
+          </section>
+
+          {canManage && (
+            <section className="space-y-3 rounded-xl border border-border p-3">
+              <p className="font-medium">Courier & payment details</p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Field label="Courier" htmlFor="o-courier">
+                  <input
+                    id="o-courier"
+                    list="courier-list"
+                    value={courierName}
+                    onChange={(e) => setCourierName(e.target.value)}
+                    className={inputClass}
+                  />
+                  <datalist id="courier-list">
+                    {COURIER_OPTIONS.map((c) => (
+                      <option key={c} value={c} />
+                    ))}
+                  </datalist>
+                </Field>
+                <Field label="Tracking / consignment ID" htmlFor="o-tracking">
+                  <input
+                    id="o-tracking"
+                    value={trackingId}
+                    onChange={(e) => setTrackingId(e.target.value)}
+                    className={inputClass}
+                  />
+                </Field>
+                <Field label="Tracking link" htmlFor="o-turl">
+                  <input
+                    id="o-turl"
+                    type="url"
+                    placeholder="https://"
+                    value={trackingUrl}
+                    onChange={(e) => setTrackingUrl(e.target.value)}
+                    className={inputClass}
+                  />
+                </Field>
+                <Field label="Payment transaction ID" htmlFor="o-trx">
+                  <input
+                    id="o-trx"
+                    value={transactionId}
+                    onChange={(e) => setTransactionId(e.target.value)}
+                    className={inputClass}
+                  />
+                </Field>
+              </div>
+              <Field label="Internal note (not shown to the customer)" htmlFor="o-notes">
+                <textarea
+                  id="o-notes"
+                  rows={2}
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  className={textareaClass}
+                />
+              </Field>
+              {["pending", "confirmed", "processing"].includes(order.status) && (
+                <label className="flex items-center gap-2 text-muted-foreground">
+                  <input
+                    type="checkbox"
+                    checked={markShipped}
+                    onChange={(e) => setMarkShipped(e.target.checked)}
+                  />
+                  Mark as shipped when a tracking ID is saved
+                </label>
+              )}
+              <div className="flex flex-wrap justify-end gap-2">
+                {order.status === "pending" && (
+                  <button
+                    type="button"
+                    className={secondaryButton}
+                    onClick={() => onStatus("confirmed")}
+                  >
+                    Confirm order
+                  </button>
+                )}
+                {order.status === "shipped" && (
+                  <button
+                    type="button"
+                    className={secondaryButton}
+                    onClick={() => onStatus("delivered")}
+                  >
+                    Mark delivered
+                  </button>
+                )}
+                <button type="button" className={primaryButton} onClick={save} disabled={saving}>
+                  {saving ? "Saving…" : "Save details"}
+                </button>
+              </div>
+            </section>
+          )}
+
+          <p className="text-[11px] text-muted-foreground">
+            Last updated {fmtDateTime(order.updatedAt)}
+            {order.deliveredAt ? ` · delivered ${fmtDateTime(order.deliveredAt)}` : ""}
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

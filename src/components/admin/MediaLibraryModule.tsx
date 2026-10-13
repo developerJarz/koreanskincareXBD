@@ -1,157 +1,187 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  Image as ImageIcon,
-  UploadCloud,
-  Copy,
-  Trash2,
-  ExternalLink,
-  Search,
-  Check,
-  Filter,
-} from "lucide-react";
+import { Check, Copy, ExternalLink, Image as ImageIcon, Search } from "lucide-react";
 import { toast } from "sonner";
 
+import { optimizedImageUrl } from "@/lib/image";
+import { inputClass } from "./catalog/ui";
+import {
+  EmptyState,
+  ErrorNotice,
+  fmtNumber,
+  PageHeader,
+  Panel,
+  Pill,
+  qs,
+  Segmented,
+  Skeleton,
+  StatTile,
+  useAdminData,
+  useDebounced,
+} from "./shared";
+
+type Asset = {
+  url: string;
+  folder: string;
+  alt?: string;
+  usedBy: { label: string; kind: string }[];
+};
+type Data = {
+  counts: {
+    all: number;
+    products: number;
+    brands: number;
+    categories: number;
+    site: number;
+    cloudinary: number;
+    missingAlt: number;
+  };
+  items: Asset[];
+  truncated: boolean;
+};
+
+/** Every image the shop uses, read from products, brands, categories and the website design. */
 export function MediaLibraryModule() {
-  const [mediaAssets, setMediaAssets] = useState([
-    {
-      id: "med_1",
-      name: "hero-autumn-edit.jpg",
-      folder: "koreanskincare/banners",
-      dimensions: "1920x1080",
-      size: "340 KB",
-      url: "https://res.cloudinary.com/koreanskincare/image/upload/v1/banners/hero-autumn.jpg",
-      uploadedAt: "12 Aug 2026",
-    },
-    {
-      id: "med_2",
-      name: "blush-mini-crossbody-front.jpg",
-      folder: "koreanskincare/products",
-      dimensions: "1200x1500",
-      size: "210 KB",
-      url: "https://res.cloudinary.com/koreanskincare/image/upload/v1/products/blush-bag-1.jpg",
-      uploadedAt: "10 Aug 2026",
-    },
-    {
-      id: "med_3",
-      name: "rose-gold-stack-macro.jpg",
-      folder: "koreanskincare/products",
-      dimensions: "1200x1200",
-      size: "180 KB",
-      url: "https://res.cloudinary.com/koreanskincare/image/upload/v1/products/rose-ring-1.jpg",
-      uploadedAt: "08 Aug 2026",
-    },
-    {
-      id: "med_4",
-      name: "eid-festive-banner-2026.jpg",
-      folder: "koreanskincare/banners",
-      dimensions: "2400x900",
-      size: "520 KB",
-      url: "https://res.cloudinary.com/koreanskincare/image/upload/v1/banners/eid-mega-sale.jpg",
-      uploadedAt: "05 Aug 2026",
-    },
-  ]);
+  const [folder, setFolder] = useState("");
+  const [search, setSearch] = useState("");
+  const q = useDebounced(search);
+  const { data, error, loading, reload } = useAdminData<Data>(
+    `/api/admin/media${qs({ folder, q })}`,
+  );
+  const [copied, setCopied] = useState<string | null>(null);
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [folderFilter, setFolderFilter] = useState("all");
-
-  const filteredAssets = mediaAssets.filter((a) => {
-    const matchesSearch = a.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFolder = folderFilter === "all" || a.folder.includes(folderFilter);
-    return matchesSearch && matchesFolder;
-  });
-
-  const handleCopyUrl = (url: string) => {
+  const copy = (url: string) => {
     navigator.clipboard.writeText(url);
-    toast.success("Cloudinary CDN URL copied to clipboard!");
+    setCopied(url);
+    toast.success("Image link copied.");
+    setTimeout(() => setCopied(null), 1500);
   };
 
-  const handleSimulateUpload = () => {
-    const newAsset = {
-      id: `med_${Date.now()}`,
-      name: `catalog-item-${Math.floor(100 + Math.random() * 900)}.jpg`,
-      folder: "koreanskincare/products",
-      dimensions: "1500x1500",
-      size: "245 KB",
-      url: `https://res.cloudinary.com/koreanskincare/image/upload/v1/products/new-asset-${Date.now()}.jpg`,
-      uploadedAt: "Just now",
-    };
-    setMediaAssets([newAsset, ...mediaAssets]);
-    toast.success("Image optimized and uploaded to Cloudinary CDN!");
-  };
-
+  const c = data?.counts;
   return (
-    <div className="space-y-6">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card border border-border p-4 rounded-3xl">
-        <div>
-          <div className="flex items-center gap-2">
-            <ImageIcon className="w-5 h-5 text-primary" />
-            <h2 className="font-serif text-2xl font-bold">Cloudinary Media Library & CDN</h2>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Manage high-res product photos, campaign banners & WebP auto-compressed assets
-          </p>
+    <div className="space-y-5">
+      <PageHeader
+        title="Media"
+        description="Images in use across the shop. Upload new images from the product, brand, category or website design editors."
+      />
+      {c && (
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <StatTile label="Images in use" value={fmtNumber(c.all)} />
+          <StatTile
+            label="On Cloudinary CDN"
+            value={fmtNumber(c.cloudinary)}
+            hint={`${fmtNumber(c.all - c.cloudinary)} stored elsewhere`}
+          />
+          <StatTile
+            label="Product images"
+            value={fmtNumber(c.products)}
+            hint={
+              c.missingAlt ? `${c.missingAlt} without a description (alt text)` : "all described"
+            }
+          />
+          <StatTile
+            label="Brand, category & site"
+            value={fmtNumber(c.brands + c.categories + c.site)}
+          />
         </div>
-
-        <button
-          onClick={handleSimulateUpload}
-          className="px-4 py-2 rounded-2xl bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 transition flex items-center gap-2"
-        >
-          <UploadCloud className="w-4 h-4" />
-          <span>Upload New Asset</span>
-        </button>
-      </div>
-
-      {/* Media Assets Grid */}
-      <div className="bg-card border border-border rounded-3xl p-6 shadow-xs space-y-4">
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+      )}
+      <Panel>
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <Segmented
+            label="Folder"
+            value={folder}
+            onChange={setFolder}
+            options={[
+              { value: "", label: "All" },
+              { value: "products", label: "Products" },
+              { value: "brands", label: "Brands" },
+              { value: "categories", label: "Categories" },
+              { value: "site", label: "Website" },
+            ]}
+          />
+          <div className="relative min-w-[12rem] flex-1">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             <input
-              type="text"
-              placeholder="Search assets by file name..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-2xl border border-border bg-background text-xs focus:outline-hidden"
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Product name or file name"
+              aria-label="Search images"
+              className={`${inputClass} h-9 pl-8`}
             />
           </div>
         </div>
-
-        <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4">
-          {filteredAssets.map((asset) => (
-            <div
-              key={asset.id}
-              className="bg-card border border-border rounded-2xl p-3 shadow-2xs space-y-2 hover:border-primary/50 transition group"
-            >
-              <div className="aspect-square bg-secondary/50 rounded-xl flex items-center justify-center relative overflow-hidden">
-                <ImageIcon className="w-12 h-12 text-primary/30" />
-                <span className="absolute bottom-2 left-2 px-2 py-0.5 rounded text-[9px] font-mono bg-black/60 text-white font-bold">
-                  {asset.dimensions}
-                </span>
-              </div>
-
-              <div>
-                <h4 className="font-semibold text-xs text-foreground truncate">{asset.name}</h4>
-                <p className="text-[10px] text-muted-foreground">
-                  {asset.folder} · {asset.size}
-                </p>
-              </div>
-
-              <div className="flex gap-1.5 pt-1 border-t border-border">
-                <button
-                  onClick={() => handleCopyUrl(asset.url)}
-                  className="flex-1 py-1.5 rounded-xl border border-border hover:bg-secondary text-[11px] font-semibold flex items-center justify-center gap-1 transition"
-                >
-                  <Copy className="w-3 h-3" />
-                  <span>Copy CDN</span>
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+        {error && <ErrorNotice message={error} onRetry={reload} />}
+        {!data && !error && <Skeleton className="h-80" />}
+        {data && data.items.length === 0 && (
+          <EmptyState icon={ImageIcon} title="No images match." />
+        )}
+        {data && data.items.length > 0 && (
+          <ul
+            className={`grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 ${loading ? "opacity-60" : ""}`}
+          >
+            {data.items.map((a) => (
+              <li
+                key={a.url}
+                className="group overflow-hidden rounded-xl border border-border bg-card"
+              >
+                <div className="relative aspect-square bg-secondary">
+                  <img
+                    src={optimizedImageUrl(a.url, 320)}
+                    alt={a.alt ?? ""}
+                    loading="lazy"
+                    className="h-full w-full object-cover"
+                  />
+                  <div className="absolute right-1.5 top-1.5 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+                    <button
+                      type="button"
+                      onClick={() => copy(a.url)}
+                      className="rounded-md bg-card/90 p-1.5 shadow"
+                      aria-label="Copy image link"
+                    >
+                      {copied === a.url ? (
+                        <Check className="h-3.5 w-3.5" />
+                      ) : (
+                        <Copy className="h-3.5 w-3.5" />
+                      )}
+                    </button>
+                    <a
+                      href={a.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="rounded-md bg-card/90 p-1.5 shadow"
+                      aria-label="Open image"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
+                  </div>
+                </div>
+                <div className="space-y-1 p-2 text-[11px]">
+                  <Pill>{a.folder}</Pill>
+                  <p
+                    className="line-clamp-2 text-foreground"
+                    title={a.usedBy.map((u) => u.label).join(", ")}
+                  >
+                    {a.usedBy[0]?.label}
+                    {a.usedBy.length > 1 && (
+                      <span className="text-muted-foreground"> +{a.usedBy.length - 1} more</span>
+                    )}
+                  </p>
+                  {a.folder === "products" && !a.alt && (
+                    <p className="text-amber-700 dark:text-amber-400">No description</p>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+        {data?.truncated && (
+          <p className="mt-3 text-xs text-muted-foreground">
+            Showing the first 600 — search to narrow down.
+          </p>
+        )}
+      </Panel>
     </div>
   );
 }

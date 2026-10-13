@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/server/db/connection";
 import { Order, Product } from "@/server/db/models";
 import { requireAuth, serverError, STAFF_ROLES } from "@/server/auth/session";
+import { requirePermission } from "@/server/auth/permissions";
 import {
   barcodeTaken,
   fillInventoryCodes,
@@ -20,7 +21,7 @@ const notFound = () => NextResponse.json({ error: "Product not found." }, { stat
 // GET — one product in the editor's shape
 export async function GET(request: NextRequest, { params }: Ctx) {
   try {
-    const auth = await requireAuth(request, STAFF_ROLES);
+    const auth = await requirePermission(request, "catalog.view");
     if (!auth.ok) return auth.response;
     const { id } = await params;
     if (!isObjectId(id)) return notFound();
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest, { params }: Ctx) {
 // PUT — save the full editor form
 export async function PUT(request: NextRequest, { params }: Ctx) {
   try {
-    const auth = await requireAuth(request, STAFF_ROLES);
+    const auth = await requirePermission(request, "catalog.manage");
     if (!auth.ok) return auth.response;
     const { id } = await params;
     if (!isObjectId(id)) return notFound();
@@ -98,12 +99,16 @@ export async function PUT(request: NextRequest, { params }: Ctx) {
  */
 export async function PATCH(request: NextRequest, { params }: Ctx) {
   try {
-    const auth = await requireAuth(request, STAFF_ROLES);
+    const auth = await requirePermission(request, ["catalog.manage", "inventory.manage"], "any");
     if (!auth.ok) return auth.response;
     const { id } = await params;
     if (!isObjectId(id)) return notFound();
 
     const body = await request.json().catch(() => ({}));
+    // Stock-only roles may change the stock count and nothing else
+    if (!auth.permissions.includes("catalog.manage") && Object.keys(body).some((k) => k !== "stock")) {
+      return NextResponse.json({ error: "Your role can only change stock." }, { status: 403 });
+    }
     await connectDB();
     const product = await Product.findById(id);
     if (!product) return notFound();
@@ -151,7 +156,7 @@ export async function PATCH(request: NextRequest, { params }: Ctx) {
  */
 export async function DELETE(request: NextRequest, { params }: Ctx) {
   try {
-    const auth = await requireAuth(request, STAFF_ROLES);
+    const auth = await requirePermission(request, "catalog.manage");
     if (!auth.ok) return auth.response;
     const { id } = await params;
     if (!isObjectId(id)) return notFound();

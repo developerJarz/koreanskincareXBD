@@ -10,10 +10,12 @@ import { BD_DIVISIONS, BD_DISTRICTS } from "@/lib/constants";
 import { optimizedImageUrl } from "@/lib/image";
 import { useCartStore } from "@/store/cart.store";
 import { useAuthStore } from "@/store/auth.store";
+import { useAppliedCoupon, useCheckoutConfig } from "@/hooks/use-checkout";
+import { shippingCostFor } from "@/lib/checkout";
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, getSubtotal, couponCode, couponDiscount, clearCart } = useCartStore();
+  const { items, getSubtotal, couponCode, couponDiscount, clearCart, removeCoupon } = useCartStore();
   const { user } = useAuthStore();
   const [mounted, setMounted] = useState(false);
 
@@ -64,9 +66,20 @@ export default function CheckoutPage() {
     };
   }, [user?.id]);
 
+  // Delivery charges, payment methods and coupons all come from the admin settings in MongoDB
+  const config = useCheckoutConfig();
+  const { freeShipping } = useAppliedCoupon(subtotal);
   const isDhaka = division === "Dhaka" && district === "Dhaka";
-  const shippingCost = subtotal >= 2000 ? 0 : isDhaka ? 70 : 120;
+  const shippingCost = shippingCostFor(
+    subtotal - couponDiscount,
+    { division, district },
+    config,
+    freeShipping,
+  );
   const total = Math.max(0, subtotal - couponDiscount + shippingCost);
+  const activePaymentMethod = config.paymentMethods.some((m) => m.id === paymentMethod)
+    ? paymentMethod
+    : (config.paymentMethods[0]?.id ?? "COD");
 
   const handleDivisionChange = (val: string) => {
     setDivision(val);
@@ -105,7 +118,7 @@ export default function CheckoutPage() {
             area,
             streetAddress,
           },
-          paymentMethod,
+          paymentMethod: activePaymentMethod,
           couponCode: couponCode || undefined,
           deliveryNotes,
           guestEmail: email,
@@ -116,6 +129,7 @@ export default function CheckoutPage() {
       const data = await res.json();
 
       if (!res.ok) {
+        if (data.field === "coupon") removeCoupon();
         throw new Error(data.error || "Failed to place order");
       }
 
@@ -322,15 +336,11 @@ export default function CheckoutPage() {
             </h2>
 
             <div className="grid sm:grid-cols-3 gap-4">
-              {[
-                { id: "COD", title: "Cash on Delivery", desc: "Pay cash when receiving parcel" },
-                { id: "bKash", title: "bKash", desc: "Online payment via bKash" },
-                { id: "Nagad", title: "Nagad", desc: "Online payment via Nagad" },
-              ].map((method) => (
+              {config.paymentMethods.map((method) => (
                 <label
                   key={method.id}
                   className={`p-4 rounded-2xl border cursor-pointer transition flex flex-col justify-between ${
-                    paymentMethod === method.id
+                    activePaymentMethod === method.id
                       ? "border-primary bg-primary/5 ring-2 ring-primary/20"
                       : "border-border hover:bg-accent"
                   }`}
@@ -340,12 +350,12 @@ export default function CheckoutPage() {
                     <input
                       type="radio"
                       name="payment"
-                      checked={paymentMethod === method.id}
+                      checked={activePaymentMethod === method.id}
                       onChange={() => setPaymentMethod(method.id)}
                       className="accent-primary"
                     />
                   </div>
-                  <span className="text-xs text-muted-foreground">{method.desc}</span>
+                  <span className="text-xs text-muted-foreground">{method.description}</span>
                 </label>
               ))}
             </div>

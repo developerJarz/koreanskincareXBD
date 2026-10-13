@@ -8,6 +8,7 @@ import { Search, X, ArrowRight, Loader2 } from "lucide-react";
 import { useUIStore } from "@/store/ui.store";
 import type { CardProduct } from "@/lib/catalog-shared";
 import { getResponsiveImage } from "@/lib/image";
+import { trackEvent } from "@/lib/activity-client";
 
 const POPULAR_SEARCHES = [
   "COSRX",
@@ -76,6 +77,7 @@ export function SearchDialog() {
   const q = query.trim();
   const openAll = () => {
     if (!q) return;
+    trackEvent("search", { searchTerm: q.slice(0, 120) });
     closeSearch();
     router.push(`/products?q=${encodeURIComponent(q)}`);
   };

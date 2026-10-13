@@ -16,18 +16,26 @@ import {
   Plus,
   RotateCcw,
   Save,
+  SlidersHorizontal,
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import {
+  CONTENT_SECTIONS,
   HOME_SECTIONS,
+  MAX_SLIDES,
+  SLIDER_HEIGHTS,
+  type HeroSlide,
+  type SliderHeight,
   PRODUCT_ROW_SECTIONS,
+  PRODUCT_SORTS,
   TRUST_ICONS,
   type StorefrontConfig,
   type TrustIcon,
 } from "@/lib/storefront";
 import { ImageUploader } from "../catalog/ImageUploader";
+import { SectionContentEditor } from "./SectionContentEditor";
 import {
   api,
   ApiError,
@@ -201,6 +209,7 @@ export function StorefrontModule() {
         const jump: Record<string, Section> = {
           branding: "branding",
           hero: "homepage",
+          slider: "homepage",
           promise: "homepage",
           footer: "footer",
           contact: "contact",
@@ -499,7 +508,14 @@ export function StorefrontModule() {
           )}
 
           {section === "homepage" && (
-            <HomepageEditor cfg={cfg} setCfg={setCfg} set={set} err={err} resetArea={resetArea} />
+            <HomepageEditor
+              cfg={cfg}
+              setCfg={setCfg}
+              set={set}
+              err={err}
+              resetArea={resetArea}
+              canEdit={!readOnly}
+            />
           )}
 
           {section === "footer" && (
@@ -619,14 +635,18 @@ function HomepageEditor({
   set,
   err,
   resetArea,
+  canEdit,
 }: {
   cfg: StorefrontConfig;
   setCfg: React.Dispatch<React.SetStateAction<StorefrontConfig | null>>;
   set: SetFn;
   err: (k: string) => string | undefined;
   resetArea: (keys: Array<keyof StorefrontConfig>) => void;
+  canEdit: boolean;
 }) {
   const [open, setOpen] = useState<string>("hero");
+  const [editingContent, setEditingContent] = useState<string | null>(null);
+  const contentSection = cfg.sections.find((s) => s.id === editingContent);
   const moveSection = (from: number, to: number) => {
     if (to < 0 || to >= cfg.sections.length) return;
     const next = [...cfg.sections];
@@ -660,7 +680,7 @@ function HomepageEditor({
     <>
       <Card
         title="Sections & order"
-        description={`${enabledCount} of ${cfg.sections.length} sections are showing. Use the arrows to change the order on the homepage. Product rows only appear when products are marked for them.`}
+        description={`${enabledCount} of ${cfg.sections.length} sections are showing. Use the arrows to change the order, and “Choose” to decide exactly what a product, category or brand section shows. A section with nothing to show is hidden.`}
         action={
           <button type="button" className={secondaryButton} onClick={() => resetArea(["sections"])}>
             <RotateCcw className="w-4 h-4" aria-hidden="true" /> Reset order
@@ -688,14 +708,29 @@ function HomepageEditor({
                 ) : (
                   <span className="text-sm font-medium">{HOME_SECTIONS[s.id]}</span>
                 )}
-                {(PRODUCT_ROW_SECTIONS.includes(s.id) ||
-                  s.id === "categories" ||
-                  s.id === "brands") && (
+                {CONTENT_SECTIONS.includes(s.id) && (
                   <span className="block text-[11px] text-muted-foreground mt-0.5">
-                    {HOME_SECTIONS[s.id]}
+                    {HOME_SECTIONS[s.id]} ·{" "}
+                    {s.source === "manual"
+                      ? `hand-picked (${s.itemIds.length})`
+                      : PRODUCT_ROW_SECTIONS.includes(s.id)
+                        ? `automatic, ${PRODUCT_SORTS[s.sort].toLowerCase()}`
+                        : "automatic"}{" "}
+                    · up to {s.limit}
                   </span>
                 )}
               </div>
+              {CONTENT_SECTIONS.includes(s.id) && (
+                <button
+                  type="button"
+                  className={`${secondaryButton} h-8 px-3 text-xs`}
+                  onClick={() => setEditingContent(s.id)}
+                >
+                  <SlidersHorizontal className="w-3.5 h-3.5" aria-hidden="true" />
+                  Choose{" "}
+                  {s.id === "categories" ? "categories" : s.id === "brands" ? "brands" : "products"}
+                </button>
+              )}
               <button
                 type="button"
                 className={iconButton}
@@ -728,139 +763,30 @@ function HomepageEditor({
         </ol>
       </Card>
 
+      {contentSection && (
+        <SectionContentEditor
+          section={contentSection}
+          canEdit={canEdit}
+          onChange={(patch) =>
+            setCfg((c) =>
+              c
+                ? {
+                    ...c,
+                    sections: c.sections.map((s) =>
+                      s.id === contentSection.id ? { ...s, ...patch } : s,
+                    ),
+                  }
+                : c,
+            )
+          }
+          onClose={() => setEditingContent(null)}
+        />
+      )}
+
       {panel(
         "hero",
-        "Hero banner (top of the homepage)",
-        <>
-          <div className="grid gap-4 md:grid-cols-2">
-            <Text
-              id="h-badge"
-              label="Badge"
-              value={cfg.hero.badge}
-              onChange={(badge) => set("hero", { badge })}
-              maxLength={80}
-            />
-            <Text
-              id="h-badgeNote"
-              label="Badge note"
-              value={cfg.hero.badgeNote}
-              onChange={(badgeNote) => set("hero", { badgeNote })}
-              maxLength={80}
-            />
-            <Text
-              id="h-t1"
-              label="Heading — line 1"
-              value={cfg.hero.titleLine1}
-              onChange={(titleLine1) => set("hero", { titleLine1 })}
-              maxLength={80}
-            />
-            <Text
-              id="h-t2"
-              label="Heading — line 2 (highlighted)"
-              value={cfg.hero.titleLine2}
-              onChange={(titleLine2) => set("hero", { titleLine2 })}
-              maxLength={80}
-            />
-          </div>
-          <Text
-            id="h-desc"
-            label="Description"
-            value={cfg.hero.description}
-            onChange={(description) => set("hero", { description })}
-            maxLength={400}
-            multiline
-          />
-          <div className="grid gap-4 md:grid-cols-2">
-            <Text
-              id="h-pl"
-              label="Main button text"
-              value={cfg.hero.primaryLabel}
-              onChange={(primaryLabel) => set("hero", { primaryLabel })}
-              maxLength={40}
-            />
-            <Text
-              id="h-ph"
-              label="Main button link"
-              value={cfg.hero.primaryHref}
-              onChange={(primaryHref) => set("hero", { primaryHref })}
-              error={err("hero.primaryHref")}
-              hint="A page like /products or /category/serums"
-            />
-            <Text
-              id="h-sl"
-              label="Second button text"
-              value={cfg.hero.secondaryLabel}
-              onChange={(secondaryLabel) => set("hero", { secondaryLabel })}
-              maxLength={40}
-              hint="Leave empty to hide"
-            />
-            <Text
-              id="h-sh"
-              label="Second button link"
-              value={cfg.hero.secondaryHref}
-              onChange={(secondaryHref) => set("hero", { secondaryHref })}
-              error={err("hero.secondaryHref")}
-            />
-          </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            <ImageField
-              label="Banner image"
-              value={cfg.hero.image}
-              onChange={(image) => set("hero", { image })}
-              hint="Portrait (4:5) photo works best, at least 1200px wide."
-              error={err("hero.image")}
-            />
-            <div className="space-y-4">
-              <Text
-                id="h-alt"
-                label="Image description (for Google & screen readers)"
-                value={cfg.hero.imageAlt}
-                onChange={(imageAlt) => set("hero", { imageAlt })}
-                maxLength={150}
-              />
-              <Text
-                id="h-fl"
-                label="Card label on image"
-                value={cfg.hero.featuredLabel}
-                onChange={(featuredLabel) => set("hero", { featuredLabel })}
-                maxLength={60}
-              />
-              <Text
-                id="h-ft"
-                label="Card title on image"
-                value={cfg.hero.featuredTitle}
-                onChange={(featuredTitle) => set("hero", { featuredTitle })}
-                maxLength={80}
-                hint="Leave empty to hide the card"
-              />
-              <Text
-                id="h-fh"
-                label="Card link"
-                value={cfg.hero.featuredHref}
-                onChange={(featuredHref) => set("hero", { featuredHref })}
-                error={err("hero.featuredHref")}
-              />
-            </div>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            <Text
-              id="h-rating"
-              label="Rating text"
-              value={cfg.hero.ratingText}
-              onChange={(ratingText) => set("hero", { ratingText })}
-              maxLength={60}
-              hint="Leave empty to hide"
-            />
-            <Text
-              id="h-cust"
-              label="Customers text"
-              value={cfg.hero.customersText}
-              onChange={(customersText) => set("hero", { customersText })}
-              maxLength={60}
-            />
-          </div>
-          <ResetLink onClick={() => resetArea(["hero"])} />
-        </>,
+        "Banner slider (top of the homepage)",
+        <SliderEditor cfg={cfg} setCfg={setCfg} err={err} />,
       )}
 
       {panel(
@@ -1305,5 +1231,279 @@ function FooterEditor({
         </button>
       </Card>
     </>
+  );
+}
+
+// ─── Banner slider ────────────────────────────────────────────────────────────
+
+const BLANK_SLIDE: HeroSlide = {
+  image: "",
+  mobileImage: "",
+  alt: "",
+  title: "",
+  subtitle: "",
+  ctaLabel: "",
+  href: "/products",
+  textPosition: "left",
+  theme: "light",
+};
+
+function SliderEditor({
+  cfg,
+  setCfg,
+  err,
+}: {
+  cfg: StorefrontConfig;
+  setCfg: React.Dispatch<React.SetStateAction<StorefrontConfig | null>>;
+  err: (k: string) => string | undefined;
+}) {
+  const [openSlide, setOpenSlide] = useState<number | null>(cfg.slider.slides.length ? 0 : null);
+  const slider = cfg.slider;
+  const update = (patch: Partial<StorefrontConfig["slider"]>) =>
+    setCfg((c) => (c ? { ...c, slider: { ...c.slider, ...patch } } : c));
+  const updateSlide = (i: number, patch: Partial<HeroSlide>) =>
+    update({ slides: slider.slides.map((s, j) => (j === i ? { ...s, ...patch } : s)) });
+  const move = (from: number, to: number) => {
+    if (to < 0 || to >= slider.slides.length) return;
+    const next = [...slider.slides];
+    const [s] = next.splice(from, 1);
+    next.splice(to, 0, s);
+    update({ slides: next });
+    setOpenSlide(to);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="grid gap-3 sm:grid-cols-3">
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-border p-3">
+          <span className="text-xs font-medium">Play automatically</span>
+          <Switch
+            label="Play automatically"
+            checked={slider.autoplay}
+            onChange={(autoplay) => update({ autoplay })}
+          />
+        </div>
+        <Field label="Each slide shows for" htmlFor="sl-interval">
+          <select
+            id="sl-interval"
+            className={inputClass}
+            value={slider.intervalSeconds}
+            disabled={!slider.autoplay}
+            onChange={(e) => update({ intervalSeconds: Number(e.target.value) })}
+          >
+            {[3, 4, 5, 6, 7, 8, 10, 12, 15].map((n) => (
+              <option key={n} value={n}>
+                {n} seconds
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field label="Height" htmlFor="sl-height">
+          <select
+            id="sl-height"
+            className={inputClass}
+            value={slider.height}
+            onChange={(e) => update({ height: e.target.value as SliderHeight })}
+          >
+            {Object.entries(SLIDER_HEIGHTS).map(([k, v]) => (
+              <option key={k} value={k}>
+                {v}
+              </option>
+            ))}
+          </select>
+        </Field>
+      </div>
+
+      <ol className="space-y-2">
+        {slider.slides.map((slide, i) => {
+          const open = openSlide === i;
+          const hasError = Boolean(
+            err(`slider.slides.${i}.image`) ||
+            err(`slider.slides.${i}.mobileImage`) ||
+            err(`slider.slides.${i}.href`),
+          );
+          return (
+            <li
+              key={i}
+              className={`rounded-xl border ${hasError ? "border-destructive" : "border-border"}`}
+            >
+              <div className="flex items-center gap-3 p-2">
+                <span className="w-5 text-center text-xs tabular-nums text-muted-foreground">
+                  {i + 1}
+                </span>
+                <span className="h-11 w-20 shrink-0 overflow-hidden rounded-md bg-secondary">
+                  {slide.image && (
+                    <img src={slide.image} alt="" className="h-full w-full object-cover" />
+                  )}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setOpenSlide(open ? null : i)}
+                  aria-expanded={open}
+                  className="min-w-0 flex-1 text-left"
+                >
+                  <span className="block truncate text-sm font-medium">
+                    {slide.title ||
+                      slide.alt ||
+                      (slide.image ? "Banner without text" : "New slide: add an image")}
+                  </span>
+                  <span className="block text-[11px] text-muted-foreground">
+                    {slide.textPosition === "none"
+                      ? "Image only"
+                      : `Text ${slide.textPosition === "center" ? "in the middle" : "on the left"}`}
+                    {slide.href ? `, opens ${slide.href}` : ""}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className={iconButton}
+                  onClick={() => move(i, i - 1)}
+                  disabled={i === 0}
+                  aria-label={`Move slide ${i + 1} up`}
+                >
+                  <ArrowUp className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  className={iconButton}
+                  onClick={() => move(i, i + 1)}
+                  disabled={i === slider.slides.length - 1}
+                  aria-label={`Move slide ${i + 1} down`}
+                >
+                  <ArrowDown className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  className={`${iconButton} text-destructive`}
+                  onClick={() => {
+                    update({ slides: slider.slides.filter((_, j) => j !== i) });
+                    setOpenSlide(null);
+                  }}
+                  aria-label={`Delete slide ${i + 1}`}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+
+              {open && (
+                <div className="space-y-4 border-t border-border p-4">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <ImageField
+                      label="Banner image"
+                      value={slide.image}
+                      onChange={(image) => updateSlide(i, { image })}
+                      hint="A wide photo or designed banner, ideally 1920 × 800 px or larger."
+                      error={err(`slider.slides.${i}.image`)}
+                    />
+                    <ImageField
+                      label="Phone image (optional)"
+                      value={slide.mobileImage}
+                      onChange={(mobileImage) => updateSlide(i, { mobileImage })}
+                      hint="A taller version for phones, about 1080 × 900 px. Leave empty to use the banner."
+                      error={err(`slider.slides.${i}.mobileImage`)}
+                    />
+                  </div>
+                  <Text
+                    id={`sl-alt-${i}`}
+                    label="Image description"
+                    value={slide.alt}
+                    onChange={(alt) => updateSlide(i, { alt })}
+                    hint="What the picture shows, for screen readers and Google."
+                    maxLength={150}
+                  />
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <Field label="Text on the banner" htmlFor={`sl-pos-${i}`}>
+                      <select
+                        id={`sl-pos-${i}`}
+                        className={inputClass}
+                        value={slide.textPosition}
+                        onChange={(e) =>
+                          updateSlide(i, {
+                            textPosition: e.target.value as HeroSlide["textPosition"],
+                          })
+                        }
+                      >
+                        <option value="left">On the left</option>
+                        <option value="center">In the middle</option>
+                        <option value="none">None, the words are in the image</option>
+                      </select>
+                    </Field>
+                    {slide.textPosition !== "none" && (
+                      <Field label="Text colour" htmlFor={`sl-theme-${i}`}>
+                        <select
+                          id={`sl-theme-${i}`}
+                          className={inputClass}
+                          value={slide.theme}
+                          onChange={(e) =>
+                            updateSlide(i, { theme: e.target.value as HeroSlide["theme"] })
+                          }
+                        >
+                          <option value="light">White text, for darker pictures</option>
+                          <option value="dark">Dark text, for light pictures</option>
+                        </select>
+                      </Field>
+                    )}
+                  </div>
+                  {slide.textPosition !== "none" && (
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <Text
+                        id={`sl-title-${i}`}
+                        label="Headline"
+                        value={slide.title}
+                        onChange={(title) => updateSlide(i, { title })}
+                        maxLength={90}
+                      />
+                      <Text
+                        id={`sl-sub-${i}`}
+                        label="Supporting line"
+                        value={slide.subtitle}
+                        onChange={(subtitle) => updateSlide(i, { subtitle })}
+                        maxLength={200}
+                      />
+                      <Text
+                        id={`sl-cta-${i}`}
+                        label="Button text"
+                        value={slide.ctaLabel}
+                        onChange={(ctaLabel) => updateSlide(i, { ctaLabel })}
+                        hint="Leave empty to make the whole banner the link."
+                        maxLength={40}
+                      />
+                    </div>
+                  )}
+                  <Text
+                    id={`sl-href-${i}`}
+                    label="Opens"
+                    value={slide.href}
+                    onChange={(href) => updateSlide(i, { href })}
+                    hint="A page on your site such as /products?flag=bestseller or /brand/cosrx, or a full https:// link."
+                    error={err(`slider.slides.${i}.href`)}
+                    maxLength={500}
+                  />
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ol>
+
+      {slider.slides.length === 0 && (
+        <p className="rounded-xl border border-dashed border-border p-6 text-center text-xs text-muted-foreground">
+          No slides, so the banner area is hidden on the homepage. Add one below.
+        </p>
+      )}
+
+      <button
+        type="button"
+        className={secondaryButton}
+        disabled={slider.slides.length >= MAX_SLIDES}
+        onClick={() => {
+          update({ slides: [...slider.slides, { ...BLANK_SLIDE }] });
+          setOpenSlide(slider.slides.length);
+        }}
+      >
+        <Plus className="w-4 h-4" aria-hidden="true" /> Add slide
+        {slider.slides.length >= MAX_SLIDES ? ` (max ${MAX_SLIDES})` : ""}
+      </button>
+    </div>
   );
 }

@@ -1,4 +1,5 @@
 import mongoose, { Schema, type Document, type Model } from "mongoose";
+import { refreshModelInDev } from "./dev-refresh";
 import type { ISiteSettings } from "@/types";
 
 export interface SettingsDocument extends Omit<ISiteSettings, "_id">, Document {}
@@ -61,6 +62,19 @@ const settingsSchema = new Schema<SettingsDocument>(
         config: { type: Schema.Types.Mixed, default: {} },
       },
     ],
+    activityTracking: {
+      enabled: { type: Boolean, default: true },
+      // 0 = keep forever
+      retentionDays: { type: Number, default: 30, min: 0, max: 365 },
+      anonymizeIp: { type: Boolean, default: false },
+      trackStaff: { type: Boolean, default: false },
+      excludePaths: [{ type: String }],
+    },
+    // Shape and validation live in src/lib/invoice.ts (normalizeInvoiceTemplate)
+    invoiceTemplate: { type: Schema.Types.Mixed },
+    security: {
+      blockedIps: [{ type: String }],
+    },
   },
   {
     timestamps: true,
@@ -73,6 +87,8 @@ const settingsSchema = new Schema<SettingsDocument>(
     },
   },
 );
+
+refreshModelInDev("Settings");
 
 export const Settings: Model<SettingsDocument> =
   mongoose.models.Settings || mongoose.model<SettingsDocument>("Settings", settingsSchema);

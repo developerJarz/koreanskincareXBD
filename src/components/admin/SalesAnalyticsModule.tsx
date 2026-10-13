@@ -1,405 +1,405 @@
 "use client";
 
 import React, { useState } from "react";
+import { Download, TrendingUp } from "lucide-react";
+
+import { optimizedImageUrl } from "@/lib/image";
+import { secondaryButton } from "./catalog/ui";
+import { TimeSeriesChart } from "./charts";
 import {
-  DollarSign,
-  TrendingUp,
-  ShoppingBag,
-  Percent,
-  Users,
-  MapPin,
-  Globe,
-  ArrowUpRight,
-  ArrowDownRight,
-  Sparkles,
-  Calendar,
-  Filter,
-  Download,
-  Flame,
-  PieChart,
-} from "lucide-react";
-import { BD_DIVISIONS } from "@/lib/constants";
+  BarList,
+  downloadCsv,
+  EmptyState,
+  ErrorNotice,
+  fmtNumber,
+  fmtPercent,
+  fmtTaka,
+  PageHeader,
+  Panel,
+  qs,
+  rangeQuery,
+  RangePicker,
+  Segmented,
+  Skeleton,
+  StatTile,
+  type RangeValue,
+  useAdminData,
+} from "./shared";
 
-interface SalesAnalyticsModuleProps {
-  orders: any[];
-  products: any[];
-  totalRevenue: number;
-}
+export type SalesStats = {
+  range: { key: string; from: string | null; to: string; bucket: string };
+  totals: {
+    allOrders: number;
+    orders: number;
+    revenue: number;
+    subtotal: number;
+    shipping: number;
+    discounts: number;
+    paidRevenue: number;
+    cancelled: number;
+    cancelledValue: number;
+    returned: number;
+    returnedValue: number;
+    pending: number;
+    delivered: number;
+    customers: number;
+    aov: number;
+    itemsSold: number;
+    newCustomers: number;
+    visitors: number;
+    conversionRate: number | null;
+    repeatCustomerRate: number;
+    cancelRate: number;
+  };
+  profit: {
+    itemRevenue: number;
+    cogs: number;
+    costedRevenue: number;
+    grossProfit: number;
+    marginPercent: number | null;
+    coveragePercent: number;
+    uncostedProducts: number;
+  };
+  change: null | {
+    revenue: number | null;
+    orders: number | null;
+    aov: number | null;
+    customers: number | null;
+  };
+  series: { label: string; revenue: number; orders: number }[];
+  byDivision: { name: string; orders: number; revenue: number }[];
+  byDistrict: { name: string; orders: number; revenue: number }[];
+  byPayment: { name: string; orders: number; revenue: number; paid: number }[];
+  byStatus: { name: string; orders: number; value: number }[];
+  byCourier: { name: string; orders: number; value: number }[];
+  topProducts: {
+    id: string | null;
+    name: string;
+    image?: string;
+    slug: string | null;
+    stock: number | null;
+    quantity: number;
+    revenue: number;
+    orders: number;
+    profit: number | null;
+  }[];
+};
 
-export function SalesAnalyticsModule({
-  orders = [],
-  products = [],
-  totalRevenue,
-}: SalesAnalyticsModuleProps) {
-  const [timeframe, setTimeframe] = useState<"today" | "7d" | "30d" | "year">("30d");
+const STATUS_LABEL: Record<string, string> = {
+  pending: "Pending",
+  confirmed: "Confirmed",
+  processing: "Processing",
+  shipped: "Shipped",
+  delivered: "Delivered",
+  cancelled: "Cancelled",
+  returned: "Returned",
+  refunded: "Refunded",
+};
 
-  // Dynamic calculated business metrics
-  const totalOrdersCount = orders.length || 24;
-  const avgOrderValue = totalOrdersCount > 0 ? Math.round(totalRevenue / totalOrdersCount) : 2450;
-  const estimatedCostOfGoods = Math.round(totalRevenue * 0.42);
-  const estimatedGrossProfit = totalRevenue - estimatedCostOfGoods;
-  const grossMarginPercent =
-    totalRevenue > 0 ? Math.round((estimatedGrossProfit / totalRevenue) * 100) : 58;
-  const conversionRate = 3.82; // % benchmark for fashion in BD
-  const roas = 4.6; // Return on Ad Spend (Meta & TikTok BD)
-  const cac = 310; // Customer Acquisition Cost in BDT ৳
+/** Sales report — every figure is aggregated from orders in MongoDB for the chosen period. */
+export function SalesAnalyticsModule({ embedded = false }: { embedded?: boolean }) {
+  const [range, setRange] = useState<RangeValue>({ key: "30d" });
+  const [metric, setMetric] = useState<"revenue" | "orders">("revenue");
+  const { data, error, loading, reload } = useAdminData<SalesStats>(
+    `/api/admin/stats${qs(rangeQuery(range))}`,
+  );
 
-  // Division-wise sales distribution in Bangladesh
-  const divisionSales = [
-    {
-      name: "Dhaka",
-      count: Math.round(totalOrdersCount * 0.58),
-      revenue: Math.round(totalRevenue * 0.6),
-      share: 60,
-    },
-    {
-      name: "Chattogram",
-      count: Math.round(totalOrdersCount * 0.18),
-      revenue: Math.round(totalRevenue * 0.18),
-      share: 18,
-    },
-    {
-      name: "Sylhet",
-      count: Math.round(totalOrdersCount * 0.08),
-      revenue: Math.round(totalRevenue * 0.09),
-      share: 9,
-    },
-    {
-      name: "Rajshahi",
-      count: Math.round(totalOrdersCount * 0.06),
-      revenue: Math.round(totalRevenue * 0.05),
-      share: 5,
-    },
-    {
-      name: "Khulna",
-      count: Math.round(totalOrdersCount * 0.04),
-      revenue: Math.round(totalRevenue * 0.04),
-      share: 4,
-    },
-    {
-      name: "Mymensingh",
-      count: Math.round(totalOrdersCount * 0.03),
-      revenue: Math.round(totalRevenue * 0.02),
-      share: 2,
-    },
-    {
-      name: "Rangpur & Barishal",
-      count: Math.round(totalOrdersCount * 0.03),
-      revenue: Math.round(totalRevenue * 0.02),
-      share: 2,
-    },
-  ];
+  const exportCsv = () => {
+    if (!data) return;
+    downloadCsv(`sales-${range.key}.csv`, [
+      ["Period", "Revenue (BDT)", "Orders"],
+      ...data.series.map((s) => [s.label, Math.round(s.revenue), s.orders]),
+      [],
+      ["Product", "Units", "Revenue (BDT)", "Orders", "Gross profit (BDT)"],
+      ...data.topProducts.map((p) => [
+        p.name,
+        p.quantity,
+        Math.round(p.revenue),
+        p.orders,
+        p.profit == null ? "" : Math.round(p.profit),
+      ]),
+    ]);
+  };
 
-  // Sales Channel breakdown
-  const salesChannels = [
-    {
-      channel: "Online Web Store",
-      share: 62,
-      revenue: Math.round(totalRevenue * 0.62),
-      color: "bg-primary",
-    },
-    {
-      channel: "Facebook & Instagram Shop",
-      share: 24,
-      revenue: Math.round(totalRevenue * 0.24),
-      color: "bg-pink-500",
-    },
-    {
-      channel: "WhatsApp Direct Booking",
-      share: 10,
-      revenue: Math.round(totalRevenue * 0.1),
-      color: "bg-emerald-500",
-    },
-    {
-      channel: "Banani Flagship POS Outlet",
-      share: 4,
-      revenue: Math.round(totalRevenue * 0.04),
-      color: "bg-amber-500",
-    },
-  ];
+  const header = (
+    <PageHeader
+      title={embedded ? "Sales" : "Sales report"}
+      description="Revenue counts orders that are not cancelled, returned or refunded."
+      actions={
+        <>
+          <RangePicker value={range} onChange={setRange} />
+          {!embedded && (
+            <button type="button" className={secondaryButton} onClick={exportCsv} disabled={!data}>
+              <Download className="h-4 w-4" /> Export CSV
+            </button>
+          )}
+        </>
+      }
+    />
+  );
 
-  // Interactive 7-point Revenue Curve Data
-  const trendPoints = [
-    { label: "Day 1", rev: 14200, profit: 8200 },
-    { label: "Day 5", rev: 22400, profit: 13100 },
-    { label: "Day 10", rev: 18900, profit: 10800 },
-    { label: "Day 15", rev: 34500, profit: 20200 },
-    { label: "Day 20", rev: 29800, profit: 17400 },
-    { label: "Day 25", rev: 41200, profit: 24300 },
-    { label: "Today", rev: 48900, profit: 28600 },
-  ];
+  if (error && !data) {
+    return (
+      <div className="space-y-5">
+        {header}
+        <ErrorNotice message={error} onRetry={reload} />
+      </div>
+    );
+  }
+  if (!data) {
+    return (
+      <div className="space-y-5">
+        {header}
+        <Skeleton className="h-96" />
+      </div>
+    );
+  }
+
+  const t = data.totals;
+  const p = data.profit;
+  const ch = data.change;
+  const totalDivisionRevenue = data.byDivision.reduce((s, d) => s + d.revenue, 0);
 
   return (
-    <div className="space-y-6">
-      {/* Top Header & Timeframe Selector */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card border border-border p-4 rounded-3xl">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs uppercase tracking-wider text-primary font-bold">
-              Executive Intelligence
-            </span>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
-              Live BI Synced
-            </span>
-          </div>
-          <h2 className="font-serif text-2xl font-bold mt-0.5">Sales & Business Analytics</h2>
-        </div>
+    <div className={`space-y-5 ${loading ? "opacity-70 transition-opacity" : ""}`}>
+      {header}
 
-        <div className="flex items-center gap-2">
-          <div className="flex bg-secondary p-1 rounded-2xl border border-border">
-            {(["today", "7d", "30d", "year"] as const).map((t) => (
-              <button
-                key={t}
-                onClick={() => setTimeframe(t)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold uppercase transition ${
-                  timeframe === t
-                    ? "bg-card text-foreground shadow-xs"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {t}
-              </button>
-            ))}
-          </div>
-        </div>
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <StatTile
+          label="Revenue"
+          value={fmtTaka(t.revenue)}
+          change={ch ? ch.revenue : undefined}
+          hint={ch ? "vs previous period" : undefined}
+        />
+        <StatTile
+          label="Orders"
+          value={fmtNumber(t.orders)}
+          change={ch ? ch.orders : undefined}
+          hint={`${fmtNumber(t.allOrders)} placed in total`}
+        />
+        <StatTile
+          label="Average order"
+          value={fmtTaka(t.aov)}
+          change={ch ? ch.aov : undefined}
+          hint={`${fmtNumber(t.itemsSold)} items sold`}
+        />
+        <StatTile
+          label="Customers"
+          value={fmtNumber(t.customers)}
+          change={ch ? ch.customers : undefined}
+          hint={`${fmtNumber(t.newCustomers)} new sign-ups`}
+        />
       </div>
-
-      {/* Primary KPI Metrics Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Gross Revenue */}
-        <div className="card-interactive bg-card border border-border/80 p-5 rounded-3xl relative overflow-hidden shadow-xs hover:shadow-lg">
-          <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
-            <span>Gross Revenue</span>
-            <div className="p-2.5 rounded-2xl bg-primary/10 text-primary border border-primary/20 shadow-xs">
-              <DollarSign className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="text-xl sm:text-2xl lg:text-3xl font-serif font-bold tabular-nums text-foreground mt-2.5 tracking-tight">
-            ৳{totalRevenue.toLocaleString()}
-          </div>
-          <div className="mt-3 flex items-center justify-between">
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
-              <ArrowUpRight className="w-3 h-3" /> +24.8%
-            </span>
-            <span className="text-[10px] text-muted-foreground font-medium">vs last month</span>
-          </div>
+      {!embedded && (
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <StatTile
+            label="Gross profit"
+            value={p.costedRevenue ? fmtTaka(p.grossProfit) : "—"}
+            hint={
+              p.costedRevenue
+                ? `${fmtPercent(p.marginPercent)} margin · cost known for ${fmtPercent(p.coveragePercent, 0)} of sales`
+                : "Add cost prices to products to see profit"
+            }
+          />
+          <StatTile
+            label="Visitor → order"
+            value={t.conversionRate == null ? "—" : fmtPercent(t.conversionRate)}
+            hint={
+              t.visitors
+                ? `${fmtNumber(t.visitors)} visitors (Site activity)`
+                : "Needs site activity data"
+            }
+          />
+          <StatTile
+            label="Repeat customers"
+            value={fmtPercent(t.repeatCustomerRate)}
+            hint="ordered 2+ times in this period"
+          />
+          <StatTile
+            label="Cancelled & returned"
+            value={fmtNumber(t.cancelled + t.returned)}
+            hint={`${fmtTaka(t.cancelledValue + t.returnedValue)} · ${fmtPercent(t.cancelRate)} cancel rate`}
+          />
         </div>
+      )}
 
-        {/* Estimated Gross Profit */}
-        <div className="card-interactive bg-card border border-border/80 p-5 rounded-3xl relative overflow-hidden shadow-xs hover:shadow-lg">
-          <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
-            <span>Gross Profit ({grossMarginPercent}%)</span>
-            <div className="p-2.5 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-xs">
-              <TrendingUp className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="text-xl sm:text-2xl lg:text-3xl font-serif font-bold tabular-nums text-foreground mt-2.5 tracking-tight">
-            ৳{estimatedGrossProfit.toLocaleString()}
-          </div>
-          <div className="mt-3 flex items-center justify-between">
-            <span className="text-[11px] text-muted-foreground font-medium">
-              COGS: ৳{estimatedCostOfGoods.toLocaleString()}
-            </span>
-            <span className="text-[10px] font-bold text-emerald-600">Healthy Margin</span>
-          </div>
-        </div>
+      <Panel
+        title={metric === "revenue" ? "Revenue over time" : "Orders over time"}
+        description={`Grouped by ${data.range.bucket} · Bangladesh time`}
+        action={
+          <Segmented
+            label="Chart metric"
+            value={metric}
+            onChange={setMetric}
+            options={[
+              { value: "revenue", label: "Revenue" },
+              { value: "orders", label: "Orders" },
+            ]}
+          />
+        }
+      >
+        {t.allOrders === 0 ? (
+          <EmptyState icon={TrendingUp} title="No orders in this period" />
+        ) : (
+          <TimeSeriesChart
+            ariaLabel={metric === "revenue" ? "Revenue over time" : "Orders over time"}
+            data={data.series}
+            kind={data.series.length <= 31 ? "bar" : "area"}
+            series={[{ key: metric, label: metric === "revenue" ? "Revenue" : "Orders" }]}
+            format={metric === "revenue" ? fmtTaka : fmtNumber}
+          />
+        )}
+      </Panel>
 
-        {/* Average Order Value (AOV) */}
-        <div className="card-interactive bg-card border border-border/80 p-5 rounded-3xl relative overflow-hidden shadow-xs hover:shadow-lg">
-          <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
-            <span>Average Order Value</span>
-            <div className="p-2.5 rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 shadow-xs">
-              <ShoppingBag className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="text-xl sm:text-2xl lg:text-3xl font-serif font-bold tabular-nums text-foreground mt-2.5 tracking-tight">
-            ৳{avgOrderValue.toLocaleString()}
-          </div>
-          <div className="mt-3 flex items-center justify-between">
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
-              <ArrowUpRight className="w-3 h-3" /> +8.2%
-            </span>
-            <span className="text-[10px] text-muted-foreground font-medium">basket size</span>
-          </div>
-        </div>
-
-        {/* Conversion & ROAS */}
-        <div className="card-interactive bg-card border border-border/80 p-5 rounded-3xl relative overflow-hidden shadow-xs hover:shadow-lg">
-          <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
-            <span>Conversion & ROAS</span>
-            <div className="p-2.5 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shadow-xs">
-              <Percent className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="text-xl sm:text-2xl lg:text-3xl font-serif font-bold tabular-nums text-foreground mt-2.5 tracking-tight">
-            {conversionRate}%{" "}
-            <span className="text-sm text-muted-foreground font-sans font-semibold">
-              / {roas}x ROAS
-            </span>
-          </div>
-          <div className="mt-3 flex items-center justify-between">
-            <span className="text-[11px] text-muted-foreground font-medium">Avg CAC: ৳{cac}</span>
-            <span className="text-[10px] font-bold text-amber-600">Meta + TikTok</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Revenue Growth Trend & Interactive Visual Chart */}
-      <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-card border border-border p-6 rounded-3xl shadow-xs space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-serif font-bold text-lg">Revenue vs Net Margin Velocity</h3>
-              <p className="text-xs text-muted-foreground">
-                Daily performance trajectory in Bangladeshi Taka (৳)
-              </p>
-            </div>
-            <div className="flex items-center gap-4 text-xs font-semibold">
-              <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-primary inline-block"></span> Revenue
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>{" "}
-                Profit
-              </span>
-            </div>
-          </div>
-
-          {/* CSS/SVG Bar Chart Visualization */}
-          <div className="pt-6 pb-2">
-            <div className="grid grid-cols-7 gap-3 sm:gap-6 items-end h-48 sm:h-56 border-b border-border pb-2">
-              {trendPoints.map((pt) => {
-                const maxVal = 50000;
-                const revHeight = Math.round((pt.rev / maxVal) * 100);
-                const profitHeight = Math.round((pt.profit / maxVal) * 100);
-                return (
-                  <div
-                    key={pt.label}
-                    className="flex flex-col items-center gap-2 h-full justify-end group"
-                  >
-                    <div className="w-full flex items-end justify-center gap-1 sm:gap-2 h-full">
-                      {/* Revenue Bar */}
-                      <div
-                        style={{ height: `${revHeight}%` }}
-                        className="w-3 sm:w-6 bg-primary rounded-t-lg transition-all group-hover:brightness-110 relative"
-                        title={`Revenue: ৳${pt.rev.toLocaleString()}`}
-                      />
-                      {/* Profit Bar */}
-                      <div
-                        style={{ height: `${profitHeight}%` }}
-                        className="w-3 sm:w-6 bg-emerald-500 rounded-t-lg transition-all group-hover:brightness-110 relative"
-                        title={`Profit: ৳${pt.profit.toLocaleString()}`}
-                      />
-                    </div>
-                    <span className="text-[10px] text-muted-foreground font-semibold truncate">
-                      {pt.label}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Sales Channels Distribution */}
-        <div className="bg-card border border-border p-6 rounded-3xl shadow-xs space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-serif font-bold text-lg">Sales Channels</h3>
-            <Globe className="w-4 h-4 text-muted-foreground" />
-          </div>
-          <p className="text-xs text-muted-foreground">Multi-channel order origin breakdown</p>
-
-          <div className="space-y-4 pt-2">
-            {salesChannels.map((ch) => (
-              <div key={ch.channel} className="space-y-1.5">
-                <div className="flex justify-between text-xs font-medium">
-                  <span>{ch.channel}</span>
-                  <span className="font-bold">
-                    ৳{ch.revenue.toLocaleString()} ({ch.share}%)
-                  </span>
-                </div>
-                <div className="w-full h-2 bg-secondary rounded-full overflow-hidden">
-                  <div
-                    className={`h-full ${ch.color} rounded-full`}
-                    style={{ width: `${ch.share}%` }}
-                  />
-                </div>
+      <div className="grid gap-5 lg:grid-cols-2">
+        <Panel title="Sales by division" description="Where orders are delivered">
+          <BarList
+            rows={data.byDivision.map((d) => ({ name: d.name, value: d.revenue }))}
+            format={fmtTaka}
+            sub={(r) =>
+              `${fmtNumber(data.byDivision.find((d) => d.name === r.name)?.orders)} orders`
+            }
+          />
+          {totalDivisionRevenue > 0 && data.byDistrict.length > 0 && (
+            <details className="mt-4 text-xs">
+              <summary className="cursor-pointer font-medium text-primary">Top districts</summary>
+              <div className="mt-3">
+                <BarList
+                  rows={data.byDistrict.map((d) => ({ name: d.name, value: d.revenue }))}
+                  format={fmtTaka}
+                  max={10}
+                />
               </div>
-            ))}
-          </div>
-        </div>
+            </details>
+          )}
+        </Panel>
+        <Panel title="Payment methods" description="Revenue by how customers chose to pay">
+          <BarList
+            rows={data.byPayment.map((d) => ({ name: d.name, value: d.revenue }))}
+            format={fmtTaka}
+            sub={(r) => {
+              const row = data.byPayment.find((d) => d.name === r.name);
+              return row
+                ? `${fmtNumber(row.orders)} orders · ${fmtTaka(row.paid)} marked paid`
+                : null;
+            }}
+          />
+        </Panel>
       </div>
 
-      {/* Bangladesh Regional Heatmap / Division Breakdown */}
-      <div className="grid lg:grid-cols-2 gap-6">
-        <div className="bg-card border border-border p-6 rounded-3xl shadow-xs space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-serif font-bold text-lg">Bangladesh Division Distribution</h3>
-              <p className="text-xs text-muted-foreground">
-                Order volume and revenue across 8 divisions
-              </p>
-            </div>
-            <MapPin className="w-4 h-4 text-primary" />
+      <Panel
+        title="Top products"
+        description="By revenue in this period (profit shown where a cost price is set)"
+      >
+        {data.topProducts.length === 0 ? (
+          <p className="py-6 text-center text-xs text-muted-foreground">
+            No products sold in this period.
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[40rem] text-left text-xs">
+              <thead className="text-muted-foreground">
+                <tr className="border-b border-border">
+                  <th className="py-2 pr-3 font-medium">#</th>
+                  <th className="px-3 py-2 font-medium">Product</th>
+                  <th className="px-3 py-2 text-right font-medium">Units</th>
+                  <th className="px-3 py-2 text-right font-medium">Orders</th>
+                  <th className="px-3 py-2 text-right font-medium">Revenue</th>
+                  <th className="px-3 py-2 text-right font-medium">Gross profit</th>
+                  <th className="py-2 pl-3 text-right font-medium">In stock</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {data.topProducts.map((prod, i) => (
+                  <tr key={prod.id ?? prod.name}>
+                    <td className="py-2 pr-3 tabular-nums text-muted-foreground">{i + 1}</td>
+                    <td className="px-3 py-2">
+                      <span className="flex items-center gap-2.5">
+                        {prod.image && (
+                          <img
+                            src={optimizedImageUrl(prod.image, 80)}
+                            alt=""
+                            className="h-9 w-9 shrink-0 rounded-md object-cover"
+                            loading="lazy"
+                          />
+                        )}
+                        {prod.slug ? (
+                          <a
+                            href={`/product/${prod.slug}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="font-medium text-foreground hover:text-primary"
+                          >
+                            {prod.name}
+                          </a>
+                        ) : (
+                          <span className="font-medium">{prod.name}</span>
+                        )}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2 text-right tabular-nums">
+                      {fmtNumber(prod.quantity)}
+                    </td>
+                    <td className="px-3 py-2 text-right tabular-nums">{fmtNumber(prod.orders)}</td>
+                    <td className="px-3 py-2 text-right font-semibold tabular-nums">
+                      {fmtTaka(prod.revenue)}
+                    </td>
+                    <td className="px-3 py-2 text-right tabular-nums">
+                      {prod.profit == null ? (
+                        <span className="text-muted-foreground">no cost price</span>
+                      ) : (
+                        fmtTaka(prod.profit)
+                      )}
+                    </td>
+                    <td className="py-2 pl-3 text-right tabular-nums">{prod.stock ?? "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
+        )}
+      </Panel>
 
-          <div className="divide-y divide-border pt-1">
-            {divisionSales.map((div) => (
-              <div key={div.name} className="py-3 flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-2 h-2 rounded-full bg-primary" />
-                  <span className="font-semibold text-foreground">{div.name} Division</span>
-                  <span className="text-[11px] text-muted-foreground">({div.count} orders)</span>
+      {!embedded && (
+        <div className="grid gap-5 lg:grid-cols-3">
+          <Panel title="Orders by status" description="All orders placed in this period">
+            <BarList
+              rows={data.byStatus.map((s) => ({
+                name: STATUS_LABEL[s.name] ?? s.name,
+                value: s.orders,
+              }))}
+              format={fmtNumber}
+            />
+          </Panel>
+          <Panel title="Money breakdown">
+            <dl className="space-y-2 text-xs">
+              {[
+                ["Product sales", t.subtotal],
+                ["Delivery charges collected", t.shipping],
+                ["Coupon discounts given", -t.discounts],
+                ["Revenue", t.revenue],
+                ["Marked as paid", t.paidRevenue],
+                ["Still to collect", t.revenue - t.paidRevenue],
+              ].map(([k, v]) => (
+                <div
+                  key={k as string}
+                  className="flex justify-between gap-3 border-b border-border pb-1.5 last:border-0"
+                >
+                  <dt className="text-muted-foreground">{k}</dt>
+                  <dd className="font-semibold tabular-nums">{fmtTaka(v as number)}</dd>
                 </div>
-                <div className="text-right">
-                  <div className="font-bold text-foreground">৳{div.revenue.toLocaleString()}</div>
-                  <span className="text-[10px] text-muted-foreground">{div.share}% of total</span>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </dl>
+          </Panel>
+          <Panel title="Couriers used">
+            <BarList
+              rows={data.byCourier.map((c) => ({ name: c.name, value: c.orders }))}
+              format={(n) => `${fmtNumber(n)} orders`}
+              empty="No courier recorded on orders yet."
+            />
+          </Panel>
         </div>
-
-        {/* Top Selling Products Leaderboard */}
-        <div className="bg-card border border-border p-6 rounded-3xl shadow-xs space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-serif font-bold text-lg">Top Grossing Products</h3>
-              <p className="text-xs text-muted-foreground">
-                Highest revenue generating catalog items
-              </p>
-            </div>
-            <Flame className="w-4 h-4 text-amber-500" />
-          </div>
-
-          <div className="space-y-3 pt-1">
-            {products.slice(0, 5).map((p, idx) => (
-              <div
-                key={p._id || p.name || idx}
-                className="flex items-center justify-between p-3 rounded-2xl bg-secondary/40 border border-border text-xs"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <span className="w-6 h-6 rounded-lg bg-card flex items-center justify-center font-bold text-[11px] border border-border text-muted-foreground shrink-0">
-                    #{idx + 1}
-                  </span>
-                  <div className="truncate">
-                    <div className="font-semibold text-foreground truncate">{p.name}</div>
-                    <div className="text-[11px] text-muted-foreground">
-                      ৳{p.price?.toLocaleString()} · Sold: {p.totalSold || 35 + idx * 8} units
-                    </div>
-                  </div>
-                </div>
-                <div className="text-right shrink-0">
-                  <div className="font-bold text-primary">
-                    ৳{((p.price || 2400) * (p.totalSold || 35 + idx * 8)).toLocaleString()}
-                  </div>
-                  <span className="text-[10px] text-emerald-600 font-semibold">+18% MoM</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

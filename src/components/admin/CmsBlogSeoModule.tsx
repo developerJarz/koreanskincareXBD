@@ -1,194 +1,175 @@
 "use client";
 
-import React, { useState } from "react";
-import { FileText, Plus, Edit2, Trash2, Globe, Code, Check, Copy, Search } from "lucide-react";
+import React from "react";
+import { Copy, ExternalLink, FileText, Search } from "lucide-react";
 import { toast } from "sonner";
 
-export function CmsBlogSeoModule() {
-  const [activeSubTab, setActiveSubTab] = useState<"blog" | "pages" | "schema">("blog");
+import { secondaryButton } from "./catalog/ui";
+import {
+  ErrorNotice,
+  fmtNumber,
+  PageHeader,
+  Panel,
+  Pill,
+  Skeleton,
+  StatTile,
+  useAdminData,
+} from "./shared";
 
-  const [posts, setPosts] = useState([
-    {
-      id: "post_1",
-      title: "The Rose Gold Story: Why Pink Tones Resonate in Dhaka",
-      slug: "the-rose-gold-story",
-      author: "Nusrat Jahan",
-      date: "14 Aug 2026",
-      views: 1840,
-      status: "published",
-    },
-    {
-      id: "post_2",
-      title: "How to Choose an Everyday Luxury Bag That Lasts",
-      slug: "choosing-a-bag-that-lasts",
-      author: "Store Editorial",
-      date: "08 Aug 2026",
-      views: 920,
-      status: "published",
-    },
-  ]);
-
-  const [cmsPages, setCmsPages] = useState([
-    { title: "About koreanskincare.bd & Our Story", slug: "about", status: "published" },
-    { title: "Delivery Policy & 64 District Hubs", slug: "delivery-policy", status: "published" },
-    { title: "7-Day Return & Replacement Terms", slug: "return-policy", status: "published" },
-    { title: "Privacy Policy & Customer Data", slug: "privacy", status: "published" },
-  ]);
-
-  const schemaJsonLd = JSON.stringify(
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      name: "koreanskincare.bd",
-      url: "https://koreanskincare.bd",
-      logo: "https://koreanskincare.bd/logo.png",
-      contactPoint: {
-        "@type": "ContactPoint",
-        telephone: "+880 1711-223344",
-        contactType: "Customer Support",
-        areaServed: "BD",
-        availableLanguage: ["en", "bn"],
-      },
-      sameAs: ["https://facebook.com/koreanskincarebd", "https://instagram.com/koreanskincarebd"],
-    },
-    null,
-    2,
-  );
-
-  const handleCopySchema = () => {
-    navigator.clipboard.writeText(schemaJsonLd);
-    toast.success("Schema.org JSON-LD snippet copied!");
+type Data = {
+  products: {
+    total: number;
+    noSeoTitle: number;
+    noSeoDesc: number;
+    shortDesc: number;
+    noAlt: number;
   };
+  categories: { total: number; noDescription: number };
+  brands: { total: number; noDescription: number };
+  toFix: { id: string; name: string; slug: string; sold: number; issues: string[] }[];
+  schema: Record<string, unknown>;
+};
+
+const pct = (part: number, total: number) =>
+  total ? Math.round(((total - part) / total) * 100) : 100;
+
+/** How the live catalogue appears in Google, measured from the database. */
+export function CmsBlogSeoModule() {
+  const { data, error, reload } = useAdminData<Data>("/api/admin/seo");
+  if (error && !data) return <ErrorNotice message={error} onRetry={reload} />;
+  if (!data) return <Skeleton className="h-96" />;
+  const p = data.products;
+  const schemaText = JSON.stringify(data.schema, null, 2);
 
   return (
-    <div className="space-y-6">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card border border-border p-4 rounded-3xl">
-        <div>
-          <div className="flex items-center gap-2">
-            <FileText className="w-5 h-5 text-primary" />
-            <h2 className="font-serif text-2xl font-bold">CMS, Blog & SEO Management</h2>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Publish journal articles, manage legal pages & inject Schema.org structured data
-          </p>
-        </div>
+    <div className="space-y-5">
+      <PageHeader
+        title="Pages & SEO"
+        description="Search-appearance health of your published products, categories and brands."
+      />
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <StatTile
+          label="Products with a search title"
+          value={`${pct(p.noSeoTitle, p.total)}%`}
+          hint={`${fmtNumber(p.noSeoTitle)} of ${fmtNumber(p.total)} missing`}
+        />
+        <StatTile
+          label="With a search description"
+          value={`${pct(p.noSeoDesc, p.total)}%`}
+          hint={`${fmtNumber(p.noSeoDesc)} missing`}
+        />
+        <StatTile
+          label="Descriptions 120+ characters"
+          value={`${pct(p.shortDesc, p.total)}%`}
+          hint={`${fmtNumber(p.shortDesc)} too short`}
+        />
+        <StatTile
+          label="Images described (alt text)"
+          value={`${pct(p.noAlt, p.total)}%`}
+          hint={`${fmtNumber(p.noAlt)} products have undescribed images`}
+        />
+      </div>
 
-        {/* Tab Controls */}
-        <div className="flex bg-secondary p-1 rounded-2xl border border-border text-xs">
-          <button
-            onClick={() => setActiveSubTab("blog")}
-            className={`px-3 py-1.5 rounded-xl font-bold transition ${
-              activeSubTab === "blog" ? "bg-card text-primary shadow-xs" : "text-muted-foreground"
-            }`}
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
+        <Panel
+          title="Best sellers to improve first"
+          description="Live products with missing or thin search information, best sellers first"
+        >
+          {data.toFix.length === 0 ? (
+            <p className="py-6 text-center text-xs text-muted-foreground">
+              Every live product has its search details filled in.
+            </p>
+          ) : (
+            <ul className="divide-y divide-border text-xs">
+              {data.toFix.map((item) => (
+                <li
+                  key={item.id}
+                  className="flex flex-wrap items-center justify-between gap-2 py-2"
+                >
+                  <span className="min-w-0">
+                    <a
+                      href={`/product/${item.slug}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="font-medium hover:text-primary"
+                    >
+                      {item.name} <ExternalLink className="inline h-3 w-3" aria-hidden="true" />
+                    </a>
+                    <span className="block text-muted-foreground">{fmtNumber(item.sold)} sold</span>
+                  </span>
+                  <span className="flex flex-wrap gap-1">
+                    {item.issues.map((i) => (
+                      <Pill key={i} tone="warn">
+                        {i}
+                      </Pill>
+                    ))}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <p className="mt-3 text-[11px] text-muted-foreground">
+            Fix them in Products → edit → Search appearance, or draft text with the AI writer.
+          </p>
+        </Panel>
+        <div className="space-y-5">
+          <Panel title="Categories & brands">
+            <dl className="space-y-2 text-xs">
+              <div className="flex justify-between">
+                <dt className="text-muted-foreground">Categories without a description</dt>
+                <dd className="font-semibold tabular-nums">
+                  {data.categories.noDescription} / {data.categories.total}
+                </dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-muted-foreground">Brands without a description</dt>
+                <dd className="font-semibold tabular-nums">
+                  {data.brands.noDescription} / {data.brands.total}
+                </dd>
+              </div>
+            </dl>
+          </Panel>
+          <Panel
+            title="Blog"
+            description="Blog posts are currently written in the website code (app/(store)/blog), so they can't be edited here yet."
           >
-            Blog & Journal ({posts.length})
-          </button>
-          <button
-            onClick={() => setActiveSubTab("pages")}
-            className={`px-3 py-1.5 rounded-xl font-bold transition ${
-              activeSubTab === "pages" ? "bg-card text-primary shadow-xs" : "text-muted-foreground"
-            }`}
-          >
-            Policy Pages ({cmsPages.length})
-          </button>
-          <button
-            onClick={() => setActiveSubTab("schema")}
-            className={`px-3 py-1.5 rounded-xl font-bold transition ${
-              activeSubTab === "schema" ? "bg-card text-primary shadow-xs" : "text-muted-foreground"
-            }`}
-          >
-            Schema.org JSON-LD
-          </button>
+            <a href="/blog" target="_blank" rel="noreferrer" className={secondaryButton}>
+              <FileText className="h-4 w-4" /> View the blog
+            </a>
+          </Panel>
         </div>
       </div>
 
-      {/* 1. Blog Posts Subview */}
-      {activeSubTab === "blog" && (
-        <div className="bg-card border border-border rounded-3xl p-6 shadow-xs space-y-4 text-xs">
-          <div className="flex items-center justify-between">
-            <h3 className="font-serif font-bold text-lg">Journal Articles</h3>
-            <button
-              onClick={() => toast.success("Opened article editor draft!")}
-              className="px-3.5 py-1.5 rounded-xl bg-primary text-primary-foreground font-bold flex items-center gap-1.5"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Write Article</span>
-            </button>
-          </div>
-
-          <div className="space-y-2.5">
-            {posts.map((post) => (
-              <div
-                key={post.id}
-                className="p-3.5 rounded-2xl bg-secondary/40 border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-              >
-                <div>
-                  <h4 className="font-bold text-foreground">{post.title}</h4>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">
-                    Author: {post.author} · Date: {post.date} · Views: {post.views.toLocaleString()}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-500/15 text-emerald-600">
-                    {post.status}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* 2. Policy Pages Subview */}
-      {activeSubTab === "pages" && (
-        <div className="bg-card border border-border rounded-3xl p-6 shadow-xs space-y-4 text-xs">
-          <h3 className="font-serif font-bold text-lg">CMS Storefront Pages</h3>
-          <div className="space-y-2.5">
-            {cmsPages.map((page) => (
-              <div
-                key={page.slug}
-                className="p-3.5 rounded-2xl bg-secondary/40 border border-border flex items-center justify-between"
-              >
-                <div>
-                  <h4 className="font-bold text-foreground">{page.title}</h4>
-                  <p className="text-[11px] font-mono text-muted-foreground">
-                    URL: https://koreanskincare.bd/{page.slug}
-                  </p>
-                </div>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-500/15 text-emerald-600">
-                  {page.status}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* 3. Schema.org JSON-LD */}
-      {activeSubTab === "schema" && (
-        <div className="bg-card border border-border rounded-3xl p-6 shadow-xs space-y-4 text-xs">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-serif font-bold text-lg">Schema.org JSON-LD Structured Data</h3>
-              <p className="text-muted-foreground">
-                Automated SEO rich snippets for Google Bangladesh
-              </p>
-            </div>
-            <button
-              onClick={handleCopySchema}
-              className="px-3.5 py-1.5 rounded-xl bg-primary text-primary-foreground font-bold flex items-center gap-1.5"
-            >
-              <Copy className="w-3.5 h-3.5" />
-              <span>Copy Schema</span>
-            </button>
-          </div>
-
-          <pre className="p-4 rounded-2xl bg-neutral-950 text-emerald-400 font-mono text-[11px] leading-relaxed overflow-x-auto border border-neutral-800">
-            {schemaJsonLd}
-          </pre>
-        </div>
-      )}
+      <Panel
+        title="Organization schema (JSON-LD)"
+        description="Built from your store name, logo, contact details and social links in Website design"
+        action={
+          <button
+            type="button"
+            className={secondaryButton}
+            onClick={() => {
+              navigator.clipboard.writeText(
+                `<script type="application/ld+json">\n${schemaText}\n</script>`,
+              );
+              toast.success("Schema copied.");
+            }}
+          >
+            <Copy className="h-4 w-4" /> Copy
+          </button>
+        }
+      >
+        <pre className="max-h-80 overflow-auto rounded-xl bg-secondary/60 p-3 text-[11px] leading-relaxed">
+          {schemaText}
+        </pre>
+        <a
+          href={`https://search.google.com/test/rich-results`}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+        >
+          <Search className="h-3 w-3" /> Test it in Google's Rich Results Test
+        </a>
+      </Panel>
     </div>
   );
 }

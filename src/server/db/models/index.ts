@@ -18,3 +18,24 @@ export { Payment, type PaymentDocument } from "./payment.model";
 export { Analytics, type AnalyticsDocument } from "./analytics.model";
 export { Vendor, type VendorDocument } from "./vendor.model";
 export { EmailOtp, type EmailOtpDocument, type OtpPurpose } from "./email-otp.model";
+export { Role, type RoleDocument } from "./role.model";
+export { AuditLog, type AuditLogDocument } from "./audit-log.model";
+export {
+  ActivityEvent,
+  ACTIVITY_TYPES,
+  type ActivityEventDocument,
+  type ActivityType,
+} from "./activity-event.model";
+export { nextSequence } from "./counter.model";
+export {
+  Expense,
+  EXPENSE_CATEGORIES,
+  EXPENSE_METHODS,
+  type ExpenseDocument,
+} from "./expense.model";
+export {
+  Invoice,
+  INVOICE_STATUSES,
+  type InvoiceDocument,
+  type InvoiceStatus,
+} from "./invoice.model";

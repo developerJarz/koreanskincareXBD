@@ -3,21 +3,22 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { connectDB } from "@/server/db/connection";
 import { Settings } from "@/server/db/models";
-import { ADMIN_ROLES, requireAuth, serverError, STAFF_ROLES } from "@/server/auth/session";
+import { serverError } from "@/server/auth/session";
+import { requirePermission } from "@/server/auth/permissions";
 import { revalidateStorefront, storefrontFromSettings } from "@/server/storefront";
 import { DEFAULT_STOREFRONT, normalizeStorefront, whatsappLink } from "@/lib/storefront";
 
 // GET — the current website design (staff can view; only admins can change it)
 export async function GET(request: NextRequest) {
   try {
-    const auth = await requireAuth(request, STAFF_ROLES);
+    const auth = await requirePermission(request, []);
     if (!auth.ok) return auth.response;
     await connectDB();
     const settings = await Settings.findOne().lean();
     return NextResponse.json({
       config: storefrontFromSettings(settings as any),
       defaults: DEFAULT_STOREFRONT,
-      canEdit: ADMIN_ROLES.includes(auth.user.role),
+      canEdit: auth.permissions.includes("storefront.manage"),
     });
   } catch (err) {
     return serverError("Get storefront error", err, "Couldn't load the website settings.");
@@ -27,7 +28,7 @@ export async function GET(request: NextRequest) {
 // PUT — save the whole website design; every field is validated in normalizeStorefront()
 export async function PUT(request: NextRequest) {
   try {
-    const auth = await requireAuth(request, ADMIN_ROLES);
+    const auth = await requirePermission(request, "storefront.manage");
     if (!auth.ok) return auth.response;
 
     const body = await request.json().catch(() => null);

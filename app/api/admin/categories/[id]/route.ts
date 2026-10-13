@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/server/db/connection";
 import { Category, Product } from "@/server/db/models";
 import { ADMIN_ROLES, requireAuth, serverError } from "@/server/auth/session";
+import { requirePermission } from "@/server/auth/permissions";
 import { validateCategory } from "@/server/category-admin";
 import { revalidateCatalog } from "@/server/catalog";
 import { isObjectId } from "@/server/security/validation";
@@ -12,7 +13,7 @@ type Ctx = { params: Promise<{ id: string }> };
 // PUT — update a category (admins). Send the full category form.
 export async function PUT(request: NextRequest, { params }: Ctx) {
   try {
-    const auth = await requireAuth(request, ADMIN_ROLES);
+    const auth = await requirePermission(request, "catalog.structure");
     if (!auth.ok) return auth.response;
     const { id } = await params;
     if (!isObjectId(id))
@@ -52,7 +53,7 @@ export async function PUT(request: NextRequest, { params }: Ctx) {
 // PATCH — quick toggles from the list: { isActive?, isFeatured? }
 export async function PATCH(request: NextRequest, { params }: Ctx) {
   try {
-    const auth = await requireAuth(request, ADMIN_ROLES);
+    const auth = await requirePermission(request, "catalog.structure");
     if (!auth.ok) return auth.response;
     const { id } = await params;
     if (!isObjectId(id))
@@ -76,7 +77,7 @@ export async function PATCH(request: NextRequest, { params }: Ctx) {
 // DELETE — only empty categories: no products and no subcategories, so nothing is orphaned
 export async function DELETE(request: NextRequest, { params }: Ctx) {
   try {
-    const auth = await requireAuth(request, ADMIN_ROLES);
+    const auth = await requirePermission(request, "catalog.structure");
     if (!auth.ok) return auth.response;
     const { id } = await params;
     if (!isObjectId(id))

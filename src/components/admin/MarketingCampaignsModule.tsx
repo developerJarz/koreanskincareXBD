@@ -1,313 +1,393 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  Flame,
-  Tag,
-  Plus,
-  Calendar,
-  MessageSquare,
-  Sparkles,
-  Percent,
-  CheckCircle,
-  Copy,
-  Trash2,
-  Send,
-  X,
-} from "lucide-react";
+import { Copy, Plus, Tag, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import type { BDSeasonalTheme, SmsTemplate } from "./types";
 
-interface MarketingCampaignsModuleProps {
-  coupons: any[];
-  seasonalTheme: BDSeasonalTheme;
-  setSeasonalTheme: (theme: BDSeasonalTheme) => void;
+import {
+  api,
+  ApiError,
+  Field,
+  iconButton,
+  inputClass,
+  Modal,
+  primaryButton,
+  secondaryButton,
+  Switch,
+} from "./catalog/ui";
+import {
+  EmptyState,
+  ErrorNotice,
+  fmtDate,
+  fmtNumber,
+  fmtRelative,
+  fmtTaka,
+  PageHeader,
+  Panel,
+  Pill,
+  Skeleton,
+  StatTile,
+  todayInput,
+  useAdminData,
+} from "./shared";
+
+type Coupon = {
+  _id: string;
+  code: string;
+  type: "percentage" | "fixed" | "free_shipping" | "first_order" | "buy_x_get_y";
+  value: number;
+  minOrderAmount?: number;
+  maxDiscount?: number;
+  usageLimit?: number;
+  usageCount: number;
+  isActive: boolean;
+  startsAt: string;
+  expiresAt?: string;
+  orders: number;
+  discountGiven: number;
+  revenue: number;
+  lastUsedAt: string | null;
+};
+
+function describe(c: Coupon) {
+  if (c.type === "free_shipping") return "Free delivery";
+  if (c.type === "fixed") return `${fmtTaka(c.value)} off`;
+  return `${c.value}% off${c.maxDiscount ? ` (max ${fmtTaka(c.maxDiscount)})` : ""}`;
 }
 
-export function MarketingCampaignsModule({
-  coupons: initialCoupons,
-  seasonalTheme,
-  setSeasonalTheme,
-}: MarketingCampaignsModuleProps) {
-  const [coupons, setCoupons] = useState(initialCoupons);
-  const [newCouponCode, setNewCouponCode] = useState("");
-  const [newCouponDiscount, setNewCouponDiscount] = useState(15);
-  const [newCouponMinSpend, setNewCouponMinSpend] = useState(2000);
-  const [smsCampaignText, setSmsCampaignText] = useState(
-    "koreanskincare.bd Eid-ul-Fitr Grand Sale! Enjoy 20% OFF on authentic Korean skincare. Use code: KOREANVIP. Shop at koreanskincare.bd",
-  );
-  const [smsAudience, setSmsAudience] = useState("vip");
+function state(c: Coupon): { label: string; tone: "good" | "neutral" | "warn" | "bad" } {
+  const now = Date.now();
+  if (!c.isActive) return { label: "Off", tone: "neutral" };
+  if (c.expiresAt && new Date(c.expiresAt).getTime() < now)
+    return { label: "Expired", tone: "bad" };
+  if (new Date(c.startsAt).getTime() > now) return { label: "Scheduled", tone: "warn" };
+  if (c.usageLimit && c.usageCount >= c.usageLimit) return { label: "Used up", tone: "bad" };
+  return { label: "Live", tone: "good" };
+}
 
-  const [smsTemplates, setSmsTemplates] = useState<SmsTemplate[]>([
-    {
-      id: "sms_1",
-      title: "Order Confirmation SMS",
-      trigger: "order_placed",
-      body: "Assalamu Alaikum {name}, your order {order_id} of BDT {amount} is confirmed at koreanskincare.bd. Hotline: 01711223344",
-      isActive: true,
-    },
-    {
-      id: "sms_2",
-      title: "Courier Shipped & Tracking",
-      trigger: "shipped",
-      body: "Your koreanskincare.bd parcel is dispatched via {courier}. Tracking ID: {tracking_code}. Expect delivery within 24-48 hrs!",
-      isActive: true,
-    },
-    {
-      id: "sms_3",
-      title: "Eid Mubarak Festive Promo",
-      trigger: "eid_promo",
-      body: "Eid Mubarak {name}! Get flat 15% OFF on all signature collections at koreanskincare.bd with code: EID2026. Free delivery across BD!",
-      isActive: true,
-    },
-  ]);
+/** Coupon codes customers can use at checkout, with real usage from orders. */
+export function MarketingCampaignsModule() {
+  const { data, error, reload, setData } = useAdminData<Coupon[]>("/api/admin/coupons");
+  const [creating, setCreating] = useState(false);
+  const [deleting, setDeleting] = useState<Coupon | null>(null);
 
-  const [isCreatingCoupon, setIsCreatingCoupon] = useState(false);
-
-  const handleCreateCoupon = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newCouponCode.trim()) return;
-
-    setIsCreatingCoupon(true);
+  const toggle = async (c: Coupon, isActive: boolean) => {
     try {
-      const res = await fetch("/api/admin/coupons", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          code: newCouponCode.toUpperCase().trim(),
-          type: "percentage",
-          value: newCouponDiscount,
-          minOrderAmount: newCouponMinSpend,
-          usageLimit: 500,
-        }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to create coupon");
-      }
-
-      const newCoupon = await res.json();
-      setCoupons([newCoupon, ...coupons]);
-      toast.success(`Coupon "${newCoupon.code}" created and saved to database!`);
-      setNewCouponCode("");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to create coupon");
-    } finally {
-      setIsCreatingCoupon(false);
+      await api("/api/admin/coupons", { method: "PATCH", json: { id: c._id, isActive } });
+      setData((list) => list?.map((x) => (x._id === c._id ? { ...x, isActive } : x)) ?? null);
+      toast.success(`${c.code} ${isActive ? "switched on" : "switched off"}.`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Couldn't update.");
+    }
+  };
+  const remove = async () => {
+    if (!deleting) return;
+    try {
+      await api(`/api/admin/coupons?id=${deleting._id}`, { method: "DELETE" });
+      toast.success(`${deleting.code} deleted.`);
+      setDeleting(null);
+      reload();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Couldn't delete.");
     }
   };
 
-  const handleBroadcastSms = () => {
-    toast.loading("Sending SMS blast via Greenweb SMS BD gateway...");
-    setTimeout(() => {
-      toast.dismiss();
-      toast.success(
-        `SMS broadcast successfully sent to 1,420 ${smsAudience.toUpperCase()} recipients!`,
-      );
-    }, 1200);
+  const live = data?.filter((c) => state(c).label === "Live") ?? [];
+  return (
+    <div className="space-y-5">
+      <PageHeader
+        title="Promotions"
+        description="Coupon codes customers enter in the cart. Discounts are checked again when the order is placed."
+        actions={
+          <button type="button" className={primaryButton} onClick={() => setCreating(true)}>
+            <Plus className="h-4 w-4" /> New coupon
+          </button>
+        }
+      />
+      {error && !data && <ErrorNotice message={error} onRetry={reload} />}
+      {!data && !error && <Skeleton className="h-80" />}
+      {data && (
+        <>
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <StatTile
+              label="Live coupons"
+              value={fmtNumber(live.length)}
+              hint={`${data.length} in total`}
+            />
+            <StatTile
+              label="Orders with a coupon"
+              value={fmtNumber(data.reduce((s, c) => s + c.orders, 0))}
+            />
+            <StatTile
+              label="Discount given"
+              value={fmtTaka(data.reduce((s, c) => s + c.discountGiven, 0))}
+            />
+            <StatTile
+              label="Revenue from coupon orders"
+              value={fmtTaka(data.reduce((s, c) => s + c.revenue, 0))}
+            />
+          </div>
+          <Panel>
+            {data.length === 0 ? (
+              <EmptyState icon={Tag} title="No coupons yet">
+                Create a code like EID15 for 15% off, or FREESHIP for free delivery.
+              </EmptyState>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[52rem] text-left text-xs">
+                  <thead className="text-muted-foreground">
+                    <tr className="border-b border-border">
+                      <th className="py-2 pr-3 font-medium">Code</th>
+                      <th className="px-3 py-2 font-medium">Discount</th>
+                      <th className="px-3 py-2 font-medium">Rules</th>
+                      <th className="px-3 py-2 font-medium">Valid</th>
+                      <th className="px-3 py-2 text-right font-medium">Orders</th>
+                      <th className="px-3 py-2 text-right font-medium">Discount given</th>
+                      <th className="px-3 py-2 font-medium">Status</th>
+                      <th className="py-2 pl-3 text-right font-medium">On</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {data.map((c) => {
+                      const st = state(c);
+                      return (
+                        <tr key={c._id}>
+                          <td className="py-2.5 pr-3">
+                            <button
+                              type="button"
+                              className="inline-flex items-center gap-1 font-mono font-semibold hover:text-primary"
+                              onClick={() => {
+                                navigator.clipboard.writeText(c.code);
+                                toast.success(`${c.code} copied.`);
+                              }}
+                            >
+                              {c.code}{" "}
+                              <Copy className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
+                            </button>
+                          </td>
+                          <td className="px-3 py-2.5">{describe(c)}</td>
+                          <td className="px-3 py-2.5 text-muted-foreground">
+                            {c.minOrderAmount ? `Min ${fmtTaka(c.minOrderAmount)}` : "Any order"}
+                            <span className="block">
+                              {c.usageLimit
+                                ? `${c.usageCount} of ${c.usageLimit} uses`
+                                : `${c.usageCount} uses`}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2.5 whitespace-nowrap text-muted-foreground">
+                            {fmtDate(c.startsAt)} → {c.expiresAt ? fmtDate(c.expiresAt) : "no end"}
+                          </td>
+                          <td className="px-3 py-2.5 text-right tabular-nums">
+                            {fmtNumber(c.orders)}
+                            {c.lastUsedAt && (
+                              <span className="block text-[11px] text-muted-foreground">
+                                last {fmtRelative(c.lastUsedAt)}
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-3 py-2.5 text-right tabular-nums">
+                            {fmtTaka(c.discountGiven)}
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <Pill tone={st.tone}>{st.label}</Pill>
+                          </td>
+                          <td className="whitespace-nowrap py-2.5 pl-3 text-right">
+                            <span className="inline-flex items-center gap-1">
+                              <Switch
+                                label={`Coupon ${c.code}`}
+                                checked={c.isActive}
+                                onChange={(v) => toggle(c, v)}
+                              />
+                              <button
+                                type="button"
+                                className={`${iconButton} text-destructive`}
+                                aria-label={`Delete ${c.code}`}
+                                onClick={() => setDeleting(c)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </Panel>
+        </>
+      )}
+      {creating && <CouponEditor onClose={() => setCreating(false)} onSaved={reload} />}
+      {deleting && (
+        <Modal
+          title="Delete coupon"
+          onClose={() => setDeleting(null)}
+          footer={
+            <>
+              <button type="button" className={secondaryButton} onClick={() => setDeleting(null)}>
+                Cancel
+              </button>
+              <button type="button" className={primaryButton} onClick={remove}>
+                Delete
+              </button>
+            </>
+          }
+        >
+          <p className="text-sm">
+            Delete {deleting.code}? Customers won't be able to use it. Past orders keep their
+            discount. Switching it off instead keeps its history here.
+          </p>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+function CouponEditor({ onClose, onSaved }: { onClose: () => void; onSaved: () => void }) {
+  const [form, setForm] = useState({
+    code: "",
+    type: "percentage",
+    value: "10",
+    minOrderAmount: "",
+    maxDiscount: "",
+    usageLimit: "",
+    startsAt: todayInput(),
+    expiresAt: "",
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState(false);
+  const set = (k: keyof typeof form, v: string) => setForm((f) => ({ ...f, [k]: v }));
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setErrors({});
+    try {
+      await api("/api/admin/coupons", { method: "POST", json: form });
+      toast.success(`${form.code.toUpperCase()} created — customers can use it now.`);
+      onSaved();
+      onClose();
+    } catch (err) {
+      if (err instanceof ApiError && err.fields) setErrors(err.fields);
+      toast.error(err instanceof Error ? err.message : "Couldn't create the coupon.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
-    <div className="space-y-6">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card border border-border p-4 rounded-3xl">
-        <div>
-          <div className="flex items-center gap-2">
-            <Flame className="w-5 h-5 text-amber-500" />
-            <h2 className="font-serif text-2xl font-bold">
-              Bangladeshi Campaigns & Marketing Suite
-            </h2>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Eid, Ramadan, Pohela Boishakh festive tools, coupon codes & Greenweb SMS broadcasts
-          </p>
-        </div>
-      </div>
-
-      {/* Seasonal Campaigns Visual Showcase */}
-      <div className="grid md:grid-cols-3 gap-4">
-        {/* Eid-ul-Fitr Campaign */}
-        <div className="bg-gradient-to-br from-amber-900/80 via-yellow-800/80 to-amber-950 text-amber-100 p-6 rounded-3xl space-y-3 shadow-lg border border-amber-500/30 relative overflow-hidden">
-          <span className="text-2xl">🕌</span>
-          <h3 className="font-serif font-bold text-lg text-white">Eid-ul-Fitr Mega Edit</h3>
-          <p className="text-xs text-amber-200/80 leading-relaxed">
-            Festive gold accents, luxury packaging, and countdown flash discounts.
-          </p>
-          <button
-            onClick={() => {
-              setSeasonalTheme("eid");
-              toast.success("Eid Mubarak Campaign mode activated across the platform!");
-            }}
-            className={`w-full py-2 rounded-2xl text-xs font-bold transition shadow-sm ${
-              seasonalTheme === "eid"
-                ? "bg-white text-amber-900"
-                : "bg-amber-500 text-white hover:bg-amber-400"
-            }`}
-          >
-            {seasonalTheme === "eid" ? "✓ Active Mode" : "Activate Eid Mode"}
+    <Modal
+      title="New coupon"
+      onClose={onClose}
+      footer={
+        <>
+          <button type="button" className={secondaryButton} onClick={onClose}>
+            Cancel
           </button>
-        </div>
-
-        {/* Ramadan Kareem Campaign */}
-        <div className="bg-gradient-to-br from-emerald-950 via-teal-900/90 to-emerald-900 text-emerald-100 p-6 rounded-3xl space-y-3 shadow-lg border border-emerald-500/30 relative overflow-hidden">
-          <span className="text-2xl">🌙</span>
-          <h3 className="font-serif font-bold text-lg text-white">Ramadan Kareem Specials</h3>
-          <p className="text-xs text-emerald-200/80 leading-relaxed">
-            Iftar & Sehri flash sales, subtle emerald theme & gift bundle highlights.
-          </p>
-          <button
-            onClick={() => {
-              setSeasonalTheme("ramadan");
-              toast.success("Ramadan Kareem Campaign mode activated!");
-            }}
-            className={`w-full py-2 rounded-2xl text-xs font-bold transition shadow-sm ${
-              seasonalTheme === "ramadan"
-                ? "bg-white text-emerald-900"
-                : "bg-emerald-500 text-white hover:bg-emerald-400"
-            }`}
-          >
-            {seasonalTheme === "ramadan" ? "✓ Active Mode" : "Activate Ramadan Mode"}
+          <button type="submit" form="coupon-form" className={primaryButton} disabled={saving}>
+            {saving ? "Creating…" : "Create coupon"}
           </button>
-        </div>
-
-        {/* Pohela Boishakh Campaign */}
-        <div className="bg-gradient-to-br from-rose-900 via-red-900 to-amber-900 text-rose-100 p-6 rounded-3xl space-y-3 shadow-lg border border-rose-500/30 relative overflow-hidden">
-          <span className="text-2xl">🏮</span>
-          <h3 className="font-serif font-bold text-lg text-white">Pohela Boishakh 1433</h3>
-          <p className="text-xs text-rose-200/80 leading-relaxed">
-            Bengali New Year red & white motifs, special Baisakhi gift boxes.
-          </p>
-          <button
-            onClick={() => {
-              setSeasonalTheme("boishakh");
-              toast.success("Pohela Boishakh Campaign mode activated!");
-            }}
-            className={`w-full py-2 rounded-2xl text-xs font-bold transition shadow-sm ${
-              seasonalTheme === "boishakh"
-                ? "bg-white text-rose-900"
-                : "bg-rose-500 text-white hover:bg-rose-400"
-            }`}
-          >
-            {seasonalTheme === "boishakh" ? "✓ Active Mode" : "Activate Boishakh Mode"}
-          </button>
-        </div>
-      </div>
-
-      {/* Coupon Engine & SMS Broadcast Grid */}
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Coupon Manager */}
-        <div className="bg-card border border-border p-6 rounded-3xl shadow-xs space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-serif font-bold text-lg">Active Promotional Coupons</h3>
-            <Tag className="w-4 h-4 text-primary" />
-          </div>
-
-          <form
-            onSubmit={handleCreateCoupon}
-            className="p-4 rounded-2xl bg-secondary/40 border border-border space-y-3"
-          >
-            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Create New Promo Code
-            </p>
-            <div className="grid grid-cols-3 gap-2">
-              <input
-                type="text"
-                placeholder="Code (e.g. EID20)"
-                value={newCouponCode}
-                onChange={(e) => setNewCouponCode(e.target.value)}
-                className="col-span-1 px-3 py-2 rounded-xl border border-border bg-background text-xs uppercase font-bold focus:outline-hidden"
-              />
-              <input
-                type="number"
-                placeholder="Discount %"
-                value={newCouponDiscount}
-                onChange={(e) => setNewCouponDiscount(Number(e.target.value))}
-                className="col-span-1 px-3 py-2 rounded-xl border border-border bg-background text-xs font-bold focus:outline-hidden"
-              />
-              <button
-                type="submit"
-                disabled={isCreatingCoupon}
-                className="col-span-1 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 transition disabled:opacity-50"
-              >
-                {isCreatingCoupon ? "Saving..." : "+ Add Coupon"}
-              </button>
-            </div>
-          </form>
-
-          <div className="space-y-2 pt-1 max-h-64 overflow-y-auto scrollbar-thin">
-            {coupons.map((c: any) => (
-              <div
-                key={c._id || c.code}
-                className="flex items-center justify-between p-3 rounded-2xl bg-card border border-border text-xs"
-              >
-                <div className="flex items-center gap-2.5">
-                  <div className="px-2 py-1 rounded-lg bg-primary/10 text-primary font-mono font-bold">
-                    {c.code}
-                  </div>
-                  <div>
-                    <div className="font-bold">{c.value}% OFF</div>
-                    <div className="text-[10px] text-muted-foreground">
-                      Min spend: ৳{c.minOrderAmount || 1000}
-                    </div>
-                  </div>
-                </div>
-                <span className="text-[10px] text-muted-foreground font-semibold">
-                  Used: {c.usageCount || 0} times
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Bangladeshi SMS Broadcast Engine */}
-        <div className="bg-card border border-border p-6 rounded-3xl shadow-xs space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-serif font-bold text-lg">Bangladeshi SMS Marketing Hub</h3>
-            <MessageSquare className="w-4 h-4 text-primary" />
-          </div>
-
-          <div className="space-y-3 text-xs">
-            <div>
-              <label className="block font-semibold mb-1">Target Customer Segment</label>
-              <select
-                value={smsAudience}
-                onChange={(e) => setSmsAudience(e.target.value)}
-                className="w-full p-2.5 rounded-xl border border-border bg-background font-medium focus:outline-hidden"
-              >
-                <option value="all">All Registered Customers (4,280 contacts)</option>
-                <option value="vip">VIP & High-LTV Buyers (320 contacts)</option>
-                <option value="abandoned">Abandoned Cart Users (85 contacts)</option>
-                <option value="dhaka">Dhaka Metropolitan Only (2,890 contacts)</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block font-semibold mb-1">
-                SMS Content (Max 160 chars / 1 SMS)
-              </label>
-              <textarea
-                rows={4}
-                value={smsCampaignText}
-                onChange={(e) => setSmsCampaignText(e.target.value)}
-                className="w-full p-3 rounded-2xl border border-border bg-background focus:outline-hidden text-xs leading-relaxed"
-              />
-              <div className="flex justify-between text-[11px] text-muted-foreground mt-1">
-                <span>Chars: {smsCampaignText.length} / 160</span>
-                <span>Gateway: Greenweb BD API (Connected)</span>
-              </div>
-            </div>
-
-            <button
-              onClick={handleBroadcastSms}
-              className="w-full py-2.5 rounded-2xl bg-primary text-primary-foreground font-bold hover:opacity-90 transition flex items-center justify-center gap-2 shadow-xs"
+        </>
+      }
+    >
+      <form id="coupon-form" onSubmit={save} className="space-y-3">
+        <Field
+          label="Code"
+          htmlFor="cp-code"
+          error={errors.code}
+          hint="Letters and numbers, e.g. EID15"
+        >
+          <input
+            id="cp-code"
+            value={form.code}
+            onChange={(e) => set("code", e.target.value.toUpperCase())}
+            className={`${inputClass} font-mono uppercase`}
+            autoFocus
+          />
+        </Field>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Field label="Type" htmlFor="cp-type">
+            <select
+              id="cp-type"
+              value={form.type}
+              onChange={(e) => set("type", e.target.value)}
+              className={inputClass}
             >
-              <Send className="w-3.5 h-3.5" />
-              <span>Launch SMS Campaign Broadcast</span>
-            </button>
-          </div>
+              <option value="percentage">Percentage off</option>
+              <option value="fixed">Fixed amount off</option>
+              <option value="free_shipping">Free delivery</option>
+            </select>
+          </Field>
+          {form.type !== "free_shipping" && (
+            <Field
+              label={form.type === "fixed" ? "Amount off (৳)" : "Percent off"}
+              htmlFor="cp-value"
+              error={errors.value}
+            >
+              <input
+                id="cp-value"
+                type="number"
+                min={0}
+                value={form.value}
+                onChange={(e) => set("value", e.target.value)}
+                className={inputClass}
+              />
+            </Field>
+          )}
+          <Field label="Minimum order (৳)" htmlFor="cp-min" hint="Leave empty for any order">
+            <input
+              id="cp-min"
+              type="number"
+              min={0}
+              value={form.minOrderAmount}
+              onChange={(e) => set("minOrderAmount", e.target.value)}
+              className={inputClass}
+            />
+          </Field>
+          {form.type === "percentage" && (
+            <Field label="Maximum discount (৳)" htmlFor="cp-max" hint="Optional cap">
+              <input
+                id="cp-max"
+                type="number"
+                min={0}
+                value={form.maxDiscount}
+                onChange={(e) => set("maxDiscount", e.target.value)}
+                className={inputClass}
+              />
+            </Field>
+          )}
+          <Field label="Total uses allowed" htmlFor="cp-limit" hint="Leave empty for unlimited">
+            <input
+              id="cp-limit"
+              type="number"
+              min={0}
+              value={form.usageLimit}
+              onChange={(e) => set("usageLimit", e.target.value)}
+              className={inputClass}
+            />
+          </Field>
+          <Field label="Starts" htmlFor="cp-start">
+            <input
+              id="cp-start"
+              type="date"
+              value={form.startsAt}
+              onChange={(e) => set("startsAt", e.target.value)}
+              className={inputClass}
+            />
+          </Field>
+          <Field label="Ends (last day)" htmlFor="cp-end" error={errors.expiresAt} hint="Optional">
+            <input
+              id="cp-end"
+              type="date"
+              min={form.startsAt}
+              value={form.expiresAt}
+              onChange={(e) => set("expiresAt", e.target.value)}
+              className={inputClass}
+            />
+          </Field>
         </div>
-      </div>
-    </div>
+      </form>
+    </Modal>
   );
 }

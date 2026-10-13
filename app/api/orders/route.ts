@@ -3,7 +3,7 @@ import type { Types } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 
 import { connectDB } from "@/server/db/connection";
-import { Order, Product } from "@/server/db/models";
+import { Coupon, Order, Product } from "@/server/db/models";
 import {
   getSessionUser,
   isCrossSiteRequest,
@@ -12,10 +12,13 @@ import {
   STAFF_ROLES,
 } from "@/server/auth/session";
 import { getClientIp, rateLimit } from "@/server/security/rate-limit";
-import { cleanString, isEmail, isObjectId } from "@/server/security/validation";
+import { cleanString, escapeRegex, isEmail, isObjectId } from "@/server/security/validation";
+import { getAccessProfile } from "@/server/auth/permissions";
+import { createdAtMatch, resolveRange } from "@/server/admin/range";
 import { isPubliclyVisible } from "@/server/marketplace";
+import { recordServerEvent } from "@/server/activity";
+import { evaluateCoupon, getCheckoutConfig, shippingCostFor } from "@/server/checkout-config";
 
-const PAYMENT_METHODS = ["COD", "bKash", "Nagad", "SSLCommerz"];
 const ORDER_STATUSES = [
   "pending",
   "confirmed",
@@ -86,8 +89,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!PAYMENT_METHODS.includes(data.paymentMethod)) {
-      return NextResponse.json({ error: "Invalid payment method" }, { status: 400 });
+    const config = await getCheckoutConfig();
+    if (!config.paymentMethods.some((m) => m.id === data.paymentMethod)) {
+      return NextResponse.json(
+        { error: "This payment method isn’t available. Please choose another." },
+        { status: 400 },
+      );
     }
 
     const guestEmail = cleanString(data.guestEmail, 254)?.toLowerCase();
@@ -151,9 +158,24 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const isDhaka = shippingAddress.division === "Dhaka" && shippingAddress.district === "Dhaka";
-    const shippingCost = subtotal >= 2000 ? 0 : isDhaka ? 70 : 120;
-    const total = subtotal + shippingCost;
+    // Coupons from Promotions, checked again here so the order always matches what the shop allows
+    const couponInput = cleanString(data.couponCode, 40);
+    let discount = 0;
+    let freeShipping = false;
+    let couponCode: string | undefined;
+    let couponId: string | undefined;
+    if (couponInput) {
+      const coupon = await evaluateCoupon(couponInput, subtotal);
+      if (!coupon.ok) throw Object.assign(new Error("bad_coupon"), { reason: coupon.error });
+      discount = coupon.discount;
+      freeShipping = coupon.freeShipping;
+      couponCode = coupon.code;
+      couponId = coupon.couponId;
+    }
+
+    // Delivery charges come from admin Settings (free delivery is judged after the discount)
+    const shippingCost = shippingCostFor(subtotal - discount, shippingAddress, config, freeShipping);
+    const total = Math.max(0, subtotal - discount + shippingCost);
 
     // Secret that lets the buyer (incl. guests) open their confirmation page; only its hash is stored
     const accessToken = crypto.randomBytes(24).toString("base64url");
@@ -166,8 +188,8 @@ export async function POST(request: NextRequest) {
       subtotal,
       shippingCost,
       tax: 0,
-      discount: 0,
-      couponCode: cleanString(data.couponCode, 40)?.toUpperCase(),
+      discount,
+      couponCode,
       total,
       paymentMethod: data.paymentMethod,
       shippingAddress,
@@ -175,6 +197,25 @@ export async function POST(request: NextRequest) {
       deliveryNotes: cleanString(data.deliveryNotes, 1000),
       accessTokenHash: crypto.createHash("sha256").update(accessToken).digest("hex"),
     });
+
+    if (couponId) {
+      await Coupon.updateOne({ _id: couponId }, { $inc: { usageCount: 1 } }).catch((err) =>
+        console.error("Coupon usage count error:", err),
+      );
+    }
+
+    recordServerEvent(
+      request,
+      {
+        type: "purchase",
+        orderId: order._id,
+        orderNumber: order.orderNumber,
+        value: total,
+        quantity: orderItems.reduce((sum, item) => sum + item.quantity, 0),
+        label: data.paymentMethod,
+      },
+      sessionUser,
+    );
 
     return NextResponse.json({ ...order.toJSON(), accessToken }, { status: 201 });
   } catch (err: any) {
@@ -184,6 +225,9 @@ export async function POST(request: NextRequest) {
         { _id: r.id },
         { $inc: { stock: r.quantity, totalSold: -r.quantity } },
       ).catch(() => {});
+    }
+    if (err?.message === "bad_coupon") {
+      return NextResponse.json({ error: err.reason, field: "coupon" }, { status: 400 });
     }
     if (err?.message === "out_of_stock") {
       return NextResponse.json(
@@ -195,35 +239,73 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET — Staff: all orders (optional status filter). Customers: only their own orders.
+// GET — Staff with "View orders": every order, searchable and filterable. Everyone else (and
+// staff with ?mine=1): only their own orders.
+//   ?q= (order number, name, phone, email, tracking, transaction id) &status=a,b &payment=COD
+//   &paymentStatus= &range= &from= &to= &sort=newest|oldest|total_desc|total_asc &page= &pageSize=
 export async function GET(request: NextRequest) {
   try {
     const auth = await requireAuth(request);
     if (!auth.ok) return auth.response;
-    const isStaff = STAFF_ROLES.includes(auth.user.role);
+    const access = STAFF_ROLES.includes(auth.user.role) ? await getAccessProfile(auth.user) : null;
+    const canSeeAll = Boolean(access?.permissions.includes("orders.view"));
 
     const { searchParams } = new URL(request.url);
-    const status = searchParams.get("status");
     const page = Math.max(1, Math.floor(Number(searchParams.get("page") ?? "1")) || 1);
     const pageSize = Math.min(
-      50,
+      100,
       Math.max(1, Math.floor(Number(searchParams.get("pageSize") ?? "20")) || 20),
     );
     const skip = (page - 1) * pageSize;
 
     const query: Record<string, unknown> = {};
     // ?mine=1 — a staff member's own orders (their account page), not the whole shop's
-    if (!isStaff || searchParams.get("mine") === "1") query.user = auth.user._id;
-    if (status && ORDER_STATUSES.includes(status)) query.status = status;
+    if (!canSeeAll || searchParams.get("mine") === "1") query.user = auth.user._id;
 
-    const [orders, total] = await Promise.all([
-      Order.find(query)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(pageSize)
-        .populate("user", "name email")
-        .lean(),
+    const statuses = (searchParams.get("status") ?? "")
+      .split(",")
+      .filter((st) => ORDER_STATUSES.includes(st));
+    if (statuses.length === 1) query.status = statuses[0];
+    else if (statuses.length > 1) query.status = { $in: statuses };
+
+    if (canSeeAll) {
+      const payment = cleanString(searchParams.get("payment"), 30);
+      if (payment) query.paymentMethod = payment;
+      const paymentStatus = searchParams.get("paymentStatus");
+      if (paymentStatus && ["pending", "paid", "failed", "refunded", "partially_refunded"].includes(paymentStatus)) {
+        query.paymentStatus = paymentStatus;
+      }
+      if (searchParams.get("range")) Object.assign(query, createdAtMatch(resolveRange(searchParams, "all")));
+      const q = searchParams.get("q")?.trim().slice(0, 100);
+      if (q) {
+        const rx = new RegExp(escapeRegex(q), "i");
+        query.$or = [
+          { orderNumber: rx },
+          { "shippingAddress.fullName": rx },
+          { "shippingAddress.phone": rx },
+          { "shippingAddress.district": rx },
+          { guestEmail: rx },
+          { guestPhone: rx },
+          { trackingId: rx },
+          { paymentTransactionId: rx },
+          { "items.productName": rx },
+        ];
+      }
+    }
+
+    const sort: Record<string, 1 | -1> =
+      ({
+        oldest: { createdAt: 1 },
+        total_desc: { total: -1 },
+        total_asc: { total: 1 },
+      } as Record<string, Record<string, 1 | -1>>)[searchParams.get("sort") ?? ""] ?? { createdAt: -1 };
+
+    const [orders, total, statusCounts] = await Promise.all([
+      Order.find(query).sort(sort).skip(skip).limit(pageSize).populate("user", "name email").lean(),
       Order.countDocuments(query),
+      canSeeAll && searchParams.get("counts") === "1"
+        ? Order.aggregate([{ $group: { _id: "$status", count: { $sum: 1 } } }])
+        : Promise.resolve(null),
     ]);
 
     return NextResponse.json({
@@ -232,6 +314,7 @@ export async function GET(request: NextRequest) {
       page,
       pageSize,
       totalPages: Math.ceil(total / pageSize),
+      statusCounts: statusCounts ? Object.fromEntries(statusCounts.map((r: any) => [r._id, r.count])) : undefined,
     });
   } catch (err) {
     return serverError("List orders error", err, "Failed to fetch orders");

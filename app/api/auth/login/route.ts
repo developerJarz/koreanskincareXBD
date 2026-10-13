@@ -11,6 +11,8 @@ import {
 } from "@/server/auth/session";
 import { getClientIp, rateLimit } from "@/server/security/rate-limit";
 import { isEmail } from "@/server/security/validation";
+import { isIpBlocked } from "@/server/security/ip-block";
+import { recordServerEvent } from "@/server/activity";
 
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCK_MINUTES = 15;
@@ -30,6 +32,13 @@ export async function POST(request: NextRequest) {
     const limited = rateLimit(`login:ip:${ip}`, 20, 15 * 60_000);
     if (limited) return limited;
 
+    if (await isIpBlocked(ip)) {
+      return NextResponse.json(
+        { error: "Sign-in from your network has been blocked. Please contact support." },
+        { status: 403 },
+      );
+    }
+
     const body = await request.json().catch(() => ({}));
     const email = typeof body.email === "string" ? body.email.toLowerCase().trim() : "";
     const password = typeof body.password === "string" ? body.password : "";
@@ -46,6 +55,7 @@ export async function POST(request: NextRequest) {
 
     if (!user || !user.password) {
       await bcryptjs.compare(password, DUMMY_HASH);
+      recordServerEvent(request, { type: "login_failed", label: email.slice(0, 120) });
       return NextResponse.json({ error: INVALID }, { status: 401 });
     }
 
@@ -58,6 +68,7 @@ export async function POST(request: NextRequest) {
 
     const isValid = await bcryptjs.compare(password, user.password);
     if (!isValid) {
+      recordServerEvent(request, { type: "login_failed", label: email.slice(0, 120) }, user);
       const attempts = (user.failedLoginAttempts ?? 0) + 1;
       await User.updateOne(
         { _id: user._id },
@@ -89,6 +100,8 @@ export async function POST(request: NextRequest) {
         { $set: { lastLoginAt: new Date(), failedLoginAttempts: 0 }, $unset: { lockUntil: 1 } },
       ).catch((err) => console.error("Failed to record login:", err)),
     );
+
+    recordServerEvent(request, { type: "login" }, user);
 
     const response = NextResponse.json(toAuthUser(user));
     setSessionCookie(response, user);

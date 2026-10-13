@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/server/db/connection";
 import { Product } from "@/server/db/models";
 import { requireAuth, serverError, STAFF_ROLES } from "@/server/auth/session";
+import { requirePermission } from "@/server/auth/permissions";
 import { resolveSlug, toEditorProduct } from "@/server/catalog-admin";
 import { revalidateCatalog } from "@/server/catalog";
 import { isObjectId } from "@/server/security/validation";
@@ -11,7 +12,7 @@ import { generateBarcode, generateSku } from "@/server/sku";
 // POST — copies a product as a new draft (new SKU/barcode, no sales history) to edit and publish
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const auth = await requireAuth(request, STAFF_ROLES);
+    const auth = await requirePermission(request, "catalog.manage");
     if (!auth.ok) return auth.response;
     const { id } = await params;
     if (!isObjectId(id)) return NextResponse.json({ error: "Product not found." }, { status: 404 });

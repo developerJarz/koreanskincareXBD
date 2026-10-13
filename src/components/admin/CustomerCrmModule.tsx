@@ -1,493 +1,683 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  Users,
-  Search,
-  Filter,
-  Phone,
+  Download,
+  KeyRound,
   Mail,
-  MapPin,
-  Sparkles,
-  ShoppingBag,
-  ExternalLink,
   MessageCircle,
+  Phone,
+  Search,
+  UserX,
+  Users,
   X,
-  CreditCard,
-  Award,
-  Calendar,
-  Send,
-  Key,
-  RefreshCw,
-  Check,
 } from "lucide-react";
 import { toast } from "sonner";
-import type { AdminUserRow } from "./types";
 
-interface CustomerCrmModuleProps {
-  users: AdminUserRow[];
-  onToggleUserStatus: (userId: string, currentStatus: boolean) => Promise<void>;
+import { ORDER_STATUS_CONFIG } from "@/lib/constants";
+import {
+  api,
+  Field,
+  iconButton,
+  inputClass,
+  Modal,
+  primaryButton,
+  secondaryButton,
+} from "./catalog/ui";
+import {
+  downloadCsv,
+  EmptyState,
+  ErrorNotice,
+  fmtDate,
+  fmtDateTime,
+  fmtNumber,
+  fmtRelative,
+  fmtTaka,
+  PageHeader,
+  Pagination,
+  Panel,
+  Pill,
+  qs,
+  Segmented,
+  Skeleton,
+  StatTile,
+  useAccess,
+  useAdminData,
+  useDebounced,
+} from "./shared";
+
+type Customer = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: string;
+  isActive: boolean;
+  emailVerified: boolean;
+  walletBalance: number;
+  rewardPoints: number;
+  createdAt: string | null;
+  lastLoginAt: string | null;
+  orders: number;
+  allOrders: number;
+  spent: number;
+  avgOrder: number;
+  lastOrderAt: string | null;
+  district: string | null;
+  segment: string;
+};
+
+type ListResponse = {
+  items: Customer[];
+  total: number;
+  totalPages: number;
+  segments: Record<string, number> & { lifetimeValue: number };
+};
+
+const SEGMENTS: Record<
+  string,
+  { label: string; tone: "accent" | "good" | "info" | "warn" | "bad" | "neutral"; rule: string }
+> = {
+  vip: { label: "VIP", tone: "accent", rule: "Spent ৳20,000+ or 5+ orders" },
+  loyal: { label: "Loyal", tone: "good", rule: "2 or more orders" },
+  new: { label: "New", tone: "info", rule: "Joined in the last 30 days" },
+  at_risk: { label: "At risk", tone: "warn", rule: "No order for 90+ days" },
+  no_orders: { label: "No orders", tone: "neutral", rule: "Signed up, never ordered" },
+  inactive: { label: "Suspended", tone: "bad", rule: "Account switched off" },
+  regular: { label: "Regular", tone: "neutral", rule: "One order" },
+};
+
+function whatsappLink(phone: string) {
+  const digits = phone.replace(/\D/g, "");
+  const intl = digits.startsWith("880") ? digits : digits.startsWith("0") ? `88${digits}` : digits;
+  return `https://wa.me/${intl}`;
 }
 
-export function CustomerCrmModule({ users, onToggleUserStatus }: CustomerCrmModuleProps) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [segmentFilter, setSegmentFilter] = useState<string>("all");
-  const [activeCustomer, setActiveCustomer] = useState<AdminUserRow | null>(null);
-  const [smsModalCustomer, setSmsModalCustomer] = useState<AdminUserRow | null>(null);
-  const [smsText, setSmsText] = useState("");
-  const [resetPassModalCustomer, setResetPassModalCustomer] = useState<AdminUserRow | null>(null);
-  const [customerNewPassword, setCustomerNewPassword] = useState("");
-  const [isResettingPass, setIsResettingPass] = useState(false);
+export function CustomerCrmModule({ initialSearch = "" }: { initialSearch?: string }) {
+  const { can } = useAccess();
+  const [segment, setSegment] = useState("all");
+  const [search, setSearch] = useState(initialSearch);
+  const [sort, setSort] = useState("newest");
+  const [page, setPage] = useState(1);
+  const [openId, setOpenId] = useState<string | null>(null);
+  const q = useDebounced(search);
+  useEffect(() => setSearch(initialSearch), [initialSearch]);
+  useEffect(() => setPage(1), [segment, q, sort]);
 
-  // Customer RFM segmentation logic
-  const getCustomerSegment = (user: AdminUserRow) => {
-    const points = user.rewardPoints || 0;
-    const balance = user.walletBalance || 0;
-    if (points > 1000 || balance > 5000)
-      return { label: "VIP Champion", color: "bg-purple-500/15 text-purple-600 border-purple-300" };
-    if (points > 300)
-      return {
-        label: "Loyal Buyer",
-        color: "bg-emerald-500/15 text-emerald-600 border-emerald-300",
-      };
-    if (points > 100)
-      return { label: "Growing Shopper", color: "bg-blue-500/15 text-blue-600 border-blue-300" };
-    if (!user.isActive)
-      return { label: "At Risk / Inactive", color: "bg-rose-500/15 text-rose-600 border-rose-300" };
-    return { label: "New Customer", color: "bg-secondary text-muted-foreground border-border" };
-  };
+  const { data, error, loading, reload, setData } = useAdminData<ListResponse>(
+    `/api/admin/customers${qs({ segment, q, sort, page })}`,
+  );
 
-  const filteredUsers = users.filter((u) => {
-    const matchesSearch =
-      !searchQuery ||
-      u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      u.email.toLowerCase().includes(searchQuery.toLowerCase());
-
-    if (segmentFilter === "vip")
-      return matchesSearch && (u.rewardPoints > 1000 || u.walletBalance > 5000);
-    if (segmentFilter === "loyal") return matchesSearch && u.rewardPoints > 300;
-    if (segmentFilter === "inactive") return matchesSearch && !u.isActive;
-    return matchesSearch;
-  });
-
-  const handleSendQuickSms = () => {
-    if (!smsText.trim()) return;
-    toast.success(`SMS sent to ${smsModalCustomer?.name || "Customer"} successfully!`);
-    setSmsModalCustomer(null);
-    setSmsText("");
-  };
-
-  const handleResetCustomerPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!customerNewPassword || customerNewPassword.length < 10) {
-      toast.error("Password must be at least 10 characters long.");
-      return;
-    }
-    if (!resetPassModalCustomer) return;
-
-    setIsResettingPass(true);
+  const toggleActive = async (c: Customer) => {
     try {
-      const res = await fetch("/api/admin/users/password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: resetPassModalCustomer.id,
-          email: resetPassModalCustomer.email,
-          newPassword: customerNewPassword,
-        }),
+      await api("/api/admin/users", {
+        method: "PATCH",
+        json: { userId: c.id, isActive: !c.isActive },
       });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to update password");
-
-      toast.success(`Password for ${resetPassModalCustomer.name} updated successfully!`);
-      setResetPassModalCustomer(null);
-      setCustomerNewPassword("");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to reset customer password");
-    } finally {
-      setIsResettingPass(false);
+      setData((d) =>
+        d
+          ? {
+              ...d,
+              items: d.items.map((x) => (x.id === c.id ? { ...x, isActive: !c.isActive } : x)),
+            }
+          : d,
+      );
+      toast.success(c.isActive ? `${c.name} suspended.` : `${c.name} re-activated.`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Couldn't update the account.");
     }
   };
+
+  const seg = data?.segments;
+  const exportCsv = () =>
+    data &&
+    downloadCsv("customers.csv", [
+      [
+        "Name",
+        "Email",
+        "Phone",
+        "District",
+        "Orders",
+        "Spent (BDT)",
+        "Average order",
+        "Last order",
+        "Joined",
+        "Segment",
+        "Active",
+      ],
+      ...data.items.map((c) => [
+        c.name,
+        c.email,
+        c.phone,
+        c.district,
+        c.orders,
+        Math.round(c.spent),
+        Math.round(c.avgOrder),
+        c.lastOrderAt ? fmtDate(c.lastOrderAt) : "",
+        c.createdAt ? fmtDate(c.createdAt) : "",
+        SEGMENTS[c.segment]?.label ?? c.segment,
+        c.isActive ? "yes" : "no",
+      ]),
+    ]);
 
   return (
-    <div className="space-y-6">
-      {/* Top Header & Segmentation Filter */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card border border-border p-4 rounded-3xl">
-        <div>
-          <h2 className="font-serif text-2xl font-bold">Customer CRM & RFM Segmentation</h2>
-          <p className="text-xs text-muted-foreground">
-            Customer lifetime value, loyalty tiers, WhatsApp direct chat & engagement
-          </p>
-        </div>
+    <div className="space-y-5">
+      <PageHeader
+        title="Customers"
+        description="Lifetime orders and spend are calculated from real orders (cancelled, returned and refunded orders don't count)."
+        actions={
+          <button
+            type="button"
+            className={secondaryButton}
+            onClick={exportCsv}
+            disabled={!data?.items.length}
+          >
+            <Download className="h-4 w-4" /> Export
+          </button>
+        }
+      />
 
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex bg-secondary p-1 rounded-2xl border border-border text-xs">
-            <button
-              onClick={() => setSegmentFilter("all")}
-              className={`px-3 py-1.5 rounded-xl font-semibold transition ${
-                segmentFilter === "all"
-                  ? "bg-card text-foreground shadow-xs"
-                  : "text-muted-foreground"
-              }`}
-            >
-              All ({users.length})
-            </button>
-            <button
-              onClick={() => setSegmentFilter("vip")}
-              className={`px-3 py-1.5 rounded-xl font-semibold transition ${
-                segmentFilter === "vip"
-                  ? "bg-card text-purple-600 shadow-xs"
-                  : "text-muted-foreground"
-              }`}
-            >
-              VIP
-            </button>
-            <button
-              onClick={() => setSegmentFilter("loyal")}
-              className={`px-3 py-1.5 rounded-xl font-semibold transition ${
-                segmentFilter === "loyal"
-                  ? "bg-card text-emerald-600 shadow-xs"
-                  : "text-muted-foreground"
-              }`}
-            >
-              Loyal
-            </button>
-            <button
-              onClick={() => setSegmentFilter("inactive")}
-              className={`px-3 py-1.5 rounded-xl font-semibold transition ${
-                segmentFilter === "inactive"
-                  ? "bg-card text-rose-600 shadow-xs"
-                  : "text-muted-foreground"
-              }`}
-            >
-              At Risk
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Search Input */}
-      <div className="relative">
-        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <input
-          type="text"
-          placeholder="Search by customer name or email..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-border bg-card text-xs focus:outline-hidden"
-        />
-      </div>
-
-      {/* Customer Cards Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredUsers.map((user) => {
-          const segment = getCustomerSegment(user);
-          return (
-            <div
-              key={user.id}
-              className="bg-card border border-border rounded-3xl p-5 shadow-xs flex flex-col justify-between space-y-4 hover:border-primary/40 transition group"
-            >
-              <div className="space-y-3">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-serif font-bold text-sm">
-                      {user.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-xs text-foreground group-hover:text-primary transition-colors">
-                        {user.name}
-                      </h4>
-                      <p className="text-[11px] text-muted-foreground truncate max-w-[140px]">
-                        {user.email}
-                      </p>
-                    </div>
-                  </div>
-                  <span
-                    className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${segment.color}`}
-                  >
-                    {segment.label}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 text-xs pt-1">
-                  <div className="p-2.5 rounded-2xl bg-secondary/50 border border-border">
-                    <span className="text-[10px] uppercase font-bold text-muted-foreground">
-                      Reward Points
-                    </span>
-                    <p className="font-bold text-primary text-sm mt-0.5">{user.rewardPoints} pts</p>
-                  </div>
-                  <div className="p-2.5 rounded-2xl bg-secondary/50 border border-border">
-                    <span className="text-[10px] uppercase font-bold text-muted-foreground">
-                      Wallet Balance
-                    </span>
-                    <p className="font-bold text-emerald-600 text-sm mt-0.5">
-                      ৳{user.walletBalance.toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex items-center gap-2 pt-2 border-t border-border">
-                {/* WhatsApp Chat Button */}
-                <a
-                  href={`https://wa.me/8801711223344?text=Hello%20${encodeURIComponent(user.name)}%2C%20greetings%20from%20koreanskincare.bd!`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex-1 py-1.5 px-2.5 rounded-xl border border-border bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 text-[11px] font-bold flex items-center justify-center gap-1.5 transition"
-                  title="Direct WhatsApp Chat"
-                >
-                  <MessageCircle className="w-3.5 h-3.5" />
-                  <span>WhatsApp</span>
-                </a>
-
-                {/* Quick SMS Button */}
-                <button
-                  onClick={() => {
-                    setSmsModalCustomer(user);
-                    setSmsText(
-                      `Hello ${user.name}, enjoy exclusive 15% OFF on our authentic Korean skincare at koreanskincare.bd! Use code: KOREANVIP`,
-                    );
-                  }}
-                  className="py-1.5 px-2.5 rounded-xl border border-border hover:bg-secondary text-[11px] font-semibold text-foreground transition"
-                  title="Send Quick SMS"
-                >
-                  <Send className="w-3.5 h-3.5" />
-                </button>
-
-                {/* View Details Drawer */}
-                <button
-                  onClick={() => setActiveCustomer(user)}
-                  className="py-1.5 px-2.5 rounded-xl bg-primary text-primary-foreground text-[11px] font-bold hover:opacity-90 transition"
-                >
-                  Profile
-                </button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Customer Profile Drawer */}
-      {activeCustomer && (
-        <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-xs animate-fade-in">
-          <div className="bg-card border-l border-border w-full max-w-md h-full shadow-2xl p-6 flex flex-col justify-between overflow-y-auto animate-in slide-in-from-right duration-200 space-y-6">
-            <div className="space-y-6">
-              <div className="flex items-center justify-between border-b border-border pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center font-serif font-bold text-lg">
-                    {activeCustomer.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <h3 className="font-serif font-bold text-lg">{activeCustomer.name}</h3>
-                    <p className="text-xs text-muted-foreground">{activeCustomer.email}</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setActiveCustomer(null)}
-                  className="p-1.5 rounded-xl text-muted-foreground hover:bg-secondary"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Status & Segment */}
-              <div className="space-y-3">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                  Account Overview
-                </h4>
-                <div className="grid grid-cols-2 gap-3 text-xs">
-                  <div className="p-3 rounded-2xl bg-secondary/50 border border-border">
-                    <span className="text-[10px] text-muted-foreground uppercase font-bold">
-                      Role
-                    </span>
-                    <p className="font-bold capitalize mt-0.5">
-                      {activeCustomer.role.replace("_", " ")}
-                    </p>
-                  </div>
-                  <div className="p-3 rounded-2xl bg-secondary/50 border border-border">
-                    <span className="text-[10px] text-muted-foreground uppercase font-bold">
-                      Status
-                    </span>
-                    <p
-                      className={`font-bold mt-0.5 ${activeCustomer.isActive ? "text-emerald-600" : "text-rose-600"}`}
-                    >
-                      {activeCustomer.isActive ? "Active Account" : "Suspended"}
-                    </p>
-                  </div>
-                  <div className="p-3 rounded-2xl bg-secondary/50 border border-border">
-                    <span className="text-[10px] text-muted-foreground uppercase font-bold">
-                      Reward Points
-                    </span>
-                    <p className="font-bold text-primary mt-0.5">
-                      {activeCustomer.rewardPoints} pts
-                    </p>
-                  </div>
-                  <div className="p-3 rounded-2xl bg-secondary/50 border border-border">
-                    <span className="text-[10px] text-muted-foreground uppercase font-bold">
-                      Wallet Balance
-                    </span>
-                    <p className="font-bold text-emerald-600 mt-0.5">
-                      ৳{activeCustomer.walletBalance.toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Delivery Address Details */}
-              <div className="space-y-2 text-xs">
-                <h4 className="font-bold uppercase tracking-wider text-muted-foreground text-[10px]">
-                  Primary Delivery Hub
-                </h4>
-                <div className="p-3 rounded-2xl bg-secondary/40 border border-border space-y-1">
-                  <p className="font-semibold text-foreground">
-                    House 42, Road 11, Banani, Dhaka 1213
-                  </p>
-                  <p className="text-muted-foreground">
-                    District: Dhaka Metropolitan · Zone: Banani/Gulshan
-                  </p>
-                  <p className="text-muted-foreground">Phone: +880 1711-223344</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-4 border-t border-border flex flex-wrap gap-2">
-              <button
-                onClick={() => {
-                  setResetPassModalCustomer(activeCustomer);
-                  setCustomerNewPassword("");
-                  setActiveCustomer(null);
-                }}
-                className="py-2.5 px-3.5 rounded-2xl text-xs font-bold bg-primary/10 text-primary hover:bg-primary/20 transition flex items-center gap-1.5"
-              >
-                <Key className="w-3.5 h-3.5" />
-                <span>Reset Password</span>
-              </button>
-              <button
-                onClick={() => {
-                  onToggleUserStatus(activeCustomer.id, activeCustomer.isActive);
-                  setActiveCustomer(null);
-                }}
-                className={`flex-1 py-2.5 rounded-2xl text-xs font-bold transition ${
-                  activeCustomer.isActive
-                    ? "bg-rose-500/10 text-rose-600 hover:bg-rose-500/20"
-                    : "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20"
-                }`}
-              >
-                {activeCustomer.isActive ? "Suspend Customer" : "Activate Account"}
-              </button>
-              <button
-                onClick={() => setActiveCustomer(null)}
-                className="px-5 py-2.5 rounded-2xl border border-border text-xs font-medium hover:bg-secondary"
-              >
-                Close
-              </button>
-            </div>
-          </div>
+      {seg && (
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <StatTile
+            label="Customer accounts"
+            value={fmtNumber(seg.all)}
+            hint={`${fmtNumber(seg.new)} joined in 30 days`}
+          />
+          <StatTile
+            label="Lifetime value"
+            value={fmtTaka(seg.lifetimeValue)}
+            hint={seg.all ? `${fmtTaka(seg.lifetimeValue / seg.all)} per account` : undefined}
+          />
+          <StatTile
+            label="Repeat buyers"
+            value={fmtNumber(seg.loyal)}
+            hint={`${fmtNumber(seg.vip)} VIP`}
+          />
+          <StatTile
+            label="Never ordered"
+            value={fmtNumber(seg.no_orders)}
+            hint={`${fmtNumber(seg.at_risk)} at risk · ${fmtNumber(seg.inactive)} suspended`}
+          />
         </div>
       )}
 
-      {/* Reset Customer Password Modal */}
-      {resetPassModalCustomer && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
-          <div className="bg-card border border-border rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 animate-scale-up text-xs">
-            <div className="flex items-center justify-between border-b border-border pb-3">
-              <div className="flex items-center gap-2">
-                <Key className="w-4 h-4 text-primary" />
-                <h3 className="font-serif font-bold text-base">Reset Account Password</h3>
-              </div>
-              <button
-                onClick={() => setResetPassModalCustomer(null)}
-                className="p-1 rounded-xl hover:bg-secondary"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <p className="text-muted-foreground">
-              Set a new password for{" "}
-              <strong className="text-foreground">{resetPassModalCustomer.name}</strong> (
-              {resetPassModalCustomer.email}):
-            </p>
-            <form onSubmit={handleResetCustomerPassword} className="space-y-3">
-              <div>
-                <label className="block font-semibold mb-1">New Password</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Min 10 chars: upper, lower, number, symbol"
-                  value={customerNewPassword}
-                  onChange={(e) => setCustomerNewPassword(e.target.value)}
-                  className="w-full p-2.5 rounded-xl border border-border bg-background focus:outline-hidden font-mono text-xs"
-                />
-              </div>
-              <div className="flex justify-end gap-2 pt-2 border-t border-border">
-                <button
-                  type="button"
-                  onClick={() => setResetPassModalCustomer(null)}
-                  className="px-4 py-2 rounded-xl border border-border font-medium hover:bg-secondary"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isResettingPass || !customerNewPassword}
-                  className="px-4 py-2 rounded-xl bg-primary text-primary-foreground font-bold flex items-center gap-1.5 disabled:opacity-50"
-                >
-                  {isResettingPass ? (
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                  ) : (
-                    <Check className="w-3.5 h-3.5" />
-                  )}
-                  <span>{isResettingPass ? "Updating..." : "Save Password"}</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Send Quick SMS Modal */}
-      {smsModalCustomer && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
-          <div className="bg-card border border-border rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 animate-scale-up text-xs">
-            <div className="flex items-center justify-between border-b border-border pb-3">
-              <h3 className="font-serif font-bold text-base">Send SMS Broadcast</h3>
-              <button
-                onClick={() => setSmsModalCustomer(null)}
-                className="p-1 rounded-xl hover:bg-secondary"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <p className="text-muted-foreground">
-              Recipient: <strong className="text-foreground">{smsModalCustomer.name}</strong> (+880
-              1711-223344)
-            </p>
-            <textarea
-              rows={4}
-              value={smsText}
-              onChange={(e) => setSmsText(e.target.value)}
-              className="w-full p-3 rounded-2xl border border-border bg-background focus:outline-hidden"
+      <Panel>
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <Segmented
+            label="Customer segment"
+            value={segment}
+            onChange={setSegment}
+            options={[
+              { value: "all", label: `All${seg ? ` (${seg.all})` : ""}` },
+              ...["vip", "loyal", "new", "at_risk", "no_orders", "inactive"].map((k) => ({
+                value: k,
+                label: `${SEGMENTS[k].label}${seg ? ` (${seg[k] ?? 0})` : ""}`,
+              })),
+            ]}
+          />
+          <div className="relative min-w-[12rem] flex-1">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Name, email or phone"
+              aria-label="Search customers"
+              className={`${inputClass} h-9 pl-8`}
             />
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setSmsModalCustomer(null)}
-                className="px-4 py-2 rounded-xl border border-border font-medium"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSendQuickSms}
-                className="px-4 py-2 rounded-xl bg-primary text-primary-foreground font-bold flex items-center gap-1.5"
-              >
-                <Send className="w-3.5 h-3.5" />
-                <span>Send SMS</span>
-              </button>
-            </div>
           </div>
+          <select
+            aria-label="Sort"
+            value={sort}
+            onChange={(e) => setSort(e.target.value)}
+            className={`${inputClass} h-9 w-auto`}
+          >
+            <option value="newest">Newest accounts</option>
+            <option value="spent">Highest spend</option>
+            <option value="orders">Most orders</option>
+            <option value="last_order">Latest order</option>
+            <option value="name">Name A–Z</option>
+          </select>
         </div>
+        {segment !== "all" && SEGMENTS[segment] && (
+          <p className="mb-3 text-xs text-muted-foreground">{SEGMENTS[segment].rule}</p>
+        )}
+
+        {error && <ErrorNotice message={error} onRetry={reload} />}
+        {!data && !error && <Skeleton className="h-80" />}
+        {data && data.items.length === 0 && <EmptyState icon={Users} title="No customers match." />}
+        {data && data.items.length > 0 && (
+          <div className="overflow-x-auto">
+            <table
+              className={`w-full min-w-[54rem] text-left text-xs ${loading ? "opacity-60" : ""}`}
+            >
+              <thead className="text-muted-foreground">
+                <tr className="border-b border-border">
+                  <th className="py-2 pr-3 font-medium">Customer</th>
+                  <th className="px-3 py-2 font-medium">Segment</th>
+                  <th className="px-3 py-2 text-right font-medium">Orders</th>
+                  <th className="px-3 py-2 text-right font-medium">Spent</th>
+                  <th className="px-3 py-2 text-right font-medium">Avg order</th>
+                  <th className="px-3 py-2 font-medium">Last order</th>
+                  <th className="px-3 py-2 font-medium">Joined</th>
+                  <th className="py-2 pl-3 text-right font-medium">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {data.items.map((c) => (
+                  <tr key={c.id} className="hover:bg-secondary/40">
+                    <td className="py-2.5 pr-3">
+                      <button type="button" onClick={() => setOpenId(c.id)} className="text-left">
+                        <span className="block font-medium text-foreground hover:text-primary">
+                          {c.name}
+                        </span>
+                        <span className="block text-[11px] text-muted-foreground">{c.email}</span>
+                        {(c.phone || c.district) && (
+                          <span className="block text-[11px] text-muted-foreground">
+                            {[c.phone, c.district].filter(Boolean).join(" · ")}
+                          </span>
+                        )}
+                      </button>
+                    </td>
+                    <td className="px-3 py-2.5">
+                      <Pill tone={SEGMENTS[c.segment]?.tone ?? "neutral"}>
+                        {SEGMENTS[c.segment]?.label ?? c.segment}
+                      </Pill>
+                    </td>
+                    <td className="px-3 py-2.5 text-right tabular-nums">
+                      {c.orders}
+                      {c.allOrders > c.orders && (
+                        <span className="block text-[11px] text-muted-foreground">
+                          +{c.allOrders - c.orders} cancelled
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-3 py-2.5 text-right font-semibold tabular-nums">
+                      {fmtTaka(c.spent)}
+                    </td>
+                    <td className="px-3 py-2.5 text-right tabular-nums">
+                      {c.orders ? fmtTaka(c.avgOrder) : "—"}
+                    </td>
+                    <td className="px-3 py-2.5 whitespace-nowrap">
+                      {c.lastOrderAt ? fmtRelative(c.lastOrderAt) : "—"}
+                    </td>
+                    <td className="px-3 py-2.5 whitespace-nowrap">{fmtDate(c.createdAt)}</td>
+                    <td className="py-2.5 pl-3 text-right whitespace-nowrap">
+                      {c.phone && (
+                        <a
+                          href={whatsappLink(c.phone)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className={iconButton}
+                          title="WhatsApp"
+                          aria-label={`WhatsApp ${c.name}`}
+                        >
+                          <MessageCircle className="h-4 w-4" />
+                        </a>
+                      )}
+                      <a
+                        href={`mailto:${c.email}`}
+                        className={iconButton}
+                        title="Email"
+                        aria-label={`Email ${c.name}`}
+                      >
+                        <Mail className="h-4 w-4" />
+                      </a>
+                      {can("customers.manage") && (
+                        <button
+                          type="button"
+                          className={`${iconButton} ${c.isActive ? "" : "text-emerald-600"}`}
+                          title={c.isActive ? "Suspend account" : "Re-activate account"}
+                          aria-label={c.isActive ? `Suspend ${c.name}` : `Re-activate ${c.name}`}
+                          onClick={() => toggleActive(c)}
+                        >
+                          <UserX className="h-4 w-4" />
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+        {data && (
+          <Pagination
+            page={page}
+            totalPages={data.totalPages}
+            total={data.total}
+            onPage={setPage}
+            label="customers"
+          />
+        )}
+      </Panel>
+
+      {openId && <CustomerDrawer id={openId} onClose={() => setOpenId(null)} />}
+    </div>
+  );
+}
+
+type Detail = {
+  customer: {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    isActive: boolean;
+    emailVerified: boolean;
+    provider: string;
+    walletBalance: number;
+    rewardPoints: number;
+    createdAt: string | null;
+    lastLoginAt: string | null;
+    role: string;
+  };
+  stats: {
+    orders: number;
+    allOrders: number;
+    spent: number;
+    avgOrder: number;
+    firstOrderAt: string | null;
+    lastOrderAt: string | null;
+    reviews: number;
+    wishlist: number;
+    favouriteProducts: { name: string; quantity: number }[];
+  };
+  addresses: {
+    _id: string;
+    label: string;
+    fullName: string;
+    phone: string;
+    streetAddress: string;
+    area: string;
+    district: string;
+    division: string;
+    isDefault: boolean;
+  }[];
+  orders: {
+    _id: string;
+    orderNumber: string;
+    total: number;
+    status: keyof typeof ORDER_STATUS_CONFIG;
+    paymentMethod: string;
+    paymentStatus: string;
+    createdAt: string;
+    items: { productName: string; quantity: number }[];
+  }[];
+  activity:
+    | {
+        _id: string;
+        type: string;
+        path?: string;
+        title?: string;
+        productName?: string;
+        searchTerm?: string;
+        orderNumber?: string;
+        device?: string;
+        createdAt: string;
+      }[]
+    | null;
+};
+
+function CustomerDrawer({ id, onClose }: { id: string; onClose: () => void }) {
+  const { can } = useAccess();
+  const { data, error, reload } = useAdminData<Detail>(`/api/admin/customers/${id}`);
+  const [resetting, setResetting] = useState(false);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && !resetting && onClose();
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose, resetting]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end bg-black/50" onClick={onClose}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Customer"
+        onClick={(e) => e.stopPropagation()}
+        className="flex h-full w-full max-w-xl flex-col border-l border-border bg-card shadow-2xl"
+      >
+        <div className="flex items-start justify-between gap-3 border-b border-border p-4">
+          <div>
+            <h3 className="font-serif text-lg">{data?.customer.name ?? "Customer"}</h3>
+            {data && <p className="text-xs text-muted-foreground">{data.customer.email}</p>}
+          </div>
+          <button type="button" className={iconButton} onClick={onClose} aria-label="Close">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="flex-1 space-y-5 overflow-y-auto p-4 text-xs">
+          {error && <ErrorNotice message={error} onRetry={reload} />}
+          {!data && !error && <Skeleton className="h-80" />}
+          {data && (
+            <>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  ["Orders", fmtNumber(data.stats.orders)],
+                  ["Spent", fmtTaka(data.stats.spent)],
+                  ["Avg order", data.stats.orders ? fmtTaka(data.stats.avgOrder) : "—"],
+                  ["Wishlist", fmtNumber(data.stats.wishlist)],
+                  ["Reviews", fmtNumber(data.stats.reviews)],
+                  ["Reward points", fmtNumber(data.customer.rewardPoints)],
+                ].map(([k, v]) => (
+                  <div key={k} className="rounded-lg bg-secondary/60 p-2.5">
+                    <p className="text-[11px] text-muted-foreground">{k}</p>
+                    <p className="text-sm font-semibold tabular-nums">{v}</p>
+                  </div>
+                ))}
+              </div>
+
+              <dl className="grid grid-cols-2 gap-2">
+                {[
+                  ["Phone", data.customer.phone || data.addresses[0]?.phone || "—"],
+                  ["Joined", fmtDate(data.customer.createdAt)],
+                  [
+                    "Last sign-in",
+                    data.customer.lastLoginAt ? fmtDateTime(data.customer.lastLoginAt) : "—",
+                  ],
+                  ["Sign-in method", data.customer.provider],
+                  ["Email verified", data.customer.emailVerified ? "Yes" : "No"],
+                  ["Account", data.customer.isActive ? "Active" : "Suspended"],
+                ].map(([k, v]) => (
+                  <div key={k}>
+                    <dt className="text-[11px] text-muted-foreground">{k}</dt>
+                    <dd className="font-medium">{v}</dd>
+                  </div>
+                ))}
+              </dl>
+
+              <div className="flex flex-wrap gap-2">
+                {(data.customer.phone || data.addresses[0]?.phone) && (
+                  <a
+                    className={secondaryButton}
+                    href={whatsappLink(data.customer.phone || data.addresses[0].phone)}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <MessageCircle className="h-4 w-4" /> WhatsApp
+                  </a>
+                )}
+                {(data.customer.phone || data.addresses[0]?.phone) && (
+                  <a
+                    className={secondaryButton}
+                    href={`tel:${data.customer.phone || data.addresses[0].phone}`}
+                  >
+                    <Phone className="h-4 w-4" /> Call
+                  </a>
+                )}
+                {can("roles.manage") && (
+                  <button
+                    type="button"
+                    className={secondaryButton}
+                    onClick={() => setResetting(true)}
+                  >
+                    <KeyRound className="h-4 w-4" /> Set new password
+                  </button>
+                )}
+              </div>
+
+              {data.stats.favouriteProducts.length > 0 && (
+                <section>
+                  <p className="mb-1.5 font-medium">Buys most</p>
+                  <div className="flex flex-wrap gap-1">
+                    {data.stats.favouriteProducts.map((p) => (
+                      <Pill key={p.name}>
+                        {p.quantity}× {p.name}
+                      </Pill>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              <section>
+                <p className="mb-1.5 font-medium">Orders ({data.stats.allOrders})</p>
+                {data.orders.length === 0 ? (
+                  <p className="text-muted-foreground">No orders yet.</p>
+                ) : (
+                  <ul className="divide-y divide-border rounded-xl border border-border">
+                    {data.orders.map((o) => (
+                      <li key={o._id} className="flex items-center justify-between gap-3 p-2.5">
+                        <span className="min-w-0">
+                          <span className="font-mono font-semibold">{o.orderNumber}</span>
+                          <span className="block truncate text-muted-foreground">
+                            {o.items.map((i) => `${i.quantity}× ${i.productName}`).join(", ")}
+                          </span>
+                        </span>
+                        <span className="shrink-0 text-right">
+                          <span className="block font-semibold tabular-nums">
+                            {fmtTaka(o.total)}
+                          </span>
+                          <span className="text-muted-foreground">
+                            {ORDER_STATUS_CONFIG[o.status]?.label ?? o.status} ·{" "}
+                            {fmtDate(o.createdAt)}
+                          </span>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+
+              {data.addresses.length > 0 && (
+                <section>
+                  <p className="mb-1.5 font-medium">Saved addresses</p>
+                  <ul className="space-y-1.5">
+                    {data.addresses.map((a) => (
+                      <li key={a._id} className="rounded-lg border border-border p-2">
+                        <span className="font-medium">
+                          {a.label}
+                          {a.isDefault ? " · default" : ""}
+                        </span>
+                        <span className="block text-muted-foreground">
+                          {[a.streetAddress, a.area, a.district, a.division]
+                            .filter(Boolean)
+                            .join(", ")}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )}
+
+              {data.activity && (
+                <section>
+                  <p className="mb-1.5 font-medium">Recent site activity</p>
+                  {data.activity.length === 0 ? (
+                    <p className="text-muted-foreground">No recorded activity while signed in.</p>
+                  ) : (
+                    <ul className="divide-y divide-border rounded-xl border border-border">
+                      {data.activity.slice(0, 20).map((e) => (
+                        <li key={e._id} className="flex justify-between gap-3 p-2">
+                          <span className="min-w-0 truncate">
+                            <span className="font-medium">{e.type.replace(/_/g, " ")}</span>{" "}
+                            <span className="text-muted-foreground">
+                              {e.productName ?? e.searchTerm ?? e.orderNumber ?? e.title ?? e.path}
+                            </span>
+                          </span>
+                          <span className="shrink-0 text-muted-foreground">
+                            {fmtRelative(e.createdAt)}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+      {resetting && data && (
+        <ResetPassword userId={id} name={data.customer.name} onClose={() => setResetting(false)} />
       )}
+    </div>
+  );
+}
+
+function ResetPassword({
+  userId,
+  name,
+  onClose,
+}: {
+  userId: string;
+  name: string;
+  onClose: () => void;
+}) {
+  const [password, setPassword] = useState("");
+  const [saving, setSaving] = useState(false);
+  return (
+    <div onClick={(e) => e.stopPropagation()}>
+      <Modal
+        title={`New password for ${name}`}
+        onClose={onClose}
+        footer={
+          <>
+            <button type="button" className={secondaryButton} onClick={onClose}>
+              Cancel
+            </button>
+            <button
+              type="button"
+              className={primaryButton}
+              disabled={saving || password.length < 10}
+              onClick={async () => {
+                setSaving(true);
+                try {
+                  await api("/api/admin/users/password", {
+                    method: "POST",
+                    json: { userId, newPassword: password },
+                  });
+                  toast.success(`Password changed for ${name}. They were signed out everywhere.`);
+                  onClose();
+                } catch (err) {
+                  toast.error(err instanceof Error ? err.message : "Couldn't change the password.");
+                } finally {
+                  setSaving(false);
+                }
+              }}
+            >
+              {saving ? "Saving…" : "Set password"}
+            </button>
+          </>
+        }
+      >
+        <Field
+          label="New password"
+          htmlFor="cp-new"
+          hint="At least 10 characters with 3 of: lowercase, uppercase, number, symbol."
+        >
+          <input
+            id="cp-new"
+            type="text"
+            autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className={`${inputClass} font-mono`}
+          />
+        </Field>
+      </Modal>
     </div>
   );
 }

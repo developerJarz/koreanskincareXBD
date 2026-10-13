@@ -11,6 +11,7 @@ import {
 import { consumeOtp, verifyOtp } from "@/server/auth/otp";
 import { getClientIp, rateLimit } from "@/server/security/rate-limit";
 import { cleanString, isEmail } from "@/server/security/validation";
+import { recordServerEvent } from "@/server/activity";
 
 // Step 2 of sign-up: confirm the emailed code, then create the account and sign the user in
 export async function POST(request: NextRequest) {
@@ -58,6 +59,7 @@ export async function POST(request: NextRequest) {
       emailVerified: true,
     });
     await consumeOtp(record);
+    recordServerEvent(request, { type: "signup" }, user);
 
     const response = NextResponse.json(toAuthUser(user), { status: 201 });
     setSessionCookie(response, user);

@@ -116,7 +116,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         {/* End Google Tag Manager (noscript) */}
 
         {children}
-        <Toaster position="bottom-right" richColors />
+        {/* On phones, keep toasts above the shop's bottom tab bar */}
+        <Toaster position="bottom-right" richColors mobileOffset={{ bottom: 80 }} />
       </body>
     </html>
   );

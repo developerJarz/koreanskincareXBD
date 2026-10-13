@@ -24,7 +24,11 @@ import { MobileNavMenu } from "@/components/navigation/MobileNavMenu";
 
 /** Categories and brands come from the database (see app/(store)/layout.tsx) */
 export function Header({ nav, branding }: { nav: NavData; branding?: LogoBranding }) {
-  const [menu, setMenu] = useState(false);
+  // Shared with the phone tab bar, which opens the same menu
+  const menu = useUIStore((s) => s.isMobileMenuOpen);
+  const openMobileMenu = useUIStore((s) => s.openMobileMenu);
+  const closeMobileMenu = useUIStore((s) => s.closeMobileMenu);
+  const setMenu = (open: boolean) => (open ? openMobileMenu() : closeMobileMenu());
   const [scrolled, setScrolled] = useState(false);
   const { openCart, openSearch } = useUIStore();
   const itemCount = useCartStore((s) => s.getItemCount());

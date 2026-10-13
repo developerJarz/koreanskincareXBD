@@ -78,9 +78,18 @@
   --sidebar-muted: oklch(0.76 0.03 20);
   --sidebar-accent: oklch(0.33 0.06 12);
   --sidebar-border: oklch(1 0 0 / 9%);
+  /* Admin chart series (validated for colour-blind separation; slot 3 always ships with labels) */
+  --viz-1: #2a78d6;
+  --viz-2: #eb6834;
+  --viz-3: #1baf7a;
+  --viz-grid: oklch(0.9 0.008 60);
 }
 
 .dark {
+  --viz-1: #3987e5;
+  --viz-2: #d95926;
+  --viz-3: #199e70;
+  --viz-grid: oklch(0.3 0.015 20);
   --background: oklch(0.14 0.015 20);
   --foreground: oklch(0.98 0.008 60);
   --card: oklch(0.18 0.02 20);
@@ -114,6 +123,8 @@
     scroll-behavior: smooth;
   }
   body {
+    /* Safety net: nothing may make the page scroll sideways (clip keeps sticky headers working) */
+    overflow-x: clip;
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
@@ -246,6 +257,39 @@
 }
 .animate-marquee {
   animation: marquee 30s linear infinite;
+}
+
+/* Homepage slider: the active dot fills while its slide is showing */
+@keyframes hero-progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+/* Swipeable rows on phones (products, categories, brands), a normal grid from sm up */
+@utility rail {
+  /* Positioned so it also clips absolutely positioned children (e.g. screen-reader labels in
+     product cards); without it they escape the row and widen the whole page on phones */
+  position: relative;
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 1rem;
+  margin-inline: -1rem;
+  padding-inline: 1rem;
+  padding-bottom: 0.25rem;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  & > * {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+  }
 }
 
 @keyframes fade-up {

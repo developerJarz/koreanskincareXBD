@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/server/db/connection";
 import { Product } from "@/server/db/models";
 import { ADMIN_ROLES, requireAuth, serverError, STAFF_ROLES } from "@/server/auth/session";
+import { requirePermission } from "@/server/auth/permissions";
 import { revalidateCatalog } from "@/server/catalog";
 import { isObjectId } from "@/server/security/validation";
 import { generateBarcode, generateSku } from "@/server/sku";
@@ -17,7 +18,7 @@ const MISSING = (field: string) => ({
  */
 export async function GET(request: NextRequest) {
   try {
-    const auth = await requireAuth(request, STAFF_ROLES);
+    const auth = await requirePermission(request, "catalog.view");
     if (!auth.ok) return auth.response;
     await connectDB();
 
@@ -47,7 +48,7 @@ export async function GET(request: NextRequest) {
 /** POST — gives every product that has no SKU or barcode one (admins only). Existing codes are kept. */
 export async function POST(request: NextRequest) {
   try {
-    const auth = await requireAuth(request, ADMIN_ROLES);
+    const auth = await requirePermission(request, "catalog.structure");
     if (!auth.ok) return auth.response;
     await connectDB();
 

@@ -1,264 +1,298 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
-  Search,
-  X,
+  ArrowRight,
+  Loader2,
   Package,
+  ReceiptText,
+  Search,
   ShoppingBag,
   Users,
-  BarChart3,
-  Sparkles,
-  Truck,
-  Shield,
-  Layers,
-  RotateCcw,
-  ArrowRight,
-  Boxes,
-  Flame,
-  DollarSign,
+  X,
 } from "lucide-react";
+
 import type { AdminTab } from "./types";
+import type { NavGroup } from "./nav";
+import { fmtTaka, useAccess, useDebounced } from "./shared";
 
 interface GlobalCommandPaletteProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectTab: (tab: AdminTab) => void;
-  products?: any[];
-  orders?: any[];
-  users?: any[];
+  /** Opens a tab; `query` pre-fills that tab's search box */
+  onSelectTab: (tab: AdminTab, query?: string) => void;
+  groups: NavGroup[];
 }
 
+type Hit = {
+  key: string;
+  tab: AdminTab;
+  query: string;
+  title: string;
+  sub: string;
+  badge?: string;
+  icon: React.ElementType;
+};
+
+async function getJson(url: string, signal: AbortSignal) {
+  const res = await fetch(url, { cache: "no-store", signal });
+  return res.ok ? res.json() : null;
+}
+
+/**
+ * Ctrl/⌘ K search across the whole admin: pages, plus live database results for orders,
+ * customers, invoices and products (only the kinds this role may open).
+ */
 export function GlobalCommandPalette({
   isOpen,
   onClose,
   onSelectTab,
-  products = [],
-  orders = [],
-  users = [],
+  groups,
 }: GlobalCommandPaletteProps) {
+  const { can } = useAccess();
   const [query, setQuery] = useState("");
+  const [hits, setHits] = useState<Hit[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [active, setActive] = useState(0);
+  const q = useDebounced(query.trim(), 250);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault();
-        if (isOpen) {
-          onClose();
-        } else {
-          // Trigger open via parent
-        }
-      }
-      if (e.key === "Escape" && isOpen) {
-        onClose();
-      }
-    };
+    if (!isOpen) {
+      setQuery("");
+      setHits([]);
+    }
+  }, [isOpen]);
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+  // Live search in MongoDB
+  useEffect(() => {
+    if (!isOpen || q.length < 2) {
+      setHits([]);
+      return;
+    }
+    const ac = new AbortController();
+    const enc = encodeURIComponent(q);
+    setSearching(true);
+    Promise.all([
+      can("orders.view") ? getJson(`/api/orders?q=${enc}&pageSize=5`, ac.signal) : null,
+      can("customers.view")
+        ? getJson(`/api/admin/customers?q=${enc}&pageSize=10`, ac.signal)
+        : null,
+      can("invoices.view") ? getJson(`/api/admin/invoices?q=${enc}&pageSize=10`, ac.signal) : null,
+      can("catalog.view") ? getJson(`/api/admin/products?q=${enc}&pageSize=5`, ac.signal) : null,
+    ])
+      .then(([orders, customers, invoices, products]) => {
+        const list: Hit[] = [];
+        for (const o of orders?.items ?? []) {
+          list.push({
+            key: `o${o._id}`,
+            tab: "orders",
+            query: o.orderNumber,
+            title: o.orderNumber,
+            sub: `${o.shippingAddress?.fullName ?? ""} · ${o.shippingAddress?.phone ?? ""} · ${fmtTaka(o.total)}`,
+            badge: o.status,
+            icon: ShoppingBag,
+          });
+        }
+        for (const c of (customers?.items ?? []).slice(0, 5)) {
+          list.push({
+            key: `c${c.id}`,
+            tab: "customers",
+            query: c.email,
+            title: c.name,
+            sub: `${c.email} · ${c.orders} orders · ${fmtTaka(c.spent)}`,
+            icon: Users,
+          });
+        }
+        for (const i of (invoices?.items ?? []).slice(0, 5)) {
+          list.push({
+            key: `i${i._id}`,
+            tab: "invoices",
+            query: i.invoiceNumber,
+            title: i.invoiceNumber,
+            sub: `${i.customer?.name ?? ""} · ${fmtTaka(i.total)}`,
+            badge: i.status,
+            icon: ReceiptText,
+          });
+        }
+        for (const p of products?.items ?? []) {
+          list.push({
+            key: `p${p._id}`,
+            tab: "products",
+            query: p.name,
+            title: p.name,
+            sub: `${fmtTaka(p.price)} · ${p.stock ?? 0} in stock`,
+            badge: p.status,
+            icon: Package,
+          });
+        }
+        setHits(list);
+        setActive(0);
+      })
+      .catch(() => {})
+      .finally(() => !ac.signal.aborted && setSearching(false));
+    return () => ac.abort();
+  }, [q, isOpen, can]);
+
+  const pages = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    return groups
+      .flatMap((g) => g.items)
+      .filter((i) => !needle || `${i.label} ${i.description}`.toLowerCase().includes(needle))
+      .slice(0, needle ? 6 : 8);
+  }, [groups, query]);
+
+  const all = [
+    ...pages.map((p) => ({ key: `nav-${p.tab}`, run: () => onSelectTab(p.tab) })),
+    ...hits.map((h) => ({ key: h.key, run: () => onSelectTab(h.tab, h.query) })),
+  ];
 
   if (!isOpen) return null;
 
-  const quickNavItems: Array<{
-    tab: AdminTab;
-    label: string;
-    group: string;
-    icon: React.ElementType;
-  }> = [
-    { tab: "overview", label: "Executive Dashboard", group: "Pages", icon: BarChart3 },
-    { tab: "analytics", label: "Sales Analytics & Conversion BI", group: "Pages", icon: BarChart3 },
-    { tab: "orders", label: "Orders Pipeline & POS Invoicing", group: "Pages", icon: ShoppingBag },
-    { tab: "products", label: "Products Catalog & Variants", group: "Pages", icon: Package },
-    { tab: "inventory", label: "Multi-Warehouse & Stock Levels", group: "Pages", icon: Boxes },
-    { tab: "customers", label: "Customer CRM & RFM Segments", group: "Pages", icon: Users },
-    { tab: "returns", label: "Returns & Refund Requests", group: "Pages", icon: RotateCcw },
-    {
-      tab: "couriers_payments",
-      label: "Bangladeshi Couriers & Gateways",
-      group: "Pages",
-      icon: Truck,
-    },
-    { tab: "marketing", label: "Campaigns (Eid, Ramadan) & SMS", group: "Pages", icon: Flame },
-    { tab: "ai_studio", label: "AI Copywriter & Image Enhancer", group: "Pages", icon: Sparkles },
-    {
-      tab: "finance",
-      label: "Profit & Loss (P&L) & Report Center",
-      group: "Pages",
-      icon: DollarSign,
-    },
-    {
-      tab: "security_rbac",
-      label: "Role Permissions & Security Center",
-      group: "Pages",
-      icon: Shield,
-    },
-  ];
+  const choose = (index: number) => {
+    all[index]?.run();
+    onClose();
+  };
 
-  const filteredNav = quickNavItems.filter((item) =>
-    item.label.toLowerCase().includes(query.toLowerCase()),
+  const row = (index: number, content: React.ReactNode, key: string) => (
+    <button
+      key={key}
+      type="button"
+      onMouseEnter={() => setActive(index)}
+      onClick={() => choose(index)}
+      className={`group flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-left ${
+        index === active ? "bg-secondary" : "hover:bg-secondary/60"
+      }`}
+    >
+      {content}
+      <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+    </button>
   );
 
-  const matchedOrders = orders
-    .filter(
-      (o) =>
-        (o.orderNumber && o.orderNumber.toLowerCase().includes(query.toLowerCase())) ||
-        (o.shippingAddress?.fullName &&
-          o.shippingAddress.fullName.toLowerCase().includes(query.toLowerCase())) ||
-        (o.shippingAddress?.phone && o.shippingAddress.phone.includes(query)),
-    )
-    .slice(0, 4);
-
-  const matchedProducts = products
-    .filter((p) => p.name && p.name.toLowerCase().includes(query.toLowerCase()))
-    .slice(0, 4);
-
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4 bg-black/60 backdrop-blur-xs animate-fade-in">
-      <div className="w-full max-w-2xl bg-card border border-border rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh] animate-scale-up">
-        {/* Search Input Bar */}
-        <div className="flex items-center px-4 py-3.5 border-b border-border gap-3">
-          <Search className="w-5 h-5 text-muted-foreground shrink-0" />
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 px-4 pt-20"
+      onClick={onClose}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Search the admin"
+        onClick={(e) => e.stopPropagation()}
+        className="flex max-h-[80vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl"
+      >
+        <div className="flex items-center gap-3 border-b border-border px-4 py-3.5">
+          {searching ? (
+            <Loader2 className="h-5 w-5 shrink-0 animate-spin text-muted-foreground" />
+          ) : (
+            <Search className="h-5 w-5 shrink-0 text-muted-foreground" />
+          )}
           <input
             type="text"
-            placeholder="Search anything (e.g. 'Eid Sale', 'Pathao', 'ORD-2026', 'Gold Ring')..."
+            placeholder="Search pages, orders, customers, invoices, products…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "ArrowDown") {
+                e.preventDefault();
+                setActive((a) => Math.min(all.length - 1, a + 1));
+              } else if (e.key === "ArrowUp") {
+                e.preventDefault();
+                setActive((a) => Math.max(0, a - 1));
+              } else if (e.key === "Enter") {
+                e.preventDefault();
+                choose(active);
+              } else if (e.key === "Escape") {
+                onClose();
+              }
+            }}
             autoFocus
-            className="flex-1 bg-transparent text-sm focus:outline-hidden text-foreground placeholder:text-muted-foreground"
+            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-hidden"
           />
           <button
+            type="button"
             onClick={onClose}
-            className="p-1 rounded-lg text-muted-foreground hover:bg-secondary"
+            className="rounded-lg p-1 text-muted-foreground hover:bg-secondary"
             aria-label="Close"
           >
-            <X className="w-4 h-4" />
+            <X className="h-4 w-4" />
           </button>
         </div>
 
-        {/* Results Body */}
-        <div className="overflow-y-auto p-3 space-y-4 text-xs scrollbar-thin">
-          {/* Matched Navigation Pages */}
-          {filteredNav.length > 0 && (
+        <div className="space-y-4 overflow-y-auto p-3 text-xs">
+          {pages.length > 0 && (
             <div>
-              <p className="px-3 py-1 text-[10px] uppercase font-bold tracking-wider text-muted-foreground">
-                Navigation & Modules
-              </p>
-              <div className="space-y-1 mt-1">
-                {filteredNav.slice(0, 6).map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <button
-                      key={item.tab}
-                      onClick={() => {
-                        onSelectTab(item.tab);
-                        onClose();
-                      }}
-                      className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left hover:bg-secondary transition text-foreground group"
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
-                          <Icon className="w-4 h-4" />
-                        </div>
-                        <span className="font-medium">{item.label}</span>
-                      </div>
-                      <ArrowRight className="w-3.5 h-3.5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
-                    </button>
+              <p className="px-3 py-1 text-[11px] font-medium text-muted-foreground">Pages</p>
+              <div className="mt-1 space-y-0.5">
+                {pages.map((p, i) => {
+                  const Icon = p.icon;
+                  return row(
+                    i,
+                    <span className="flex min-w-0 items-center gap-2.5">
+                      <span className="rounded-lg bg-primary/10 p-1.5 text-primary">
+                        <Icon className="h-4 w-4" />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block font-medium text-foreground">{p.label}</span>
+                        <span className="block truncate text-[11px] text-muted-foreground">
+                          {p.description}
+                        </span>
+                      </span>
+                    </span>,
+                    p.tab,
                   );
                 })}
               </div>
             </div>
           )}
 
-          {/* Matched Orders */}
-          {matchedOrders.length > 0 && (
+          {hits.length > 0 && (
             <div>
-              <p className="px-3 py-1 text-[10px] uppercase font-bold tracking-wider text-muted-foreground">
-                Matching Orders
+              <p className="px-3 py-1 text-[11px] font-medium text-muted-foreground">
+                From the database
               </p>
-              <div className="space-y-1 mt-1">
-                {matchedOrders.map((ord) => (
-                  <button
-                    key={ord._id || ord.orderNumber}
-                    onClick={() => {
-                      onSelectTab("orders");
-                      onClose();
-                    }}
-                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left hover:bg-secondary transition text-foreground"
-                  >
-                    <div>
-                      <div className="font-semibold text-primary">{ord.orderNumber}</div>
-                      <div className="text-[11px] text-muted-foreground">
-                        {ord.shippingAddress?.fullName} · {ord.shippingAddress?.phone} · ৳
-                        {ord.total?.toLocaleString()}
-                      </div>
-                    </div>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-secondary border border-border">
-                      {ord.status}
-                    </span>
-                  </button>
-                ))}
+              <div className="mt-1 space-y-0.5">
+                {hits.map((h, i) => {
+                  const Icon = h.icon;
+                  return row(
+                    pages.length + i,
+                    <span className="flex min-w-0 items-center gap-2.5">
+                      <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                      <span className="min-w-0">
+                        <span className="block font-semibold text-foreground">
+                          {h.title}
+                          {h.badge && (
+                            <span className="ml-2 rounded-full bg-secondary px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                              {h.badge}
+                            </span>
+                          )}
+                        </span>
+                        <span className="block truncate text-[11px] text-muted-foreground">
+                          {h.sub}
+                        </span>
+                      </span>
+                    </span>,
+                    h.key,
+                  );
+                })}
               </div>
             </div>
           )}
 
-          {/* Matched Products */}
-          {matchedProducts.length > 0 && (
-            <div>
-              <p className="px-3 py-1 text-[10px] uppercase font-bold tracking-wider text-muted-foreground">
-                Matching Products
+          {pages.length === 0 && hits.length === 0 && !searching && (
+            <div className="py-8 text-center text-muted-foreground">
+              <Search className="mx-auto mb-2 h-8 w-8 opacity-30" />
+              <p>
+                {q.length < 2
+                  ? "Type at least 2 characters to search the database."
+                  : `Nothing found for “${query}”.`}
               </p>
-              <div className="space-y-1 mt-1">
-                {matchedProducts.map((prod) => (
-                  <button
-                    key={prod._id || prod.slug}
-                    onClick={() => {
-                      onSelectTab("products");
-                      onClose();
-                    }}
-                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left hover:bg-secondary transition text-foreground"
-                  >
-                    <div>
-                      <div className="font-semibold">{prod.name}</div>
-                      <div className="text-[11px] text-muted-foreground">
-                        ৳{prod.price?.toLocaleString()} · Stock: {prod.stock || 0}
-                      </div>
-                    </div>
-                    <span className="text-[10px] text-primary font-semibold">View in Catalog</span>
-                  </button>
-                ))}
-              </div>
             </div>
           )}
-
-          {filteredNav.length === 0 &&
-            matchedOrders.length === 0 &&
-            matchedProducts.length === 0 && (
-              <div className="text-center py-8 text-muted-foreground">
-                <Search className="w-8 h-8 mx-auto mb-2 opacity-30" />
-                <p>No results found for "{query}"</p>
-              </div>
-            )}
         </div>
 
-        {/* Footer Shortcut Hints */}
-        <div className="px-4 py-2.5 bg-secondary/40 border-t border-border flex items-center justify-between text-[11px] text-muted-foreground">
-          <div className="flex gap-3">
-            <span>
-              <kbd className="font-mono bg-card px-1.5 py-0.5 border border-border rounded">↑↓</kbd>{" "}
-              to navigate
-            </span>
-            <span>
-              <kbd className="font-mono bg-card px-1.5 py-0.5 border border-border rounded">
-                Enter
-              </kbd>{" "}
-              to select
-            </span>
-          </div>
-          <span>
-            <kbd className="font-mono bg-card px-1.5 py-0.5 border border-border rounded">Esc</kbd>{" "}
-            to close
-          </span>
+        <div className="flex items-center justify-between border-t border-border bg-secondary/40 px-4 py-2.5 text-[11px] text-muted-foreground">
+          <span>↑↓ to move · Enter to open</span>
+          <span>Esc to close</span>
         </div>
       </div>
     </div>

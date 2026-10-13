@@ -34,6 +34,104 @@ export const PRODUCT_ROW_SECTIONS: HomeSectionId[] = [
   "trending",
 ];
 
+/** Sections whose content (products, categories or brands) the team controls */
+export const CONTENT_SECTIONS: HomeSectionId[] = [...PRODUCT_ROW_SECTIONS, "categories", "brands"];
+
+/** What fills a section automatically when it isn't hand-picked */
+export const AUTO_SOURCE_LABELS: Partial<Record<HomeSectionId, string>> = {
+  bestsellers: "Products marked “Best seller”",
+  newArrivals: "Products marked “New arrival”",
+  onSale: "Products with a sale price (was-price above the price)",
+  featured: "Products marked “Featured”",
+  trending: "Products marked “Trending”",
+  categories: "Categories marked “Show on homepage” (or all top-level ones)",
+  brands: "Brands marked “Show on homepage”",
+};
+
+export const PRODUCT_SORTS = {
+  bestselling: "Best selling first",
+  newest: "Newest first",
+  rating: "Top rated first",
+  price_asc: "Price: low to high",
+  price_desc: "Price: high to low",
+} as const;
+export type ProductSort = keyof typeof PRODUCT_SORTS;
+
+export type SectionSource = "auto" | "manual";
+
+export type HomeSection = {
+  id: HomeSectionId;
+  enabled: boolean;
+  /** Heading (product rows, categories, brands) */
+  title: string;
+  /** Optional line under the heading */
+  subtitle: string;
+  /** auto = filled from flags / rules, manual = the hand-picked itemIds in that order */
+  source: SectionSource;
+  /** Order of automatic product rows */
+  sort: ProductSort;
+  /** How many items to show */
+  limit: number;
+  /** Hand-picked product / category / brand ids */
+  itemIds: string[];
+};
+
+const PRODUCT_LIMIT = { min: 4, max: 24, default: 8 };
+const SECTION_LIMITS: Partial<
+  Record<HomeSectionId, { min: number; max: number; default: number }>
+> = {
+  categories: { min: 2, max: 24, default: 12 },
+  brands: { min: 2, max: 32, default: 16 },
+};
+export function sectionLimits(id: HomeSectionId) {
+  return SECTION_LIMITS[id] ?? PRODUCT_LIMIT;
+}
+const DEFAULT_SORT: Partial<Record<HomeSectionId, ProductSort>> = {
+  bestsellers: "bestselling",
+  trending: "bestselling",
+};
+
+function sectionDefaults(id: HomeSectionId, title: string): HomeSection {
+  return {
+    id,
+    enabled: true,
+    title,
+    subtitle: "",
+    source: "auto",
+    sort: DEFAULT_SORT[id] ?? "newest",
+    limit: sectionLimits(id).default,
+    itemIds: [],
+  };
+}
+
+export const SLIDER_HEIGHTS = {
+  compact: "Compact (about 45% of the screen)",
+  standard: "Standard (about 60% of the screen)",
+  tall: "Tall (about 70% of the screen)",
+} as const;
+export type SliderHeight = keyof typeof SLIDER_HEIGHTS;
+
+/** One banner in the homepage slider */
+export type HeroSlide = {
+  /** Wide image for tablets and computers */
+  image: string;
+  /** Optional taller image for phones; falls back to `image` */
+  mobileImage: string;
+  /** Describes the image for screen readers (and Google) */
+  alt: string;
+  title: string;
+  subtitle: string;
+  ctaLabel: string;
+  /** Where the slide (and its button) goes */
+  href: string;
+  /** "none" for banners whose words are already in the picture */
+  textPosition: "left" | "center" | "none";
+  /** light = white text for dark pictures, dark = dark text for light pictures */
+  theme: "light" | "dark";
+};
+
+export const MAX_SLIDES = 8;
+
 export type NavLink = { label: string; href: string };
 
 export type StorefrontConfig = {
@@ -67,6 +165,14 @@ export type StorefrontConfig = {
     ratingText: string;
     customersText: string;
   };
+  /** The banner slider at the top of the homepage */
+  slider: {
+    autoplay: boolean;
+    /** Seconds each slide shows */
+    intervalSeconds: number;
+    height: SliderHeight;
+    slides: HeroSlide[];
+  };
   trust: { items: Array<{ icon: TrustIcon; title: string; summary: string }> };
   promise: {
     eyebrow: string;
@@ -84,7 +190,7 @@ export type StorefrontConfig = {
   };
   newsletter: { eyebrow: string; title: string; description: string };
   /** Homepage order and visibility; `title` renames product rows */
-  sections: Array<{ id: HomeSectionId; enabled: boolean; title: string }>;
+  sections: HomeSection[];
   footer: {
     about: string;
     columns: Array<{ title: string; links: NavLink[] }>;
@@ -146,6 +252,36 @@ export const DEFAULT_STOREFRONT: StorefrontConfig = {
     ratingText: "4.95 / 5 Verified Rating",
     customersText: "15,000+ Happy Customers in BD",
   },
+  slider: {
+    autoplay: true,
+    intervalSeconds: 5,
+    height: "standard",
+    slides: [
+      {
+        image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=1600&q=80",
+        mobileImage: "",
+        alt: "Korean skincare bottles on a soft white towel",
+        title: "Glass skin, straight from Seoul",
+        subtitle:
+          "Essences, toners and SPF 50+ sunscreens, with cash on delivery anywhere in Bangladesh.",
+        ctaLabel: "Shop skincare",
+        href: "/products",
+        textPosition: "left",
+        theme: "light",
+      },
+      {
+        image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=1600&q=80",
+        mobileImage: "",
+        alt: "Skincare products arranged on a vanity",
+        title: "Every bottle batch-checked",
+        subtitle: "Sourced from authorised Seoul distributors and delivered sealed.",
+        ctaLabel: "See best sellers",
+        href: "/products?flag=bestseller",
+        textPosition: "left",
+        theme: "light",
+      },
+    ],
+  },
   trust: {
     items: [
       { icon: "shield", title: "100% Authentic Import", summary: "Direct Seoul batch verified" },
@@ -194,20 +330,22 @@ export const DEFAULT_STOREFRONT: StorefrontConfig = {
     description:
       "Subscribe for early access to limited Seoul shipments and authentic skincare tips.",
   },
-  sections: [
-    { id: "hero", enabled: true, title: "" },
-    { id: "trust", enabled: true, title: "" },
-    { id: "categories", enabled: true, title: "Shop by category" },
-    { id: "bestsellers", enabled: true, title: "Best sellers" },
-    { id: "brands", enabled: true, title: "Shop by brand" },
-    { id: "newArrivals", enabled: true, title: "New arrivals" },
-    { id: "promise", enabled: true, title: "" },
-    { id: "onSale", enabled: true, title: "On sale" },
-    { id: "featured", enabled: true, title: "Featured" },
-    { id: "trending", enabled: true, title: "Trending now" },
-    { id: "testimonials", enabled: true, title: "" },
-    { id: "newsletter", enabled: true, title: "" },
-  ],
+  sections: (
+    [
+      ["hero", ""],
+      ["trust", ""],
+      ["categories", "Shop by category"],
+      ["bestsellers", "Best sellers"],
+      ["brands", "Shop by brand"],
+      ["newArrivals", "New arrivals"],
+      ["promise", ""],
+      ["onSale", "On sale"],
+      ["featured", "Featured"],
+      ["trending", "Trending now"],
+      ["testimonials", ""],
+      ["newsletter", ""],
+    ] as Array<[HomeSectionId, string]>
+  ).map(([id, title]) => sectionDefaults(id, title)),
   footer: {
     about:
       "100% Authentic Korean skincare, clinically-proven beauty formulas & glass skin essentials delivered nationwide in Bangladesh with Cash on Delivery.",
@@ -381,6 +519,57 @@ export function normalizeStorefront(input: unknown): { value: StorefrontConfig; 
   };
   trust.items = trust.items.filter((i) => i.title);
 
+  // Slider: before it existed, the homepage had one hero banner — that becomes the first slide
+  const sl = obj(raw.slider);
+  const savedSlides =
+    "slides" in sl
+      ? arr(sl.slides)
+      : raw.hero
+        ? [
+            {
+              image: hero.image,
+              alt: hero.imageAlt,
+              title: [hero.titleLine1, hero.titleLine2].filter(Boolean).join(" "),
+              subtitle: hero.description,
+              ctaLabel: hero.primaryLabel,
+              href: hero.primaryHref,
+              textPosition: "left",
+              theme: "light",
+            },
+            ...D.slider.slides.slice(1),
+          ]
+        : D.slider.slides;
+  const interval = Math.round(Number(sl.intervalSeconds));
+  const slider: StorefrontConfig["slider"] = {
+    autoplay: typeof sl.autoplay === "boolean" ? sl.autoplay : D.slider.autoplay,
+    intervalSeconds: Number.isFinite(interval)
+      ? Math.min(15, Math.max(3, interval))
+      : D.slider.intervalSeconds,
+    height:
+      typeof sl.height === "string" && sl.height in SLIDER_HEIGHTS
+        ? (sl.height as SliderHeight)
+        : D.slider.height,
+    slides: savedSlides
+      .slice(0, MAX_SLIDES)
+      .map((item, i): HeroSlide => {
+        const s = obj(item);
+        const key = `slider.slides.${i}`;
+        return {
+          image: imageUrl(s.image, "", `${key}.image`, errors),
+          mobileImage: imageUrl(s.mobileImage, "", `${key}.mobileImage`, errors),
+          alt: str(s.alt, "", 150),
+          title: str(s.title, "", 90),
+          subtitle: str(s.subtitle, "", 200),
+          ctaLabel: str(s.ctaLabel, "", 40),
+          href: link(s.href, "", `${key}.href`, errors),
+          textPosition:
+            s.textPosition === "center" || s.textPosition === "none" ? s.textPosition : "left",
+          theme: s.theme === "dark" ? "dark" : "light",
+        };
+      })
+      .filter((s) => s.image),
+  };
+
   const p = obj(raw.promise);
   const promise: StorefrontConfig["promise"] = {
     eyebrow: str(p.eyebrow, D.promise.eyebrow, 80),
@@ -425,14 +614,25 @@ export function normalizeStorefront(input: unknown): { value: StorefrontConfig; 
     const id = o.id as HomeSectionId;
     if (!(id in HOME_SECTIONS) || sections.some((x) => x.id === id)) continue;
     const def = D.sections.find((x) => x.id === id)!;
+    const limits = sectionLimits(id);
+    const limit = Math.round(Number(o.limit));
+    const ids = arr(o.itemIds).filter(
+      (v): v is string => typeof v === "string" && /^[0-9a-f]{24}$/i.test(v),
+    );
     sections.push({
       id,
       enabled: typeof o.enabled === "boolean" ? o.enabled : true,
       title: str(o.title, def.title, 60) || def.title,
+      subtitle: str(o.subtitle, "", 160),
+      source: o.source === "manual" ? "manual" : "auto",
+      sort:
+        typeof o.sort === "string" && o.sort in PRODUCT_SORTS ? (o.sort as ProductSort) : def.sort,
+      limit: Number.isFinite(limit) ? Math.min(limits.max, Math.max(limits.min, limit)) : def.limit,
+      itemIds: [...new Set(ids)].slice(0, 48),
     });
   }
   for (const def of D.sections) {
-    if (!sections.some((x) => x.id === def.id)) sections.push({ ...def });
+    if (!sections.some((x) => x.id === def.id)) sections.push({ ...def, itemIds: [] });
   }
 
   const f = obj(raw.footer);
@@ -490,6 +690,7 @@ export function normalizeStorefront(input: unknown): { value: StorefrontConfig; 
       branding,
       announcement,
       hero,
+      slider,
       trust,
       promise,
       testimonials,

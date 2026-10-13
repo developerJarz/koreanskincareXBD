@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { requireAuth, serverError, STAFF_ROLES } from "@/server/auth/session";
+import { requirePermission } from "@/server/auth/permissions";
 import { requireVendor } from "@/server/auth/vendor";
 import { connectDB } from "@/server/db/connection";
 import { rateLimit } from "@/server/security/rate-limit";
@@ -29,7 +30,10 @@ async function authorizeUpload(
   request: NextRequest,
   folder: UploadFolder,
 ): Promise<{ ok: true; userId: string } | { ok: false; response: NextResponse }> {
-  const staff = await requireAuth(request, STAFF_ROLES);
+  const staff = await requirePermission(
+    request,
+    folder === "site" ? "storefront.manage" : folder === "products" ? "catalog.manage" : "catalog.structure",
+  );
   if (staff.ok) return { ok: true, userId: String(staff.user._id) };
   // Signed in, but not staff — maybe a vendor
   if (folder === "products" && staff.response.status === 403) {

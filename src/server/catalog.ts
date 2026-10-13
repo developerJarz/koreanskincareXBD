@@ -27,6 +27,13 @@ export type {
   SortKey,
 } from "@/lib/catalog-shared";
 export { SORT_OPTIONS } from "@/lib/catalog-shared";
+import {
+  CONTENT_SECTIONS,
+  PRODUCT_ROW_SECTIONS,
+  type HomeSection,
+  type HomeSectionId,
+  type ProductSort,
+} from "@/lib/storefront";
 
 /**
  * Storefront catalog queries. Everything customers browse goes through here, so filtering,
@@ -470,36 +477,138 @@ export async function queryProducts(params: ListingParams): Promise<ListingResul
 
 // ─── Homepage ───
 
-async function loadHomepage() {
-  const { brandById, catById, tree, brands } = await lookups();
-  const section = (filter: Record<string, unknown>, sort: Record<string, 1 | -1>) =>
-    Product.find({ ...PUBLIC_PRODUCT_FILTER, ...filter })
-      .sort(sort)
-      .limit(8)
+/** Product flag behind each automatic product row */
+const ROW_FILTER: Partial<Record<HomeSectionId, Record<string, unknown>>> = {
+  bestsellers: { isBestseller: true },
+  newArrivals: { isNewArrival: true },
+  onSale: { isOnSale: true },
+  featured: { isFeatured: true },
+  trending: { isTrending: true },
+};
+
+const ROW_SORT: Record<ProductSort, Record<string, 1 | -1>> = {
+  bestselling: { totalSold: -1, createdAt: -1 },
+  newest: { createdAt: -1 },
+  rating: { avgRating: -1, totalReviews: -1, createdAt: -1 },
+  price_asc: { price: 1, _id: 1 },
+  price_desc: { price: -1, _id: 1 },
+};
+
+type Lookups = Awaited<ReturnType<typeof lookups>>;
+
+/** Products for one homepage row: hand-picked (in the chosen order) or by its flag. */
+async function sectionProducts(s: HomeSection, l: Lookups): Promise<CardProduct[]> {
+  if (s.source === "manual") {
+    if (!s.itemIds.length) return [];
+    const docs = await Product.find({ ...PUBLIC_PRODUCT_FILTER, _id: { $in: s.itemIds } })
       .select(PUBLIC_FIELDS)
-      .lean()
-      .then((docs) => docs.map((d) => toCard(d, brandById, catById)));
-
-  const [bestsellers, newArrivals, featured, onSale, trending] = await Promise.all([
-    section({ isBestseller: true }, { totalSold: -1, createdAt: -1 }),
-    section({ isNewArrival: true }, { createdAt: -1 }),
-    section({ isFeatured: true }, { createdAt: -1 }),
-    section({ isOnSale: true }, { createdAt: -1 }),
-    section({ isTrending: true }, { totalSold: -1, createdAt: -1 }),
-  ]);
-
-  // Categories: the ones marked "show on homepage", or all top-level ones if none are marked
-  const marked = tree.filter((c) => c.isFeatured);
-  const categories = (marked.length ? marked : tree).slice(0, 12);
-  const homeBrands = brands.filter((b) => b.showOnHomepage).slice(0, 16);
-
-  return { bestsellers, newArrivals, featured, onSale, trending, categories, brands: homeBrands };
+      .lean();
+    const byId = new Map(docs.map((d) => [String(d._id), d]));
+    return s.itemIds
+      .map((id) => byId.get(id))
+      .filter(Boolean)
+      .slice(0, s.limit)
+      .map((d) => toCard(d, l.brandById, l.catById));
+  }
+  const filter = ROW_FILTER[s.id];
+  if (!filter) return [];
+  const docs = await Product.find({ ...PUBLIC_PRODUCT_FILTER, ...filter })
+    .sort(ROW_SORT[s.sort])
+    .limit(s.limit)
+    .select(PUBLIC_FIELDS)
+    .lean();
+  return docs.map((d) => toCard(d, l.brandById, l.catById));
 }
 
-export const getHomepageData = unstable_cache(loadHomepage, ["catalog-homepage"], {
-  tags: [CATALOG_TAG],
-  revalidate: 300,
-});
+export type HomeCategory = CategoryNode & {
+  /** The category photo, or its best-selling product's photo when it has none */
+  cover: string;
+  coverIsProduct: boolean;
+};
+
+async function sectionCategories(s: HomeSection, l: Lookups): Promise<HomeCategory[]> {
+  let list: CategoryNode[];
+  if (s.source === "manual") {
+    list = s.itemIds
+      .map((id) => l.catById.get(id))
+      .filter((c): c is CategoryNode => Boolean(c))
+      .slice(0, s.limit);
+  } else {
+    // The ones marked "show on homepage", or all top-level ones if none are marked
+    const marked = l.tree.filter((c) => c.isFeatured);
+    list = (marked.length ? marked : l.tree).slice(0, s.limit);
+  }
+
+  // A category without its own photo shows its best-selling product instead of a blank tile
+  return Promise.all(
+    list.map(async (c): Promise<HomeCategory> => {
+      if (c.image) return { ...c, cover: c.image, coverIsProduct: false };
+      const ids = [c.id, ...c.children.map((x) => x.id)].map(oid);
+      const top = await Product.findOne({
+        ...PUBLIC_PRODUCT_FILTER,
+        $or: [{ category: { $in: ids } }, { subcategory: { $in: ids } }],
+      })
+        .sort({ totalSold: -1, createdAt: -1 })
+        .select("images media")
+        .lean();
+      const cover = top?.media?.[0]?.url ?? top?.images?.[0] ?? "";
+      return { ...c, cover, coverIsProduct: Boolean(cover) };
+    }),
+  );
+}
+
+function sectionBrands(s: HomeSection, l: Lookups): BrandInfo[] {
+  if (s.source === "manual") {
+    return s.itemIds
+      .map((id) => l.brandById.get(id))
+      .filter((b): b is BrandInfo => Boolean(b))
+      .slice(0, s.limit);
+  }
+  return l.brands.filter((b) => b.showOnHomepage).slice(0, s.limit);
+}
+
+export type HomepageContent = {
+  rows: Partial<Record<HomeSectionId, CardProduct[]>>;
+  categories: HomeCategory[];
+  brands: BrandInfo[];
+};
+
+/** What each content section of the homepage shows, from its settings in Website design. */
+export async function resolveHomeSections(sections: HomeSection[]): Promise<HomepageContent> {
+  const l = await lookups();
+  const rows: HomepageContent["rows"] = {};
+  await Promise.all(
+    sections
+      .filter((s) => PRODUCT_ROW_SECTIONS.includes(s.id))
+      .map(async (s) => {
+        rows[s.id] = await sectionProducts(s, l);
+      }),
+  );
+  const cat = sections.find((s) => s.id === "categories");
+  const brand = sections.find((s) => s.id === "brands");
+  return {
+    rows,
+    categories: cat ? await sectionCategories(cat, l) : [],
+    brands: brand ? sectionBrands(brand, l) : [],
+  };
+}
+
+const cachedHomepage = unstable_cache(
+  (sectionsJson: string) => resolveHomeSections(JSON.parse(sectionsJson) as HomeSection[]),
+  ["catalog-homepage-v2"],
+  { tags: [CATALOG_TAG], revalidate: 300 },
+);
+
+/**
+ * Cached per section settings (they are part of the cache key), so saving new settings in
+ * Website design shows the new content straight away, and product edits refresh it via the tag.
+ */
+export function getHomepageData(sections: HomeSection[]) {
+  const relevant = sections
+    .filter((s) => CONTENT_SECTIONS.includes(s.id) && s.enabled)
+    .map(({ id, source, sort, limit, itemIds }) => ({ id, source, sort, limit, itemIds }));
+  return cachedHomepage(JSON.stringify(relevant));
+}
 
 // ─── Product page ───
 

@@ -4,10 +4,12 @@ import React, { useEffect } from "react";
 import Link from "next/link";
 import { ExternalLink, X } from "lucide-react";
 import type { AdminTab } from "./types";
-import { ADMIN_NAV } from "./nav";
+import type { NavGroup } from "./nav";
 import { Logo } from "@/components/Logo";
 
 interface AdminSidebarProps {
+  /** Navigation already trimmed to what this team member may open */
+  groups: NavGroup[];
   activeTab: AdminTab;
   setActiveTab: (tab: AdminTab) => void;
   isOpen: boolean;
@@ -19,6 +21,7 @@ interface AdminSidebarProps {
 }
 
 export function AdminSidebar({
+  groups,
   activeTab,
   setActiveTab,
   isOpen,
@@ -76,7 +79,7 @@ export function AdminSidebar({
         </div>
 
         <nav className="flex-1 overflow-y-auto overscroll-contain px-3 py-4 space-y-5">
-          {ADMIN_NAV.map((group) => (
+          {groups.map((group) => (
             <div key={group.title}>
               <p className="px-3 pb-1.5 text-[11px] font-medium text-sidebar-muted">
                 {group.title}

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import {
   X,
   Bell,
@@ -9,120 +9,135 @@ import {
   RotateCcw,
   ShieldAlert,
   CheckCheck,
-  ExternalLink,
+  ArrowRight,
+  RefreshCw,
 } from "lucide-react";
 import type { AdminNotification, AdminTab } from "./types";
+import { fmtRelative } from "./shared";
 
 interface NotificationDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   notifications: AdminNotification[];
+  loading: boolean;
+  onRefresh: () => void;
   onMarkAllAsRead: () => void;
   onSelectTab: (tab: AdminTab) => void;
 }
 
+const ICONS: Record<AdminNotification["type"], { icon: React.ElementType; color: string }> = {
+  order: { icon: ShoppingBag, color: "bg-primary/12 text-primary" },
+  inventory: { icon: AlertTriangle, color: "bg-amber-500/15 text-amber-700 dark:text-amber-400" },
+  refund: { icon: RotateCcw, color: "bg-rose-500/12 text-rose-700 dark:text-rose-400" },
+  security: { icon: ShieldAlert, color: "bg-purple-500/12 text-purple-700 dark:text-purple-400" },
+  system: { icon: Bell, color: "bg-sky-500/12 text-sky-700 dark:text-sky-400" },
+};
+
+/** The bell menu. Items come from /api/admin/notifications (built from the database). */
 export function NotificationDrawer({
   isOpen,
   onClose,
   notifications,
+  loading,
+  onRefresh,
   onMarkAllAsRead,
   onSelectTab,
 }: NotificationDrawerProps) {
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [isOpen, onClose]);
 
-  const iconMap: Record<AdminNotification["type"], { icon: React.ElementType; color: string }> = {
-    order: { icon: ShoppingBag, color: "bg-primary/15 text-primary" },
-    inventory: { icon: AlertTriangle, color: "bg-amber-500/15 text-amber-600" },
-    refund: { icon: RotateCcw, color: "bg-rose-500/15 text-rose-600" },
-    security: { icon: ShieldAlert, color: "bg-purple-500/15 text-purple-600" },
-    system: { icon: Bell, color: "bg-blue-500/15 text-blue-600" },
-  };
+  if (!isOpen) return null;
+  const unread = notifications.filter((n) => !n.isRead).length;
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-xs animate-fade-in">
-      <div className="w-full max-w-md bg-card border-l border-border h-full flex flex-col shadow-2xl animate-in slide-in-from-right duration-200">
-        {/* Header */}
-        <div className="p-4 border-b border-border flex items-center justify-between">
+    <div className="fixed inset-0 z-50 flex justify-end bg-black/50" onClick={onClose}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Notifications"
+        onClick={(e) => e.stopPropagation()}
+        className="flex h-full w-full max-w-md flex-col border-l border-border bg-card shadow-2xl"
+      >
+        <div className="flex items-center justify-between gap-2 border-b border-border p-4">
           <div className="flex items-center gap-2">
-            <Bell className="w-5 h-5 text-primary" />
-            <h3 className="font-serif font-bold text-lg">Notifications</h3>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary">
-              {notifications.filter((n) => !n.isRead).length} new
-            </span>
+            <Bell className="h-5 w-5 text-primary" />
+            <h3 className="font-serif text-lg">Notifications</h3>
+            {unread > 0 && (
+              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                {unread} new
+              </span>
+            )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <button
-              onClick={onMarkAllAsRead}
-              className="text-xs text-primary hover:underline font-medium flex items-center gap-1"
-              title="Mark all as read"
+              type="button"
+              onClick={onRefresh}
+              className="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary"
+              aria-label="Refresh"
             >
-              <CheckCheck className="w-3.5 h-3.5" />
-              <span>Mark read</span>
+              <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
             </button>
             <button
+              type="button"
+              onClick={onMarkAllAsRead}
+              disabled={!unread}
+              className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-medium text-primary hover:bg-primary/10 disabled:opacity-40"
+            >
+              <CheckCheck className="h-3.5 w-3.5" />
+              Mark read
+            </button>
+            <button
+              type="button"
               onClick={onClose}
-              className="p-1.5 rounded-xl text-muted-foreground hover:bg-secondary"
+              className="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary"
               aria-label="Close"
             >
-              <X className="w-5 h-5" />
+              <X className="h-5 w-5" />
             </button>
           </div>
         </div>
 
-        {/* Notifications List */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-thin">
-          {notifications.map((notif) => {
-            const { icon: Icon, color } = iconMap[notif.type] || iconMap.system;
+        <div className="flex-1 space-y-2.5 overflow-y-auto p-4">
+          {notifications.length === 0 && (
+            <p className="py-12 text-center text-sm text-muted-foreground">
+              {loading ? "Loading…" : "You're all caught up."}
+            </p>
+          )}
+          {notifications.map((n) => {
+            const { icon: Icon, color } = ICONS[n.type] ?? ICONS.system;
             return (
               <div
-                key={notif.id}
-                className={`p-3.5 rounded-2xl border transition-all ${
-                  notif.isRead
-                    ? "bg-card border-border opacity-70"
-                    : "bg-secondary/40 border-primary/20 shadow-xs"
-                }`}
+                key={n.id}
+                className={`rounded-xl border p-3 ${n.isRead ? "border-border" : "border-primary/25 bg-secondary/40"}`}
               >
                 <div className="flex items-start gap-3">
-                  <div className={`p-2 rounded-xl shrink-0 ${color}`}>
-                    <Icon className="w-4 h-4" />
+                  <div className={`shrink-0 rounded-lg p-2 ${color}`}>
+                    <Icon className="h-4 w-4" aria-hidden="true" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-1">
-                      <h4 className="font-semibold text-xs text-foreground truncate">
-                        {notif.title}
-                      </h4>
-                      <span className="text-[10px] text-muted-foreground shrink-0">
-                        {notif.timestamp}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-xs font-semibold text-foreground">{n.title}</p>
+                      <span className="shrink-0 text-[11px] text-muted-foreground">
+                        {fmtRelative(n.at)}
                       </span>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                      {notif.message}
+                    <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+                      {n.message}
                     </p>
-
-                    {notif.type === "order" && (
-                      <button
-                        onClick={() => {
-                          onSelectTab("orders");
-                          onClose();
-                        }}
-                        className="mt-2 text-[11px] font-semibold text-primary hover:underline flex items-center gap-1"
-                      >
-                        <span>View in Orders Pipeline</span>
-                        <ExternalLink className="w-3 h-3" />
-                      </button>
-                    )}
-                    {notif.type === "inventory" && (
-                      <button
-                        onClick={() => {
-                          onSelectTab("inventory");
-                          onClose();
-                        }}
-                        className="mt-2 text-[11px] font-semibold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1"
-                      >
-                        <span>Check Stock & Reorder</span>
-                        <ExternalLink className="w-3 h-3" />
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onSelectTab(n.tab);
+                        onClose();
+                      }}
+                      className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline"
+                    >
+                      Open <ArrowRight className="h-3 w-3" />
+                    </button>
                   </div>
                 </div>
               </div>
@@ -130,12 +145,9 @@ export function NotificationDrawer({
           })}
         </div>
 
-        {/* Footer */}
-        <div className="p-3 border-t border-border bg-secondary/30 text-center">
-          <p className="text-[11px] text-muted-foreground">
-            Auto-synced with Bangladeshi couriers, bKash & MongoDB webhooks
-          </p>
-        </div>
+        <p className="border-t border-border bg-secondary/30 p-3 text-center text-[11px] text-muted-foreground">
+          Built from your orders, stock, reviews and invoices — refreshed every minute.
+        </p>
       </div>
     </div>
   );

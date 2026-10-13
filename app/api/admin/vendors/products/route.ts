@@ -3,12 +3,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/server/db/connection";
 import { Product } from "@/server/db/models";
 import { requireAuth, serverError, STAFF_ROLES } from "@/server/auth/session";
+import { requirePermission } from "@/server/auth/permissions";
 import { cleanString, isObjectId } from "@/server/security/validation";
 
 // GET — Vendor products, by default the ones waiting for review (?status=pending|approved|rejected|all, ?vendor=<id>)
 export async function GET(request: NextRequest) {
   try {
-    const auth = await requireAuth(request, STAFF_ROLES);
+    const auth = await requirePermission(request, "vendors.view");
     if (!auth.ok) return auth.response;
 
     const { searchParams } = new URL(request.url);
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
 // PATCH — Approve or reject a vendor product: { productId, decision: "approve" | "reject", note? }
 export async function PATCH(request: NextRequest) {
   try {
-    const auth = await requireAuth(request, STAFF_ROLES);
+    const auth = await requirePermission(request, "vendors.view");
     if (!auth.ok) return auth.response;
 
     const { productId, decision, note } = await request.json().catch(() => ({}));

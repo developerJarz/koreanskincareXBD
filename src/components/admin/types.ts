@@ -35,7 +35,10 @@ export type AdminTab =
   | "security_rbac"
   | "api_health"
   | "storefront"
-  | "settings";
+  | "settings"
+  | "activity"
+  | "invoices"
+  | "roles";
 
 export type BDSeasonalTheme = "standard" | "ramadan" | "eid" | "boishakh";
 
@@ -44,9 +47,11 @@ export type AdminNotification = {
   title: string;
   message: string;
   type: "order" | "inventory" | "refund" | "security" | "system";
-  timestamp: string;
+  /** ISO time */
+  at: string;
+  /** Where to resolve it */
+  tab: AdminTab;
   isRead: boolean;
-  actionUrl?: string;
 };
 
 export type Warehouse = {

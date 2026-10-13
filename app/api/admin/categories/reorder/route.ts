@@ -3,13 +3,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/server/db/connection";
 import { Category } from "@/server/db/models";
 import { ADMIN_ROLES, requireAuth, serverError } from "@/server/auth/session";
+import { requirePermission } from "@/server/auth/permissions";
 import { revalidateCatalog } from "@/server/catalog";
 import { isObjectId } from "@/server/security/validation";
 
 // PATCH — { orderedIds: [...] } — sets the display order of sibling categories
 export async function PATCH(request: NextRequest) {
   try {
-    const auth = await requireAuth(request, ADMIN_ROLES);
+    const auth = await requirePermission(request, "catalog.structure");
     if (!auth.ok) return auth.response;
 
     const { orderedIds } = await request.json().catch(() => ({}));

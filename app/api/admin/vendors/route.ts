@@ -5,6 +5,7 @@ import slugify from "slugify";
 import { connectDB } from "@/server/db/connection";
 import { Category, Product, User, Vendor } from "@/server/db/models";
 import { ADMIN_ROLES, requireAuth, serverError, STAFF_ROLES } from "@/server/auth/session";
+import { requirePermission } from "@/server/auth/permissions";
 import { getVendorProductCounts, getVendorSales } from "@/server/marketplace";
 import {
   cleanString,
@@ -55,7 +56,7 @@ async function cleanLimits(
 // GET — Every vendor with product counts and sales (staff can view; only admins can change)
 export async function GET(request: NextRequest) {
   try {
-    const auth = await requireAuth(request, STAFF_ROLES);
+    const auth = await requirePermission(request, "vendors.view");
     if (!auth.ok) return auth.response;
 
     await connectDB();
@@ -86,7 +87,7 @@ export async function GET(request: NextRequest) {
 // POST — Create a vendor store and its login account (admins only)
 export async function POST(request: NextRequest) {
   try {
-    const auth = await requireAuth(request, ADMIN_ROLES);
+    const auth = await requirePermission(request, "vendors.manage");
     if (!auth.ok) return auth.response;
 
     const data = await request.json().catch(() => ({}));
@@ -205,7 +206,7 @@ export async function POST(request: NextRequest) {
 // PATCH — Change a vendor's status, commission, limits or details (admins only)
 export async function PATCH(request: NextRequest) {
   try {
-    const auth = await requireAuth(request, ADMIN_ROLES);
+    const auth = await requirePermission(request, "vendors.manage");
     if (!auth.ok) return auth.response;
 
     const data = await request.json().catch(() => ({}));

@@ -73,8 +73,16 @@ async function loadStorefront(): Promise<StorefrontConfig> {
   }
 }
 
-/** Cached; refreshed immediately whenever an admin saves the website design. */
-export const getStorefront = unstable_cache(loadStorefront, ["storefront-config"], {
+const cachedStorefront = unstable_cache(loadStorefront, ["storefront-config-v3"], {
   tags: [STOREFRONT_TAG],
   revalidate: 3600,
 });
+
+/**
+ * Cached; refreshed immediately whenever an admin saves the website design. The cached copy
+ * is checked again on every read, so after an update that adds new settings (e.g. the banner
+ * slider) a copy cached by the previous version still has every field.
+ */
+export async function getStorefront(): Promise<StorefrontConfig> {
+  return normalizeStorefront(await cachedStorefront()).value;
+}

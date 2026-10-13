@@ -1,4 +1,5 @@
 import mongoose, { Schema, type Document, type Model } from "mongoose";
+import { refreshModelInDev } from "./dev-refresh";
 import type { IUser, UserRole } from "@/types";
 
 export interface UserDocument extends Omit<IUser, "_id">, Document {}
@@ -34,6 +35,8 @@ const userSchema = new Schema<UserDocument>(
     isActive: { type: Boolean, default: true },
     lastLoginAt: { type: Date },
     sessionVersion: { type: Number, default: 0 },
+    // Staff only: custom permission role (see Role model). Empty = the default "Staff" role
+    customRole: { type: Schema.Types.ObjectId, ref: "Role" },
     failedLoginAttempts: { type: Number, default: 0, select: false },
     lockUntil: { type: Date, select: false },
   },
@@ -56,7 +59,10 @@ const userSchema = new Schema<UserDocument>(
 // Indexes
 userSchema.index({ email: 1 }, { unique: true });
 userSchema.index({ role: 1 });
+userSchema.index({ createdAt: -1 });
 userSchema.index({ provider: 1, providerId: 1 });
+
+refreshModelInDev("User");
 
 export const User: Model<UserDocument> =
   mongoose.models.User || mongoose.model<UserDocument>("User", userSchema);

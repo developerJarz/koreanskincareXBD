@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/server/db/connection";
 import { Category, Product } from "@/server/db/models";
 import { requireAuth, serverError, STAFF_ROLES } from "@/server/auth/session";
+import { requirePermission } from "@/server/auth/permissions";
 import {
   barcodeTaken,
   fillInventoryCodes,
@@ -32,7 +33,7 @@ const SORTS: Record<string, Record<string, 1 | -1>> = {
  */
 export async function GET(request: NextRequest) {
   try {
-    const auth = await requireAuth(request, STAFF_ROLES);
+    const auth = await requirePermission(request, "catalog.view");
     if (!auth.ok) return auth.response;
 
     const sp = new URL(request.url).searchParams;
@@ -128,7 +129,7 @@ export async function GET(request: NextRequest) {
 // POST — create a product from the editor
 export async function POST(request: NextRequest) {
   try {
-    const auth = await requireAuth(request, STAFF_ROLES);
+    const auth = await requirePermission(request, "catalog.manage");
     if (!auth.ok) return auth.response;
 
     await connectDB();

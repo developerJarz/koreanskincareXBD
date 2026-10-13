@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import { trackEvent } from "@/lib/activity-client";
 
 export interface CartItemStore {
   productId: string;
@@ -44,6 +45,15 @@ export const useCartStore = create<CartState>()(
       couponDiscount: 0,
 
       addItem: (item) => {
+        trackEvent("add_to_cart", {
+          productId: item.productId,
+          productSlug: item.slug,
+          productName: item.name,
+          variant:
+            [item.variant?.color, item.variant?.size].filter(Boolean).join(" / ") || undefined,
+          quantity: item.quantity,
+          value: item.price * item.quantity,
+        });
         const existing = get().items.find(
           (i) => i.productId === item.productId && i.variant?.sku === item.variant?.sku,
         );
@@ -62,6 +72,18 @@ export const useCartStore = create<CartState>()(
       },
 
       removeItem: (productId, variantSku) => {
+        const removed = get().items.find(
+          (i) => i.productId === productId && i.variant?.sku === variantSku,
+        );
+        if (removed) {
+          trackEvent("remove_from_cart", {
+            productId: removed.productId,
+            productSlug: removed.slug,
+            productName: removed.name,
+            quantity: removed.quantity,
+            value: removed.price * removed.quantity,
+          });
+        }
         set({
           items: get().items.filter(
             (i) => !(i.productId === productId && i.variant?.sku === variantSku),

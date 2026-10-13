@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/server/db/connection";
 import { Settings } from "@/server/db/models";
-import { ADMIN_ROLES, requireAuth, serverError } from "@/server/auth/session";
+import { serverError } from "@/server/auth/session";
+import { requirePermission } from "@/server/auth/permissions";
+import { audit } from "@/server/audit";
+import { revalidateCheckoutConfig } from "@/server/checkout-config";
 import { cleanString, isEmail, isSafeUrl, toNonNegativeNumber } from "@/server/security/validation";
 
 const SOCIAL_KEYS = ["instagram", "facebook", "youtube", "tiktok", "whatsapp"] as const;
@@ -15,7 +18,7 @@ const SHIPPING_KEYS = [
 // GET — Fetch current store settings (admins only: may contain gateway configuration)
 export async function GET(request: NextRequest) {
   try {
-    const auth = await requireAuth(request, ADMIN_ROLES);
+    const auth = await requirePermission(request, "settings.manage");
     if (!auth.ok) return auth.response;
 
     await connectDB();
@@ -58,7 +61,7 @@ export async function GET(request: NextRequest) {
 // PUT — Update store settings (only known fields are accepted)
 export async function PUT(request: NextRequest) {
   try {
-    const auth = await requireAuth(request, ADMIN_ROLES);
+    const auth = await requirePermission(request, "settings.manage");
     if (!auth.ok) return auth.response;
 
     const data = await request.json().catch(() => ({}));
@@ -116,6 +119,13 @@ export async function PUT(request: NextRequest) {
     }
 
     await settings.save();
+    // Checkout reads delivery charges and payment methods from these settings
+    revalidateCheckoutConfig();
+    audit(request, auth.user, {
+      action: "settings.update",
+      summary: `Saved store settings (${Object.keys(data).filter((k) => typeof k === "string").slice(0, 8).join(", ") || "no fields"})`,
+      entity: "Settings",
+    });
     return NextResponse.json(JSON.parse(JSON.stringify(settings)));
   } catch (err) {
     return serverError("Update settings error", err, "Failed to update settings");

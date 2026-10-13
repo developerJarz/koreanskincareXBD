@@ -3,6 +3,8 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { SearchDialog } from "@/components/SearchDialog";
 import { CartSheet } from "@/components/CartSheet";
+import { ActivityTracker } from "@/components/ActivityTracker";
+import { MobileTabBar } from "@/components/MobileTabBar";
 import { getNavData } from "@/server/catalog";
 import { getStorefront } from "@/server/storefront";
 
@@ -22,8 +24,12 @@ export default async function StoreLayout({ children }: Readonly<{ children: Rea
       <Header nav={nav} branding={storefront.branding} />
       <main className="flex-1">{children}</main>
       <Footer config={storefront} />
+      {/* Room for the phone tab bar so it never covers the end of the page */}
+      <div className="h-[calc(3.75rem+env(safe-area-inset-bottom))] lg:hidden" aria-hidden="true" />
+      <MobileTabBar />
       <SearchDialog />
       <CartSheet />
+      <ActivityTracker />
     </>
   );
 }

@@ -29,6 +29,8 @@ export interface IUser {
   lastLoginAt?: Date;
   /** Incremented to invalidate every existing session (password change, role change, deactivation). */
   sessionVersion?: number;
+  /** Staff only: custom permission role */
+  customRole?: any;
   failedLoginAttempts?: number;
   lockUntil?: Date;
   createdAt?: Date;
@@ -454,8 +456,28 @@ export interface ISiteSettings {
     enabled: boolean;
     config: Record<string, unknown>;
   }[];
+  /** Visitor activity tracking (admin "Site activity" tab) */
+  activityTracking?: IActivitySettings;
+  /** Invoice page design — validated with normalizeInvoiceTemplate() in src/lib/invoice.ts */
+  invoiceTemplate?: unknown;
+  security?: {
+    /** Blocked from signing in, from the admin API and from activity tracking */
+    blockedIps: string[];
+  };
   createdAt?: Date;
   updatedAt?: Date;
+}
+
+export interface IActivitySettings {
+  enabled: boolean;
+  /** Activity older than this is deleted automatically; 0 = keep forever */
+  retentionDays: number;
+  /** Store 103.145.118.x instead of the full address */
+  anonymizeIp: boolean;
+  /** Also record visits by signed-in team members */
+  trackStaff: boolean;
+  /** Paths starting with any of these are not recorded */
+  excludePaths: string[];
 }
 
 // ─── Payment Types ───

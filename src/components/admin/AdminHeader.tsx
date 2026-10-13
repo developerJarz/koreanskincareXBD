@@ -16,6 +16,9 @@ interface AdminHeaderProps {
   onChangePassword: () => void;
   notifications: AdminNotification[];
   setActiveTab: (tab: AdminTab) => void;
+  /** e.g. "Admin" or a custom role name like "Order desk" */
+  roleName: string;
+  canAddProduct: boolean;
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -33,6 +36,8 @@ export function AdminHeader({
   onChangePassword,
   notifications,
   setActiveTab,
+  roleName,
+  canAddProduct,
 }: AdminHeaderProps) {
   const router = useRouter();
   const { user, logout } = useAuthStore();
@@ -107,13 +112,15 @@ export function AdminHeader({
         <Search className="w-4.5 h-4.5" />
       </button>
 
-      <button
-        onClick={() => setActiveTab("products")}
-        className="hidden sm:inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-      >
-        <Plus className="w-3.5 h-3.5" />
-        <span>Add product</span>
-      </button>
+      {canAddProduct && (
+        <button
+          onClick={() => setActiveTab("products")}
+          className="hidden sm:inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+        >
+          <Plus className="w-3.5 h-3.5" />
+          <span>Add product</span>
+        </button>
+      )}
 
       <button
         onClick={onOpenNotifications}
@@ -144,7 +151,7 @@ export function AdminHeader({
               {user?.name || "Admin"}
             </span>
             <span className="block text-[11px] text-muted-foreground">
-              {ROLE_LABELS[user?.role ?? ""] ?? "Team member"}
+              {roleName || ROLE_LABELS[user?.role ?? ""] || "Team member"}
             </span>
           </span>
         </button>
@@ -178,7 +185,7 @@ export function AdminHeader({
               className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-foreground hover:bg-secondary rounded-lg"
             >
               <ShieldCheck className="w-3.5 h-3.5 text-muted-foreground" />
-              Team & security
+              Security & sign-ins
             </button>
             <div className="border-t border-border my-1" />
             <button

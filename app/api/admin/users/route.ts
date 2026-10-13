@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { User } from "@/server/db/models";
-import { ADMIN_ROLES, requireAuth, roleRank, serverError } from "@/server/auth/session";
+import { roleRank, serverError } from "@/server/auth/session";
+import { invalidateRoleCache, requirePermission } from "@/server/auth/permissions";
+import { audit } from "@/server/audit";
 import { isObjectId } from "@/server/security/validation";
 import type { UserRole } from "@/types";
 
@@ -8,14 +10,17 @@ import type { UserRole } from "@/types";
 // which keeps the user and its vendor store record in sync
 const VALID_ROLES: UserRole[] = ["super_admin", "admin", "staff", "customer"];
 
-// PATCH — Change a user's role or active status (admins only, respecting the role hierarchy)
+// PATCH — Suspend / re-activate an account (customers.manage) or change its role (roles.manage),
+// always respecting the role hierarchy
 export async function PATCH(request: NextRequest) {
   try {
-    const auth = await requireAuth(request, ADMIN_ROLES);
+    const { userId, role, isActive } = await request.json().catch(() => ({}));
+    const auth = await requirePermission(
+      request,
+      role !== undefined ? "roles.manage" : "customers.manage",
+    );
     if (!auth.ok) return auth.response;
     const actor = auth.user;
-
-    const { userId, role, isActive } = await request.json().catch(() => ({}));
     if (!isObjectId(userId)) {
       return NextResponse.json({ error: "User ID is required" }, { status: 400 });
     }
@@ -76,6 +81,18 @@ export async function PATCH(request: NextRequest) {
       target.sessionVersion = (target.sessionVersion ?? 0) + 1;
     }
     await target.save();
+    invalidateRoleCache();
+    audit(request, actor, {
+      action: role !== undefined ? "team.update" : "customer.status",
+      summary: `${target.name} <${target.email}>: ${[
+        role !== undefined ? `role ${target.role}` : "",
+        isActive !== undefined ? (target.isActive ? "re-activated" : "suspended") : "",
+      ]
+        .filter(Boolean)
+        .join(", ")}`,
+      entity: "User",
+      entityId: userId,
+    });
 
     return NextResponse.json(target.toJSON());
   } catch (err) {

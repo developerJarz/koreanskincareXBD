@@ -4,13 +4,14 @@ import type { Types } from "mongoose";
 import { connectDB } from "@/server/db/connection";
 import { Brand, Product } from "@/server/db/models";
 import { ADMIN_ROLES, requireAuth, serverError, STAFF_ROLES } from "@/server/auth/session";
+import { requirePermission } from "@/server/auth/permissions";
 import { validateBrand } from "@/server/brand-admin";
 import { revalidateCatalog } from "@/server/catalog";
 
 // GET — every brand (active or not) with how many products use it
 export async function GET(request: NextRequest) {
   try {
-    const auth = await requireAuth(request, STAFF_ROLES);
+    const auth = await requirePermission(request, "catalog.view");
     if (!auth.ok) return auth.response;
 
     await connectDB();
@@ -43,7 +44,7 @@ export async function GET(request: NextRequest) {
 // POST — create a brand (admins)
 export async function POST(request: NextRequest) {
   try {
-    const auth = await requireAuth(request, ADMIN_ROLES);
+    const auth = await requirePermission(request, "catalog.structure");
     if (!auth.ok) return auth.response;
 
     await connectDB();

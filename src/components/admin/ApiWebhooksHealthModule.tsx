@@ -1,216 +1,232 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  Activity,
-  Key,
-  Webhook,
-  Database,
-  Download,
-  RefreshCw,
-  CheckCircle,
-  Plus,
-  Trash2,
-  Send,
-  Cpu,
-  Server,
-  Zap,
-} from "lucide-react";
+import { CheckCircle2, Cpu, Database, Plug, XCircle } from "lucide-react";
 import { toast } from "sonner";
 
+import { api, primaryButton } from "./catalog/ui";
+import {
+  ErrorNotice,
+  fmtNumber,
+  fmtRelative,
+  PageHeader,
+  Panel,
+  Skeleton,
+  StatTile,
+  useAdminData,
+} from "./shared";
+
+type DbStatus = {
+  state: string;
+  connected: boolean;
+  database?: string;
+  host?: string;
+  pingMs?: number;
+  serverVersion?: string;
+  error?: string;
+  checkedAt: string;
+};
+type Collection = {
+  name: string;
+  documents: number;
+  sizeBytes: number | null;
+  storageBytes: number | null;
+  indexBytes: number | null;
+};
+type Data = {
+  database: DbStatus;
+  collections: Collection[];
+  services: { name: string; ok: boolean; detail: string }[];
+  runtime: {
+    node: string;
+    environment: string;
+    uptimeSeconds: number;
+    memoryMb: number;
+    heapMb: number;
+    platform: string;
+  };
+};
+
+const bytes = (n: number | null) =>
+  n == null
+    ? "—"
+    : n < 1048576
+      ? `${(n / 1024).toFixed(1)} KB`
+      : n < 1073741824
+        ? `${(n / 1048576).toFixed(1)} MB`
+        : `${(n / 1073741824).toFixed(2)} GB`;
+
+const uptime = (s: number) => {
+  const d = Math.floor(s / 86400);
+  const h = Math.floor((s % 86400) / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  return d ? `${d}d ${h}h` : h ? `${h}h ${m}m` : `${m}m`;
+};
+
+/** Database connection, collection sizes and which services are configured. */
 export function ApiWebhooksHealthModule() {
-  const [apiKeys, setApiKeys] = useState([
-    {
-      id: "key_1",
-      name: "Mobile App POS Integration",
-      prefix: "shj_live_8910a",
-      created: "10 Aug 2026",
-      status: "active",
-      scope: "read:orders, write:orders",
-    },
-    {
-      id: "key_2",
-      name: "Steadfast Auto Dispatch Sync",
-      prefix: "shj_live_7712b",
-      created: "05 Aug 2026",
-      status: "active",
-      scope: "read:inventory, write:shipments",
-    },
-  ]);
+  const { data, error, reload, setData } = useAdminData<Data>("/api/admin/system");
+  const [connecting, setConnecting] = useState(false);
 
-  const [webhooks, setWebhooks] = useState([
-    {
-      id: "whk_1",
-      url: "https://api.steadfast.com.bd/v1/koreanskincare-callback",
-      event: "order.created",
-      status: "active",
-      lastTrigger: "12 mins ago (HTTP 200 OK)",
-    },
-    {
-      id: "whk_2",
-      url: "https://greenweb.com.bd/sms-trigger",
-      event: "order.shipped",
-      status: "active",
-      lastTrigger: "1 hour ago (HTTP 200 OK)",
-    },
-  ]);
-
-  const [isBackingUp, setIsBackingUp] = useState(false);
-
-  const handleTestWebhook = (url: string) => {
-    toast.loading(`Dispatching test payload to ${url}...`);
-    setTimeout(() => {
-      toast.dismiss();
-      toast.success("Webhook test payload accepted with HTTP 200 OK!");
-    }, 800);
+  const connect = async () => {
+    setConnecting(true);
+    try {
+      const r = await api<Pick<Data, "database" | "collections">>("/api/admin/system", {
+        method: "POST",
+        json: { action: "connect" },
+      });
+      setData((d) => (d ? { ...d, ...r } : d));
+      if (r.database.connected)
+        toast.success(`Connected to MongoDB — ${r.database.pingMs} ms round trip.`);
+      else toast.error(r.database.error ?? "Couldn't connect.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Couldn't connect.");
+    } finally {
+      setConnecting(false);
+    }
   };
 
-  const handleGenerateBackup = () => {
-    setIsBackingUp(true);
-    toast.loading("Generating full MongoDB database JSON snapshot...");
-    setTimeout(() => {
-      setIsBackingUp(false);
-      toast.dismiss();
-
-      // Trigger dummy download
-      const backupData = {
-        store: "koreanskincare.bd",
-        version: "2.4-enterprise",
-        timestamp: new Date().toISOString(),
-        status: "complete_snapshot",
-      };
-      const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `koreanskincare_db_backup_${Date.now()}.json`;
-      a.click();
-      toast.success("Database backup downloaded successfully!");
-    }, 1200);
-  };
+  if (error && !data) return <ErrorNotice message={error} onRetry={reload} />;
+  if (!data) return <Skeleton className="h-96" />;
+  const db = data.database;
+  const totalDocs = data.collections.reduce((s, c) => s + c.documents, 0);
+  const totalStorage = data.collections.reduce(
+    (s, c) => s + (c.storageBytes ?? 0) + (c.indexBytes ?? 0),
+    0,
+  );
 
   return (
-    <div className="space-y-6">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card border border-border p-4 rounded-3xl">
-        <div>
-          <div className="flex items-center gap-2">
-            <Activity className="w-5 h-5 text-emerald-600" />
-            <h2 className="font-serif text-2xl font-bold">API, Webhooks & System Health</h2>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Developer REST APIs, real-time webhooks, MongoDB latency & automated backup engine
-          </p>
-        </div>
-
-        <button
-          onClick={handleGenerateBackup}
-          disabled={isBackingUp}
-          className="px-4 py-2 rounded-2xl bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 transition flex items-center gap-1.5 shadow-xs"
-        >
-          <Database className="w-3.5 h-3.5" />
-          <span>Create DB Backup Snapshot</span>
-        </button>
-      </div>
-
-      {/* System Health Diagnostics */}
-      <div className="grid md:grid-cols-4 gap-4 text-xs">
-        <div className="bg-card border border-border p-4 rounded-3xl shadow-xs space-y-1">
-          <span className="text-muted-foreground font-bold uppercase text-[10px]">
-            MongoDB Atlas Status
-          </span>
-          <div className="flex items-center gap-2 text-foreground font-bold text-base mt-1">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Connected (24ms)</span>
-          </div>
-          <span className="text-[10px] text-emerald-600">Dhaka Edge Cluster</span>
-        </div>
-
-        <div className="bg-card border border-border p-4 rounded-3xl shadow-xs space-y-1">
-          <span className="text-muted-foreground font-bold uppercase text-[10px]">
-            Server Memory
-          </span>
-          <p className="font-serif font-bold text-2xl mt-1 text-foreground">184 MB / 1 GB</p>
-          <span className="text-[10px] text-muted-foreground">Node.js Next 15 Serverless</span>
-        </div>
-
-        <div className="bg-card border border-border p-4 rounded-3xl shadow-xs space-y-1">
-          <span className="text-muted-foreground font-bold uppercase text-[10px]">
-            API Health Uptime
-          </span>
-          <p className="font-serif font-bold text-2xl mt-1 text-emerald-600">99.98%</p>
-          <span className="text-[10px] text-muted-foreground">Zero downtime past 30 days</span>
-        </div>
-
-        <div className="bg-card border border-border p-4 rounded-3xl shadow-xs space-y-1">
-          <span className="text-muted-foreground font-bold uppercase text-[10px]">
-            Route Cache Hit Rate
-          </span>
-          <p className="font-serif font-bold text-2xl mt-1 text-primary">94.2%</p>
-          <span className="text-[10px] text-emerald-600">Instant storefront rendering</span>
-        </div>
-      </div>
-
-      {/* REST API Keys Management */}
-      <div className="bg-card border border-border rounded-3xl p-6 shadow-xs space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="font-serif font-bold text-lg">REST API Keys</h3>
-          <button
-            onClick={() => toast.success("New production API Key generated!")}
-            className="px-3 py-1.5 rounded-xl border border-border hover:bg-secondary text-xs font-bold transition flex items-center gap-1"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Generate New Key</span>
+    <div className="space-y-5">
+      <PageHeader
+        title="System & database"
+        description="Live status of the MongoDB connection and the services the shop depends on."
+        actions={
+          <button type="button" className={primaryButton} onClick={connect} disabled={connecting}>
+            <Plug className={`h-4 w-4 ${connecting ? "animate-pulse" : ""}`} />
+            {connecting ? "Connecting…" : db.connected ? "Test connection" : "Connect to database"}
           </button>
-        </div>
+        }
+      />
 
-        <div className="space-y-2.5 text-xs">
-          {apiKeys.map((k) => (
-            <div
-              key={k.id}
-              className="p-3.5 rounded-2xl bg-secondary/40 border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-2"
-            >
-              <div>
-                <div className="font-bold text-foreground">{k.name}</div>
-                <div className="text-[10px] font-mono text-muted-foreground mt-0.5">
-                  Key: {k.prefix}•••••••••••• · Scopes: {k.scope}
-                </div>
-              </div>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-500/15 text-emerald-600 self-start sm:self-auto">
-                {k.status}
-              </span>
-            </div>
-          ))}
-        </div>
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <StatTile
+          label="Database"
+          value={db.connected ? "Connected" : "Offline"}
+          hint={db.connected ? `${db.pingMs} ms · checked ${fmtRelative(db.checkedAt)}` : db.error}
+        />
+        <StatTile
+          label="Records stored"
+          value={fmtNumber(totalDocs)}
+          hint={`${data.collections.length} collections`}
+        />
+        <StatTile label="Storage used" value={bytes(totalStorage || null)} hint="data + indexes" />
+        <StatTile
+          label="Server up for"
+          value={uptime(data.runtime.uptimeSeconds)}
+          hint={`${data.runtime.memoryMb} MB memory · Node ${data.runtime.node}`}
+        />
       </div>
 
-      {/* Real-time Webhooks */}
-      <div className="bg-card border border-border rounded-3xl p-6 shadow-xs space-y-4 text-xs">
-        <div className="flex items-center justify-between">
-          <h3 className="font-serif font-bold text-lg">Event Webhooks</h3>
-          <span className="text-muted-foreground">Auto-triggered on order lifecycle events</span>
-        </div>
-
-        <div className="space-y-2.5">
-          {webhooks.map((w) => (
-            <div
-              key={w.id}
-              className="p-3.5 rounded-2xl bg-secondary/40 border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-2"
-            >
-              <div>
-                <div className="font-mono font-bold text-primary">{w.event}</div>
-                <div className="text-[11px] text-foreground mt-0.5">{w.url}</div>
-                <div className="text-[10px] text-muted-foreground">{w.lastTrigger}</div>
-              </div>
-              <button
-                onClick={() => handleTestWebhook(w.url)}
-                className="px-3 py-1.5 rounded-xl border border-border hover:bg-secondary text-xs font-semibold flex items-center gap-1.5 self-start sm:self-auto"
-              >
-                <Send className="w-3 h-3" />
-                <span>Test Ping</span>
-              </button>
+      <Panel
+        title="Connection"
+        description="Credentials stay on the server; only the host name is shown."
+      >
+        <dl className="grid gap-3 text-xs sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            ["State", db.state],
+            ["Database name", db.database ?? "—"],
+            ["Host", db.host ?? "—"],
+            ["MongoDB version", db.serverVersion ?? "—"],
+          ].map(([k, v]) => (
+            <div key={k} className="rounded-lg bg-secondary/50 p-2.5">
+              <dt className="text-[11px] text-muted-foreground">{k}</dt>
+              <dd className="truncate font-mono font-medium" title={v}>
+                {v}
+              </dd>
             </div>
           ))}
+        </dl>
+      </Panel>
+
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
+        <Panel title="Collections" description="Every collection in the database">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="text-muted-foreground">
+                <tr className="border-b border-border">
+                  <th className="py-2 pr-3 font-medium">Collection</th>
+                  <th className="px-3 py-2 text-right font-medium">Records</th>
+                  <th className="px-3 py-2 text-right font-medium">Data</th>
+                  <th className="py-2 pl-3 text-right font-medium">Indexes</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {data.collections.map((c) => (
+                  <tr key={c.name}>
+                    <td className="py-1.5 pr-3 font-mono">
+                      <Database
+                        className="mr-1.5 inline h-3 w-3 text-muted-foreground"
+                        aria-hidden="true"
+                      />
+                      {c.name}
+                    </td>
+                    <td className="px-3 py-1.5 text-right tabular-nums">
+                      {fmtNumber(c.documents)}
+                    </td>
+                    <td className="px-3 py-1.5 text-right tabular-nums">{bytes(c.storageBytes)}</td>
+                    <td className="py-1.5 pl-3 text-right tabular-nums">{bytes(c.indexBytes)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Panel>
+        <div className="space-y-5">
+          <Panel
+            title="Services"
+            description="Whether each integration's keys are set on the server"
+          >
+            <ul className="space-y-2 text-xs">
+              {data.services.map((s) => (
+                <li key={s.name} className="flex items-start gap-2">
+                  {s.ok ? (
+                    <CheckCircle2
+                      className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600"
+                      aria-label="Set up"
+                    />
+                  ) : (
+                    <XCircle
+                      className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground"
+                      aria-label="Not set up"
+                    />
+                  )}
+                  <span>
+                    <span className="font-medium">{s.name}</span>
+                    <span className="block text-[11px] text-muted-foreground">
+                      {s.ok ? "Configured" : `Not configured · ${s.detail}`}
+                    </span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </Panel>
+          <Panel title="Server">
+            <dl className="space-y-1.5 text-xs">
+              {[
+                ["Environment", data.runtime.environment],
+                ["Node.js", data.runtime.node],
+                ["Platform", data.runtime.platform],
+                ["Memory", `${data.runtime.memoryMb} MB (heap ${data.runtime.heapMb} MB)`],
+              ].map(([k, v]) => (
+                <div key={k} className="flex justify-between gap-3">
+                  <dt className="flex items-center gap-1.5 text-muted-foreground">
+                    <Cpu className="h-3 w-3" aria-hidden="true" /> {k}
+                  </dt>
+                  <dd className="font-medium">{v}</dd>
+                </div>
+              ))}
+            </dl>
+          </Panel>
         </div>
       </div>
     </div>

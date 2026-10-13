@@ -5,17 +5,20 @@ import Link from "next/link";
 import { useUIStore } from "@/store/ui.store";
 import { useCartStore } from "@/store/cart.store";
 import { optimizedImageUrl } from "@/lib/image";
+import { useCheckoutConfig } from "@/hooks/use-checkout";
 
 export function CartSheet() {
   const { isCartOpen, closeCart } = useUIStore();
   const { items, updateQuantity, removeItem, getSubtotal, getItemCount } = useCartStore();
+  // Free-delivery threshold from admin Settings (0 = free delivery switched off)
+  const { freeShippingThreshold } = useCheckoutConfig().shipping;
 
   if (!isCartOpen) return null;
 
   const subtotal = getSubtotal();
-  const freeShippingThreshold = 2000;
   const remainingForFreeShipping = Math.max(0, freeShippingThreshold - subtotal);
-  const freeShippingProgress = Math.min(100, (subtotal / freeShippingThreshold) * 100);
+  const freeShippingProgress =
+    freeShippingThreshold > 0 ? Math.min(100, (subtotal / freeShippingThreshold) * 100) : 0;
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
@@ -46,28 +49,29 @@ export function CartSheet() {
           </div>
 
           {/* Free Shipping Progress */}
-          <div className="bg-secondary/40 p-4 border-b border-border text-xs">
-            {remainingForFreeShipping > 0 ? (
-              <p className="text-muted-foreground">
-                Add{" "}
-                <span className="font-medium text-foreground">
-                  ৳{remainingForFreeShipping.toLocaleString()}
-                </span>{" "}
-                more for{" "}
-                <span className="text-primary font-medium">Free Delivery inside Dhaka</span>
-              </p>
-            ) : (
-              <p className="text-primary font-medium flex items-center gap-1">
-                ✦ You unlocked Free Delivery inside Dhaka!
-              </p>
-            )}
-            <div className="w-full bg-border h-1.5 rounded-full mt-2 overflow-hidden">
-              <div
-                className="bg-primary h-full transition-all duration-500 rounded-full"
-                style={{ width: `${freeShippingProgress}%` }}
-              />
+          {freeShippingThreshold > 0 && (
+            <div className="bg-secondary/40 p-4 border-b border-border text-xs">
+              {remainingForFreeShipping > 0 ? (
+                <p className="text-muted-foreground">
+                  Add{" "}
+                  <span className="font-medium text-foreground">
+                    ৳{remainingForFreeShipping.toLocaleString()}
+                  </span>{" "}
+                  more for <span className="text-primary font-medium">free delivery</span>
+                </p>
+              ) : (
+                <p className="text-primary font-medium flex items-center gap-1">
+                  ✦ You unlocked free delivery!
+                </p>
+              )}
+              <div className="w-full bg-border h-1.5 rounded-full mt-2 overflow-hidden">
+                <div
+                  className="bg-primary h-full transition-all duration-500 rounded-full"
+                  style={{ width: `${freeShippingProgress}%` }}
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Cart Items List */}
           <div className="flex-1 overflow-y-auto p-6 space-y-4">

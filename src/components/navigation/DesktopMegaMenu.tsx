@@ -3,7 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowRight, ChevronDown, Flame, Percent, Search, Sparkles } from "lucide-react";
-import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 
 import type { NavData } from "@/lib/catalog-shared";
 import { getResponsiveImage } from "@/lib/image";
@@ -49,6 +58,11 @@ export function DesktopMegaMenu({ nav, collapsed }: { nav: NavData; collapsed: b
   useEffect(close, [pathname, collapsed, close]);
   useEffect(() => clearTimer, []);
 
+  const listRef = useRef<HTMLUListElement>(null);
+  const fitting = useFirstLineCount(listRef, nav.categories.length);
+  const overflow = nav.categories.slice(fitting);
+  const toggle = (id: string) => setOpen((cur) => (cur === id ? null : id));
+
   return (
     <nav
       aria-label="Shop by category and brand"
@@ -60,38 +74,67 @@ export function DesktopMegaMenu({ nav, collapsed }: { nav: NavData; collapsed: b
       onMouseLeave={closeSoon}
     >
       <div className="container-x flex items-center justify-between gap-4">
-        <ul className="flex items-center min-w-0 overflow-x-auto scrollbar-none -ml-3">
-          {nav.categories.map((c) => (
+        <div className="flex flex-1 items-center min-w-0 -ml-3">
+          {/* Categories that don't fit wrap onto a hidden second line (never cut in half) and are
+              listed under "More" instead */}
+          <ul
+            ref={listRef}
+            className="flex flex-1 flex-wrap items-center min-w-0 h-10 overflow-hidden"
+          >
+            {nav.categories.map((c, i) => (
+              <MenuItem
+                key={c.slug}
+                hidden={i >= fitting}
+                id={c.slug}
+                label={c.name}
+                href={`/category/${c.slug}`}
+                active={
+                  pathname === `/category/${c.slug}` ||
+                  c.children.some((s) => pathname === `/category/${s.slug}`)
+                }
+                open={open === c.slug}
+                onHover={openSoon}
+                onToggle={toggle}
+                onClose={close}
+              >
+                <CategoryPanel category={c} onNavigate={close} />
+              </MenuItem>
+            ))}
+          </ul>
+          <ul className="flex items-center shrink-0">
+            {overflow.length > 0 && (
+              <MenuItem
+                id="__more"
+                label="More"
+                href="/products"
+                active={overflow.some(
+                  (c) =>
+                    pathname === `/category/${c.slug}` ||
+                    c.children.some((s) => pathname === `/category/${s.slug}`),
+                )}
+                open={open === "__more"}
+                onHover={openSoon}
+                onToggle={toggle}
+                onClose={close}
+              >
+                <MoreCategoriesPanel categories={overflow} onNavigate={close} />
+              </MenuItem>
+            )}
+            {/* Brands is pinned, so it is always visible however many categories there are */}
             <MenuItem
-              key={c.slug}
-              id={c.slug}
-              label={c.name}
-              href={`/category/${c.slug}`}
-              active={
-                pathname === `/category/${c.slug}` ||
-                c.children.some((s) => pathname === `/category/${s.slug}`)
-              }
-              open={open === c.slug}
+              id="__brands"
+              label="Brands"
+              href="/brands"
+              active={pathname === "/brands" || pathname.startsWith("/brand/")}
+              open={open === "__brands"}
               onHover={openSoon}
-              onToggle={(id) => setOpen((cur) => (cur === id ? null : id))}
+              onToggle={toggle}
               onClose={close}
             >
-              <CategoryPanel category={c} onNavigate={close} />
+              <BrandsPanel brands={nav.brands} onNavigate={close} />
             </MenuItem>
-          ))}
-          <MenuItem
-            id="__brands"
-            label="Brands"
-            href="/brands"
-            active={pathname === "/brands" || pathname.startsWith("/brand/")}
-            open={open === "__brands"}
-            onHover={openSoon}
-            onToggle={(id) => setOpen((cur) => (cur === id ? null : id))}
-            onClose={close}
-          >
-            <BrandsPanel brands={nav.brands} onNavigate={close} />
-          </MenuItem>
-        </ul>
+          </ul>
+        </div>
 
         <div
           className="flex items-center gap-1 shrink-0 text-[13px] font-semibold"
@@ -125,6 +168,7 @@ export function DesktopMegaMenu({ nav, collapsed }: { nav: NavData; collapsed: b
 }
 
 function MenuItem({
+  hidden = false,
   id,
   label,
   href,
@@ -135,6 +179,8 @@ function MenuItem({
   onClose,
   children,
 }: {
+  /** On the hidden second line: keeps its place for measuring but can't be seen or focused */
+  hidden?: boolean;
   id: string;
   label: string;
   href: string;
@@ -151,6 +197,8 @@ function MenuItem({
 
   return (
     <li
+      className={hidden ? "invisible" : undefined}
+      aria-hidden={hidden || undefined}
       onMouseEnter={() => onHover(id)}
       onKeyDown={(e) => {
         if (e.key === "Escape" && open) {
@@ -421,6 +469,88 @@ function BrandsPanel({
           <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
         </Link>
       </div>
+    </div>
+  );
+}
+
+/**
+ * How many category items sit on the first line of the bar. The list wraps instead of
+ * scrolling, so an item that doesn't fit moves whole onto the (clipped) second line; counting
+ * the items that share the first item's line tells us which ones go under "More". Re-checked
+ * whenever the bar changes size (window resize, fonts loading, the More item appearing).
+ */
+function useFirstLineCount(listRef: React.RefObject<HTMLUListElement | null>, total: number) {
+  const [count, setCount] = useState(total);
+
+  useLayoutEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+    const check = () => {
+      const items = Array.from(list.children) as HTMLElement[];
+      if (!items.length) return setCount(0);
+      const top = items[0].offsetTop;
+      setCount(items.filter((li) => li.offsetTop === top).length);
+    };
+    check();
+    const observer = new ResizeObserver(check);
+    observer.observe(list);
+    return () => observer.disconnect();
+  }, [listRef, total]);
+
+  return count;
+}
+
+/** Categories that didn't fit on the bar, with their sub-categories. */
+function MoreCategoriesPanel({
+  categories,
+  onNavigate,
+}: {
+  categories: NavCategory[];
+  onNavigate: () => void;
+}) {
+  return (
+    <div className="grid grid-cols-2 xl:grid-cols-4 gap-x-8 gap-y-6 p-6 xl:p-7">
+      {categories.map((c) => (
+        <div key={c.slug} className="min-w-0">
+          <Link
+            href={`/category/${c.slug}`}
+            onClick={onNavigate}
+            className="group inline-flex items-center gap-1 text-sm font-semibold text-foreground hover:text-primary"
+          >
+            {c.name}
+            <ArrowRight
+              className="w-3.5 h-3.5 opacity-0 -translate-x-1 transition-all group-hover:opacity-100 group-hover:translate-x-0"
+              aria-hidden="true"
+            />
+          </Link>
+          {c.children.length > 0 && (
+            <ul className="mt-2 space-y-0.5">
+              {c.children.slice(0, 8).map((s) => (
+                <li key={s.slug}>
+                  <Link
+                    href={`/category/${s.slug}`}
+                    onClick={onNavigate}
+                    className="block py-1 text-sm text-foreground/80 hover:text-primary transition-colors truncate"
+                  >
+                    {s.name}
+                  </Link>
+                </li>
+              ))}
+              {c.children.length > 8 && (
+                <li>
+                  <Link
+                    href={`/category/${c.slug}`}
+                    onClick={onNavigate}
+                    className="block py-1 text-xs font-semibold text-primary"
+                  >
+                    View all {c.children.length}
+                  </Link>
+                </li>
+              )}
+            </ul>
+          )}
+        </div>
+      ))}
     </div>
   );
 }

@@ -46,7 +46,7 @@ export default async function VendorPage() {
     Product.find({ vendor: vendor._id, status: { $ne: "archived" } })
       .sort({ updatedAt: -1 })
       .select(
-        "name slug description price compareAtPrice stock images category status approvalStatus reviewNote vendorActive totalSold createdAt updatedAt",
+        "name slug description price compareAtPrice stock images media category status approvalStatus reviewNote vendorActive totalSold createdAt updatedAt",
       )
       .lean(),
     Order.find({ "items.vendor": vendor._id })

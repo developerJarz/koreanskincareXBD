@@ -49,6 +49,7 @@ export type VendorProductInput = {
   compareAtPrice?: number;
   stock: number;
   images: string[];
+  media?: Array<{ url: string; alt: string }>;
   category: string;
   status: "active" | "draft";
 };
@@ -103,7 +104,19 @@ export function checkVendorProduct(
     return { error: "Your account can't list products in that category." };
   }
 
-  const images = Array.isArray(raw?.images) ? raw.images.filter(isSafeUrl).slice(0, 8) : [];
+  let media: VendorProductInput["media"];
+  if (Array.isArray(raw?.media)) {
+    media = [];
+    for (const item of raw.media.slice(0, 8)) {
+      if (!isSafeUrl(item?.url)) return { error: "One of the images has an invalid link." };
+      media.push({ url: item.url, alt: cleanString(item.alt, 200) ?? "" });
+    }
+  }
+  const images = media
+    ? media.map((item) => item.url)
+    : Array.isArray(raw?.images)
+      ? raw.images.filter(isSafeUrl).slice(0, 8)
+      : [];
   if (images.length === 0) return { error: "Add at least one image link (https://…)." };
 
   return {
@@ -114,6 +127,7 @@ export function checkVendorProduct(
       compareAtPrice,
       stock,
       images,
+      ...(media ? { media } : {}),
       category: raw.category,
       status: raw?.status === "draft" ? "draft" : "active",
     },
@@ -128,6 +142,7 @@ export function needsReReview(
     price: number;
     compareAtPrice?: number;
     images?: string[];
+    media?: Array<{ url: string; alt?: string }>;
     category?: any;
   },
   after: VendorProductInput,
@@ -138,7 +153,13 @@ export function needsReReview(
     before.price !== after.price ||
     (before.compareAtPrice ?? undefined) !== after.compareAtPrice ||
     String(before.category) !== after.category ||
-    JSON.stringify(before.images ?? []) !== JSON.stringify(after.images)
+    JSON.stringify(before.images ?? []) !== JSON.stringify(after.images) ||
+    (after.media !== undefined &&
+      JSON.stringify(
+        before.media?.length
+          ? before.media.map((item) => ({ url: item.url, alt: item.alt ?? "" }))
+          : (before.images ?? []).map((url) => ({ url, alt: "" })),
+      ) !== JSON.stringify(after.media))
   );
 }
 

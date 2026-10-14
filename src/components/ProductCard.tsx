@@ -52,7 +52,7 @@ export function ProductCard({ p, priority = false }: { p: CardProduct; priority?
         <img
           {...image}
           sizes="(min-width: 1280px) 300px, (min-width: 768px) 33vw, 50vw"
-          alt=""
+          alt={p.imgAlt || p.name}
           width={600}
           height={600}
           loading={priority ? "eager" : "lazy"}

@@ -461,7 +461,7 @@ export function ProductEditor({
 
             <Card
               title="Images"
-              description="Drag to reorder. The first image is the main image in the shop."
+              description="Drag to reorder. The first image is the main image in the shop. Add alt text below each uploaded image."
             >
               <ImageUploader
                 value={form.media}

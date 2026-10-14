@@ -2,15 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/server/db/connection";
 import { Category, Product, User, Coupon, Settings } from "@/server/db/models";
 import bcryptjs from "bcryptjs";
-import { PRODUCTS, CATEGORIES } from "@/lib/site-data";
+import { CATEGORIES } from "@/lib/site-data";
 import { requireAuth, serverError, SUPER_ADMIN_ROLES } from "@/server/auth/session";
 import { passwordStrengthError } from "@/server/security/validation";
 
 /**
  * Database Seeder API — DISABLED unless ALLOW_DB_SEED=true is set on the server.
  *
- * POST /api/seed            — Seed demo catalog if the database is empty
- * POST /api/seed?force=true — Replace catalog, coupons, settings and sample orders
+ * POST /api/seed            — Seed initial store setup if the database is empty
+ * POST /api/seed?force=true — Replace coupons and settings; existing categories and products are kept
  *
  * Security rules:
  *  - Existing users are NEVER deleted.
@@ -66,9 +66,12 @@ async function handleSeed(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const force = searchParams.get("force") === "true";
 
-  const existingProducts = await Product.countDocuments();
+  const [existingProducts, existingCategories] = await Promise.all([
+    Product.countDocuments(),
+    Category.countDocuments(),
+  ]);
 
-  if (!force && existingProducts > 0) {
+  if (!force && (existingProducts > 0 || existingCategories > 0)) {
     return NextResponse.json({
       message: "Database is already seeded.",
       status: "already_seeded",
@@ -95,50 +98,21 @@ async function handleSeed(request: NextRequest) {
     );
   }
 
-  // ─── 2. Seed Categories ───
-  await Category.deleteMany({});
-  const categoryDocs = await Category.insertMany(
-    CATEGORIES.map((c, i) => ({
-      name: c.name,
-      slug: c.slug,
-      description: `Premium authentic ${c.name.toLowerCase()} for koreanskincare.bd`,
-      image: typeof c.img === "string" ? c.img : (c.img as any)?.src || "",
-      sortOrder: i,
-      isActive: true,
-      isFeatured: true,
-      productCount: parseInt(c.count) || 20,
-    })),
-  );
-
-  const categoryMap = new Map(categoryDocs.map((c) => [c.slug, c._id]));
-  const defaultCatId = categoryDocs[0]?._id;
-
-  // ─── 3. Seed Products ───
-  await Product.deleteMany({});
-  const productDocs = await Product.insertMany(
-    PRODUCTS.map((p, index) => ({
-      name: p.name,
-      slug: p.slug,
-      description: `Thoughtfully designed ${p.name.toLowerCase()} crafted for modern elegance. Premium grade materials, lightweight feel, and durable long-lasting finish.`,
-      category: categoryMap.get(p.category) || defaultCatId,
-      price: p.price,
-      compareAtPrice: p.was || undefined,
-      stock: 35 + ((index * 5) % 40),
-      lowStockThreshold: 5,
-      trackInventory: true,
-      colors: ["Default", "Rose Gold", "Noir Black", "Champagne Gold"],
-      sizes: ["Standard", "Adjustable"],
-      images: [typeof p.img === "string" ? p.img : (p.img as any)?.src || ""],
-      isFeatured: true,
-      isNewArrival: p.tag === "New" || index % 3 === 0,
-      isBestseller: p.tag === "Bestseller" || index % 2 === 0,
-      tags: p.tag ? [p.tag, p.category, "luxury"] : [p.category, "luxury"],
-      status: "active",
-      avgRating: 4.9,
-      totalReviews: 24 + index * 4,
-      totalSold: 45 + index * 12,
-    })),
-  );
+  // Keep existing category IDs so uploaded products retain their category references.
+  const categoryDocs = existingCategories
+    ? await Category.find().select("_id").lean()
+    : await Category.insertMany(
+        CATEGORIES.map((c, i) => ({
+          name: c.name,
+          slug: c.slug,
+          description: `Premium authentic ${c.name.toLowerCase()} for koreanskincare.bd`,
+          image: typeof c.img === "string" ? c.img : (c.img as any)?.src || "",
+          sortOrder: i,
+          isActive: true,
+          isFeatured: true,
+          productCount: parseInt(c.count) || 20,
+        })),
+      );
 
   // ─── 4. Seed Coupons ───
   await Coupon.deleteMany({});
@@ -213,7 +187,7 @@ async function handleSeed(request: NextRequest) {
     counts: {
       usersCreated: seededUsers.length,
       categories: categoryDocs.length,
-      products: productDocs.length,
+      products: existingProducts,
       coupons: 3,
     },
     accountsCreated: seededUsers.map((u) => ({ email: u.email, role: u.role })),

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useId, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, ImagePlus, Link2, Loader2, Star, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -115,6 +115,7 @@ export function ImageUploader({
   /** Hide the alt-text field where the form doesn't save it */
   withAlt?: boolean;
 }) {
+  const uploaderId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState<Array<{ id: string; preview: string }>>([]);
   const [dragOver, setDragOver] = useState(false);
@@ -335,16 +336,38 @@ export function ImageUploader({
               </div>
               <div className="p-2 space-y-2">
                 {withAlt && (
-                  <input
-                    value={item.alt}
-                    onChange={(e) =>
-                      onChange(value.map((m, j) => (j === i ? { ...m, alt: e.target.value } : m)))
-                    }
-                    placeholder={altPlaceholder}
-                    aria-label={`Alt text for image ${i + 1}`}
-                    maxLength={200}
-                    className={`${inputClass} h-8 text-xs`}
-                  />
+                  <div className="space-y-1">
+                    {folder === "products" && (
+                      <label
+                        htmlFor={`${uploaderId}-alt-${i}`}
+                        className="block text-xs font-medium"
+                      >
+                        Image alt text
+                      </label>
+                    )}
+                    <input
+                      id={`${uploaderId}-alt-${i}`}
+                      value={item.alt}
+                      onChange={(e) =>
+                        onChange(value.map((m, j) => (j === i ? { ...m, alt: e.target.value } : m)))
+                      }
+                      placeholder={altPlaceholder}
+                      aria-label={`Alt text for image ${i + 1}`}
+                      aria-describedby={
+                        folder === "products" ? `${uploaderId}-alt-hint-${i}` : undefined
+                      }
+                      maxLength={200}
+                      className={`${inputClass} h-8 text-xs`}
+                    />
+                    {folder === "products" && (
+                      <p
+                        id={`${uploaderId}-alt-hint-${i}`}
+                        className="text-xs text-muted-foreground"
+                      >
+                        Describe what is shown. Leave blank to use the product name.
+                      </p>
+                    )}
+                  </div>
                 )}
                 <div className="flex items-center justify-between">
                   {!single ? (

@@ -10,7 +10,7 @@ import { isObjectId } from "@/server/security/validation";
 import { generateBarcode, generateSku } from "@/server/sku";
 
 const VENDOR_PRODUCT_FIELDS =
-  "name slug description price compareAtPrice stock images category status approvalStatus reviewNote vendorActive totalSold createdAt updatedAt";
+  "name slug description price compareAtPrice stock images media category status approvalStatus reviewNote vendorActive totalSold createdAt updatedAt";
 
 // GET — This vendor's products (deleted ones excluded)
 export async function GET(request: NextRequest) {
@@ -110,6 +110,7 @@ export async function PUT(request: NextRequest) {
       compareAtPrice: input.compareAtPrice,
       stock: input.stock,
       images: input.images,
+      ...(input.media ? { media: input.media } : {}),
       category: input.category,
       status: input.status,
     });

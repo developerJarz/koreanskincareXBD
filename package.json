@@ -10,6 +10,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "seed": "node scripts/seed-catalog.mjs",
+    "products:clear": "node scripts/clear-products.mjs",
     "images:migrate": "node scripts/migrate-images-to-cloudinary.mjs"
   },
   "dependencies": {

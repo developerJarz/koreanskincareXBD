@@ -55,6 +55,7 @@ type VendorProduct = {
   compareAtPrice?: number;
   stock: number;
   images: string[];
+  media?: MediaItem[];
   category: string;
   status: "active" | "draft" | "archived";
   approvalStatus?: "approved" | "pending" | "rejected";
@@ -738,7 +739,9 @@ function ProductDialog({
     price: product ? String(product.price) : "",
     compareAtPrice: product?.compareAtPrice ? String(product.compareAtPrice) : "",
     stock: product ? String(product.stock) : "10",
-    images: (product?.images ?? []).map((url) => ({ url, alt: "" })) as MediaItem[],
+    images: product?.media?.length
+      ? product.media
+      : ((product?.images ?? []).map((url) => ({ url, alt: "" })) as MediaItem[]),
     description: product?.description ?? "",
     status: product?.status === "draft" ? "draft" : "active",
   });
@@ -782,6 +785,7 @@ function ProductDialog({
           compareAtPrice: form.compareAtPrice,
           stock: Number(form.stock),
           images: form.images.map((m) => m.url),
+          media: form.images,
           description: form.description,
           status: form.status,
         }),
@@ -916,7 +920,6 @@ function ProductDialog({
             folder="products"
             max={8}
             label="Product images"
-            withAlt={false}
           />
         </div>
 

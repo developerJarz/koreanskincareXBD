@@ -7,8 +7,7 @@
  *  2. Hides the old fashion categories (rings, earrings, bags, watches) and archives their
  *     products. Nothing is deleted — both can be restored from the admin dashboard.
  *  3. Adds the Korean beauty brands and links existing products to them (by product slug).
- *  4. Adds the demo products that don't exist yet.
- *  5. Backfills newer product fields on older products (media, isOnSale, legacy subcategory).
+ *  4. Backfills newer product fields on older products (media, isOnSale, legacy subcategory).
  *
  * Matching is by slug. Records that already exist are left as they are (edits made in the admin
  * dashboard are kept), so it is safe to run any number of times.
@@ -20,9 +19,6 @@ import slugify from "slugify";
 import {
   BRANDS,
   CATEGORIES,
-  HOW_TO_USE,
-  IMAGES,
-  PRODUCTS,
   RETIRED_CATEGORY_SLUGS,
   SUBCATEGORY_OVERRIDES,
 } from "./catalog-data.mjs";
@@ -32,9 +28,6 @@ const SITE = "KoreanSkincare.bd";
 // "rom&nd" → "romand", "Skin & Body" → "skin-and-body"
 const toSlug = (s) =>
   slugify(s.replace(/(\w)&(\w)/g, "$1$2").replace(/&/g, " and "), { lower: true, strict: true });
-
-// Small deterministic number from a string, so demo stats stay the same between runs
-const hash = (s) => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
 
 function loadEnv() {
   const env = { ...process.env };
@@ -67,8 +60,6 @@ async function main() {
     productsArchived: 0,
     brandsAdded: 0,
     productsLinkedToBrand: 0,
-    productsAdded: 0,
-    productsSkipped: 0,
   };
   const write = async (fn) => (DRY_RUN ? null : fn());
 
@@ -200,7 +191,6 @@ async function main() {
   }
 
   // ── 3. Brands ──
-  const brandIdByName = new Map();
   for (const [i, b] of BRANDS.entries()) {
     const slug = b.slug ?? toSlug(b.name);
     let doc = await brands.findOne({ slug });
@@ -225,7 +215,6 @@ async function main() {
       await write(() => brands.insertOne(doc));
       log.brandsAdded++;
     }
-    brandIdByName.set(b.name, doc._id);
 
     if (b.prefix) {
       const res = await write(() =>
@@ -243,91 +232,7 @@ async function main() {
     }
   }
 
-  // ── 4. Demo products ──
-  const catBySlug = new Map(
-    (await categories.find({}, { projection: { slug: 1, parent: 1 } }).toArray()).map((c) => [
-      c.slug,
-      c,
-    ]),
-  );
-  const topSlugById = new Map(
-    [...catBySlug.values()].filter((c) => !c.parent).map((c) => [String(c._id), c.slug]),
-  );
-
-  for (const [i, item] of PRODUCTS.entries()) {
-    const slug = toSlug(item.name);
-    if (await products.findOne({ slug }, { projection: { _id: 1 } })) {
-      log.productsSkipped++;
-      continue;
-    }
-    const sub = catBySlug.get(item.sub);
-    if (!sub?.parent && !DRY_RUN) {
-      console.warn(`  ! Skipped "${item.name}": subcategory "${item.sub}" not found`);
-      continue;
-    }
-    const brandId = item.brand ? brandIdByName.get(item.brand) : null;
-    const h = hash(slug);
-    const url = IMAGES[item.img] ?? IMAGES.serum;
-    const sku = `KSB-${String(1001 + i)}`;
-    const skuTaken = await products.findOne({ sku }, { projection: { _id: 1 } });
-    const topSlug = sub?.parent ? topSlugById.get(String(sub.parent)) : undefined;
-    const brandSlug = item.brand
-      ? (BRANDS.find((b) => b.name === item.brand)?.slug ?? toSlug(item.brand))
-      : null;
-    const created = new Date(now.getTime() - (PRODUCTS.length - i) * 60_000);
-
-    await write(() =>
-      products.insertOne({
-        name: item.name,
-        slug,
-        shortDescription: item.desc,
-        description: `${item.desc} 100% authentic — imported directly from Korea and stored in a climate-controlled warehouse in Dhaka.`,
-        category: sub.parent,
-        subcategory: sub._id,
-        brand: brandId ?? null,
-        collections: [],
-        tags: [brandSlug, item.sub, topSlug].filter(Boolean),
-        images: [url],
-        media: [{ url, alt: item.name }],
-        variants: [],
-        price: item.price,
-        ...(item.was ? { compareAtPrice: item.was } : {}),
-        ...(skuTaken ? {} : { sku }),
-        stock: 20 + (h % 100),
-        lowStockThreshold: 5,
-        trackInventory: true,
-        colors: [],
-        sizes: [],
-        materials: [],
-        status: "active",
-        approvalStatus: "approved",
-        vendorActive: true,
-        isFeatured: Boolean(item.featured || item.bestseller),
-        isNewArrival: Boolean(item.new),
-        isBestseller: Boolean(item.bestseller),
-        isOnSale: Boolean(item.was && item.was > item.price),
-        isTrending: Boolean(item.trending),
-        allowBackorders: false,
-        howToUse: HOW_TO_USE[topSlug] ?? "",
-        seoTitle: `${item.name} Price in Bangladesh | ${SITE}`,
-        seoDescription:
-          `${item.desc} Buy authentic ${item.name} in Bangladesh with fast delivery.`.slice(0, 320),
-        seoKeywords: [],
-        avgRating: Math.round((4.3 + (h % 7) / 10) * 10) / 10,
-        totalReviews: 12 + (h % 180),
-        totalSold: 40 + (h % 600),
-        viewCount: 0,
-        relatedProducts: [],
-        frequentlyBoughtWith: [],
-        createdAt: created,
-        updatedAt: created,
-        __v: 0,
-      }),
-    );
-    log.productsAdded++;
-  }
-
-  // ── 5. Product backfill (idempotent) ──
+  // ── 4. Product backfill (idempotent) ──
   const backfill = { media: 0, onSale: 0, legacySubcategory: 0 };
   const cursor = products.find(
     {
@@ -375,9 +280,6 @@ async function main() {
   );
   console.log(
     `Brands:     ${log.brandsAdded} added, ${log.productsLinkedToBrand} existing products linked to their brand`,
-  );
-  console.log(
-    `Demo items: ${log.productsAdded} added, ${log.productsSkipped} already existed (left unchanged)`,
   );
   console.log(
     `Backfill:   ${backfill.media} got image/alt data, ${backfill.onSale} got an on-sale flag, ${backfill.legacySubcategory} had an old text subcategory removed`,

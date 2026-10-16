@@ -1,11 +1,17 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Check, ExternalLink, Loader2, Wand2, X } from "lucide-react";
 import { toast } from "sonner";
 
+import { analyzeProductSeo } from "@/lib/product-seo";
+import { htmlToSnippet } from "@/lib/rich-text";
+import { SITE_NAME } from "@/lib/site";
+
 import { ImageUploader, type MediaItem } from "./ImageUploader";
+import { RichTextEditor, type RichTextTemplate } from "./RichTextEditor";
 import { SearchableSelect } from "./SearchableSelect";
+import { SeoAnalysis, SeoSummary, SerpPreview } from "./SeoPanel";
 import {
   api,
   ApiError,
@@ -60,6 +66,7 @@ type EditorState = {
   seoTitle: string;
   seoDescription: string;
   seoKeywords: string;
+  focusKeyword: string;
   canonicalUrl: string;
   vendor?: string | null;
 };
@@ -93,6 +100,7 @@ const EMPTY: EditorState = {
   seoTitle: "",
   seoDescription: "",
   seoKeywords: "",
+  focusKeyword: "",
   canonicalUrl: "",
 };
 
@@ -130,9 +138,56 @@ function fromServer(p: any): EditorState {
     seoTitle: p.seoTitle ?? "",
     seoDescription: p.seoDescription ?? "",
     seoKeywords: (p.seoKeywords ?? []).join(", "),
+    focusKeyword: p.focusKeyword ?? "",
     canonicalUrl: p.canonicalUrl ?? "",
     vendor: p.vendor ?? null,
   };
+}
+
+const escapeHtml = (s: string) =>
+  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+const titleCase = (s: string) => s.trim().replace(/(^|\s)\p{L}/gu, (m) => m.toUpperCase());
+
+/** Ready-made outlines for the description editor, built around the focus keyword. */
+function descriptionTemplates(name: string, keyword: string, brand?: string): RichTextTemplate[] {
+  const product = escapeHtml(name.trim() || "this product");
+  const kw = escapeHtml(keyword.trim() || name.trim() || "this product");
+  return [
+    {
+      label: "Full product description",
+      html: () =>
+        `<p><strong>${product}</strong> is … (one or two sentences that use the phrase “${kw}” and say what the product does).</p>` +
+        `<h2>Why you'll love this ${kw}</h2><ul><li>Benefit one</li><li>Benefit two</li><li>Benefit three</li></ul>` +
+        `<h2>Key ingredients</h2><ul><li><strong>Ingredient</strong> — what it does for the skin</li><li><strong>Ingredient</strong> — what it does for the skin</li></ul>` +
+        `<h2>Who it's for</h2><p>Skin types and concerns this suits.</p>` +
+        `<h2>How to use</h2><ol><li>Step one</li><li>Step two</li></ol>` +
+        `<h2>Why buy ${product} from ${escapeHtml(SITE_NAME)}</h2><p>100% authentic${brand ? ` ${escapeHtml(brand)}` : ""}, imported from Korea, with cash on delivery anywhere in Bangladesh.</p>`,
+    },
+    {
+      label: "Specifications table",
+      html: () =>
+        `<h2>Product details</h2><table><tbody>` +
+        [
+          ["Brand", brand ? escapeHtml(brand) : ""],
+          ["Volume / size", ""],
+          ["Skin type", ""],
+          ["Made in", "South Korea"],
+          ["Shelf life", ""],
+        ]
+          .map(([k, v]) => `<tr><th><p>${k}</p></th><td><p>${v}</p></td></tr>`)
+          .join("") +
+        `</tbody></table>`,
+    },
+    {
+      label: "FAQ section",
+      html: () =>
+        `<h2>Frequently asked questions</h2>` +
+        `<h3>Is ${product} suitable for sensitive skin?</h3><p>Answer…</p>` +
+        `<h3>How long does one bottle last?</h3><p>Answer…</p>` +
+        `<h3>Is this ${kw} original?</h3><p>Yes — every product we sell is 100% authentic and imported from Korea.</p>`,
+    },
+  ];
 }
 
 const toSlug = (s: string) =>
@@ -246,6 +301,74 @@ export function ProductEditor({
     { ok: !onSale || (sale > 0 && sale < regular), label: "Sale price below regular price" },
   ];
   const ready = checklist.every((c) => c.ok);
+
+  // Live SEO analysis — deferred so typing in the editors stays smooth
+  const seoInput = useDeferredValue(form);
+  const seo = useMemo(() => analyzeProductSeo(seoInput), [seoInput]);
+  const seoRef = useRef<HTMLDivElement>(null);
+  const brandName = brands.find((b) => b._id === form.brand)?.name;
+  const templates = useMemo(
+    () => descriptionTemplates(form.name, form.focusKeyword, brandName),
+    [form.name, form.focusKeyword, brandName],
+  );
+  const keywordIdeas = useMemo(() => {
+    const base = form.name
+      .replace(brandName ?? "", "")
+      .replace(/\b\d+(\.\d+)?\s?(ml|g|gm|pcs|pads|sheets|oz)\b/gi, "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+    const ideas = [
+      ...(base && base.split(" ").length <= 6 ? [base] : []),
+      ...form.seoKeywords.split(","),
+      ...form.tags,
+    ]
+      .map((t) => t.trim().toLowerCase())
+      .filter((t) => t.length >= 3);
+    return [...new Set(ideas)];
+  }, [form.name, form.seoKeywords, form.tags, brandName]);
+
+  const kw = form.focusKeyword.trim();
+  const passed = (id: string) => seo.checks.find((c) => c.id === id)?.status === "good";
+  const suggestedTitle = () => {
+    const named = `${form.name} | ${SITE_NAME}`;
+    if (named.toLowerCase().includes(kw.toLowerCase()) && named.length <= 60) return named;
+    const withName = `${titleCase(kw)} – ${form.name}`;
+    return withName.length <= 60 ? withName : `${titleCase(kw)} | ${SITE_NAME}`;
+  };
+  const quickFixes = [
+    {
+      label: "Write meta description for me",
+      show: !form.seoDescription && Boolean(seo.metaDescription),
+      run: () =>
+        set("seoDescription", htmlToSnippet(form.shortDescription || form.description, 158)),
+    },
+    {
+      label: "Add keyword to page title",
+      show: Boolean(kw) && !passed("kw-title"),
+      run: () => set("seoTitle", suggestedTitle().slice(0, 120)),
+    },
+    {
+      // Only before publishing: changing a live product's URL breaks links already shared
+      label: "Use keyword in URL",
+      show: Boolean(kw) && form.status !== "active" && !passed("kw-url"),
+      run: () => {
+        setSlugTouched(true);
+        set("slug", toSlug(`${brandName ?? ""} ${kw}`));
+      },
+    },
+    {
+      label: "Fill missing image alt text",
+      show: form.media.some((m) => !m.alt.trim()),
+      run: () =>
+        set(
+          "media",
+          form.media.map((m, i) =>
+            m.alt.trim() ? m : { ...m, alt: i === 0 ? form.name : `${form.name} – view ${i + 1}` },
+          ),
+        ),
+    },
+  ];
 
   const addTag = (raw: string) => {
     const tags = raw
@@ -433,28 +556,35 @@ export function ProductEditor({
               <Field
                 label="Short description"
                 htmlFor="p-short"
-                hint="One or two sentences shown near the price."
+                error={errors.shortDescription}
+                hint="One or two sentences shown near the price. Also used as the Google description when you don't write one."
               >
-                <textarea
+                <RichTextEditor
                   id="p-short"
-                  rows={2}
-                  maxLength={500}
+                  variant="compact"
+                  minHeight={84}
+                  maxChars={500}
                   value={form.shortDescription}
-                  onChange={(e) => set("shortDescription", e.target.value)}
-                  className={textareaClass}
+                  onChange={(html) => set("shortDescription", html)}
+                  placeholder="e.g. A lightweight snail mucin essence that hydrates and repairs dull, dry skin."
+                  invalid={Boolean(errors.shortDescription)}
                 />
               </Field>
               <Field
                 label="Full description"
                 htmlFor="p-desc"
-                hint="Leave a blank line between paragraphs."
+                error={errors.description}
+                hint="Use headings, lists and links. Templates give you an SEO-friendly outline to fill in."
               >
-                <textarea
+                <RichTextEditor
                   id="p-desc"
-                  rows={8}
                   value={form.description}
-                  onChange={(e) => set("description", e.target.value)}
-                  className={textareaClass}
+                  onChange={(html) => set("description", html)}
+                  placeholder="Describe the product: what it does, key ingredients, who it's for and how to use it…"
+                  mediaChoices={form.media}
+                  templates={templates}
+                  minHeight={320}
+                  invalid={Boolean(errors.description)}
                 />
               </Field>
             </Card>
@@ -715,6 +845,13 @@ export function ProductEditor({
               title="Search engine listing"
               description="Optional. Filled from the product name and description when left empty."
             >
+              <SerpPreview
+                title={seo.title}
+                description={seo.metaDescription}
+                slug={form.slug}
+                keyword={form.focusKeyword}
+                image={form.media[0]?.url}
+              />
               <Field
                 label="URL"
                 htmlFor="p-slug"
@@ -735,7 +872,7 @@ export function ProductEditor({
               <Field
                 label="Page title"
                 htmlFor="p-seo-title"
-                hint={`${form.seoTitle.length}/60 characters recommended`}
+                hint={`${seo.title.length}/60 characters recommended${form.seoTitle ? "" : " (automatic)"}`}
               >
                 <input
                   id="p-seo-title"
@@ -785,6 +922,22 @@ export function ProductEditor({
                 </Field>
               </div>
             </Card>
+
+            <div ref={seoRef} className="scroll-mt-20">
+              <Card
+                title="SEO analysis"
+                description="Updates as you type. The score is saved with the product and shown in the product list."
+              >
+                <SeoAnalysis
+                  result={seo}
+                  focusKeyword={form.focusKeyword}
+                  onFocusKeyword={(v) => set("focusKeyword", v)}
+                  suggestions={keywordIdeas}
+                  productId={form._id}
+                  quickFixes={quickFixes}
+                />
+              </Card>
+            </div>
           </div>
 
           {/* Sidebar */}
@@ -848,6 +1001,15 @@ export function ProductEditor({
                   ))}
                 </ul>
               </div>
+            </Card>
+
+            <Card title="SEO score">
+              <SeoSummary
+                result={seo}
+                onOpen={() =>
+                  seoRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+                }
+              />
             </Card>
 
             <Card title="Organisation">

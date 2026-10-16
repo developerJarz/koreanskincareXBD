@@ -12,6 +12,8 @@ import { getProductPageData } from "@/server/catalog";
 import { connectDB } from "@/server/db/connection";
 import { Review } from "@/server/db/models";
 import { absoluteUrl, jsonLd, SITE_NAME } from "@/lib/site";
+import { htmlToSnippet, htmlToText, isRichText } from "@/lib/rich-text";
+import { sanitizeRichText } from "@/server/rich-text";
 
 type Params = Promise<{ slug: string }>;
 
@@ -27,8 +29,8 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const title = product.seoTitle || `${product.name} | ${SITE_NAME}`;
   const description = (
     product.seoDescription ||
-    product.shortDescription ||
-    product.description ||
+    htmlToSnippet(product.shortDescription, 160) ||
+    htmlToSnippet(product.description, 160) ||
     `Buy ${brand ? `${brand.name} ` : ""}${product.name} in Bangladesh at ৳${product.price}.`
   ).slice(0, 160);
   const canonical = product.canonicalUrl || `/product/${product.slug}`;
@@ -46,8 +48,16 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   };
 }
 
-/** Plain-text descriptions: blank lines become paragraphs (no HTML is ever rendered from the DB). */
+/**
+ * Descriptions from the rich-text editor are HTML, re-sanitized here so only safe formatting is
+ * rendered. Older plain-text descriptions: blank lines become paragraphs.
+ */
 function Paragraphs({ text }: { text: string }) {
+  if (isRichText(text)) {
+    return (
+      <div className="rich-text" dangerouslySetInnerHTML={{ __html: sanitizeRichText(text) }} />
+    );
+  }
   return (
     <>
       {text
@@ -89,7 +99,8 @@ export default async function ProductPage({ params }: { params: Params }) {
     "@type": "Product",
     name: product.name,
     image: product.media.map((m) => absoluteUrl(m.url)),
-    description: (product.shortDescription || product.description).slice(0, 5000) || undefined,
+    description:
+      htmlToText(product.shortDescription || product.description).slice(0, 5000) || undefined,
     sku: product.sku || undefined,
     ...(brand ? { brand: { "@type": "Brand", name: brand.name } } : {}),
     ...(category ? { category: category.name } : {}),
@@ -155,7 +166,9 @@ export default async function ProductPage({ params }: { params: Params }) {
           )}
 
           {product.shortDescription && (
-            <p className="mt-4 text-muted-foreground leading-relaxed">{product.shortDescription}</p>
+            <div className="mt-4 text-muted-foreground leading-relaxed">
+              <Paragraphs text={product.shortDescription} />
+            </div>
           )}
 
           <PurchasePanel

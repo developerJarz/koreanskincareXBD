@@ -6,6 +6,7 @@ import { requireAuth, serverError, STAFF_ROLES } from "@/server/auth/session";
 import { requirePermission } from "@/server/auth/permissions";
 import {
   barcodeTaken,
+  applySeoScore,
   fillInventoryCodes,
   resolveSlug,
   skuTaken,
@@ -73,6 +74,7 @@ export async function PUT(request: NextRequest, { params }: Ctx) {
     }
     // Older products saved without codes get them the next time they're saved
     await fillInventoryCodes(value);
+    applySeoScore(value, slug.slug);
 
     product.set({
       ...value,

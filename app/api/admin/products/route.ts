@@ -6,6 +6,7 @@ import { requireAuth, serverError, STAFF_ROLES } from "@/server/auth/session";
 import { requirePermission } from "@/server/auth/permissions";
 import {
   barcodeTaken,
+  applySeoScore,
   fillInventoryCodes,
   resolveSlug,
   skuTaken,
@@ -96,7 +97,7 @@ export async function GET(request: NextRequest) {
       .skip((page - 1) * pageSize)
       .limit(pageSize)
       .select(
-        "name slug sku price compareAtPrice stock lowStockThreshold allowBackorders images media status isFeatured isBestseller isNewArrival isOnSale isTrending brand category subcategory vendor approvalStatus createdAt updatedAt",
+        "name slug sku price compareAtPrice stock lowStockThreshold allowBackorders images media status isFeatured isBestseller isNewArrival isOnSale isTrending brand category subcategory vendor approvalStatus seoScore focusKeyword createdAt updatedAt",
       )
       .populate("brand", "name slug")
       .populate("category", "name slug")
@@ -159,6 +160,7 @@ export async function POST(request: NextRequest) {
     }
     // Left empty in the form → generated automatically
     await fillInventoryCodes(value);
+    applySeoScore(value, slug.slug);
 
     const product = await Product.create({ ...value, slug: slug.slug });
     revalidateCatalog();

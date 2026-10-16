@@ -102,6 +102,9 @@ const productSchema = new Schema<ProductDocument>(
     seoTitle: { type: String },
     seoDescription: { type: String },
     seoKeywords: [{ type: String }],
+    // The phrase the product should rank for, and the editor's SEO score (0–100) for it
+    focusKeyword: { type: String },
+    seoScore: { type: Number, min: 0, max: 100 },
 
     // Stats
     avgRating: { type: Number, default: 0 },
@@ -148,6 +151,13 @@ productSchema.index(
 productSchema.index({ vendor: 1, status: 1 });
 productSchema.index({ approvalStatus: 1, createdAt: -1 });
 productSchema.index({ tags: 1 });
+productSchema.index(
+  { focusKeyword: 1 },
+  {
+    collation: { locale: "en", strength: 2 },
+    partialFilterExpression: { focusKeyword: { $type: "string" } },
+  },
+);
 productSchema.index({ name: "text", description: "text", tags: "text" });
 
 /**

@@ -28,6 +28,7 @@ import {
   Switch,
   taka,
 } from "./ui";
+import { SeoBadge } from "./SeoPanel";
 
 type Row = {
   _id: string;
@@ -51,6 +52,8 @@ type Row = {
   subcategory?: { _id: string; name: string } | null;
   vendor?: { storeName: string } | null;
   approvalStatus?: string;
+  seoScore?: number | null;
+  focusKeyword?: string;
   createdAt: string;
 };
 
@@ -461,6 +464,7 @@ export function ProductManagerModule() {
               <th className="p-3 text-right font-medium">Sale price</th>
               <th className="p-3 text-right font-medium">Stock</th>
               <th className="p-3 text-left font-medium">Status</th>
+              <th className="p-3 text-center font-medium">SEO</th>
               <th className="p-3 text-center font-medium">Featured</th>
               <th className="p-3 text-center font-medium">Bestseller</th>
               <th className="p-3 text-left font-medium">Created</th>
@@ -540,6 +544,12 @@ export function ProductManagerModule() {
                   </td>
                   <td className="p-3">
                     <StatusBadge row={row} />
+                  </td>
+                  <td
+                    className="p-3 text-center"
+                    title={row.focusKeyword ? `Focus keyword: ${row.focusKeyword}` : "No focus keyword"}
+                  >
+                    <SeoBadge score={row.seoScore} />
                   </td>
                   <td className="p-3 text-center">
                     <Switch

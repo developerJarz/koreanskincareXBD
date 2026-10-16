@@ -120,6 +120,8 @@ export interface IProduct {
   seoTitle?: string;
   seoDescription?: string;
   seoKeywords?: string[];
+  focusKeyword?: string;
+  seoScore?: number;
   avgRating: number;
   totalReviews: number;
   totalSold: number;

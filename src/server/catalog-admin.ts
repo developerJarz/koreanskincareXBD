@@ -3,6 +3,8 @@ import type { Model, Types } from "mongoose";
 
 import { Brand, Category, Product } from "@/server/db/models";
 import { generateBarcode, generateSku } from "@/server/sku";
+import { sanitizeRichText } from "@/server/rich-text";
+import { analyzeProductSeo } from "@/lib/product-seo";
 import {
   cleanString,
   isObjectId,
@@ -86,6 +88,8 @@ export type ProductWrite = {
   seoTitle: string;
   seoDescription: string;
   seoKeywords: string[];
+  focusKeyword: string;
+  seoScore?: number;
   canonicalUrl: string;
 };
 
@@ -194,8 +198,9 @@ export async function validateProduct(
       slug: cleanString(raw?.slug, 120) || undefined,
       sku,
       barcode,
-      shortDescription: cleanString(raw?.shortDescription, 500) ?? "",
-      description: cleanString(raw?.description, 20_000) ?? "",
+      // HTML from the rich-text editor, reduced to the tags the shop renders
+      shortDescription: sanitizeRichText(cleanString(raw?.shortDescription, 3000)),
+      description: sanitizeRichText(cleanString(raw?.description, 60_000)),
       brand,
       category: category!,
       subcategory,
@@ -218,9 +223,15 @@ export async function validateProduct(
       seoTitle: cleanString(raw?.seoTitle, 120) ?? "",
       seoDescription: cleanString(raw?.seoDescription, 320) ?? "",
       seoKeywords: cleanList(raw?.seoKeywords, 20, 60),
+      focusKeyword: cleanString(raw?.focusKeyword, 100)?.replace(/s+/g, " ") ?? "",
       canonicalUrl,
     },
   };
+}
+
+/** Scores the product with the same analysis the editor shows, for the product list and reports. */
+export function applySeoScore(value: ProductWrite, slug: string) {
+  value.seoScore = analyzeProductSeo({ ...value, slug }).score;
 }
 
 /**
@@ -281,6 +292,8 @@ export function toEditorProduct(p: any) {
     seoTitle: p.seoTitle ?? "",
     seoDescription: p.seoDescription ?? "",
     seoKeywords: p.seoKeywords ?? [],
+    focusKeyword: p.focusKeyword ?? "",
+    seoScore: p.seoScore ?? null,
     canonicalUrl: p.canonicalUrl ?? "",
     vendor: p.vendor ? String(p.vendor) : null,
     approvalStatus: p.approvalStatus ?? "approved",

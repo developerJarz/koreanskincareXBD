@@ -547,7 +547,9 @@ export function ProductManagerModule() {
                   </td>
                   <td
                     className="p-3 text-center"
-                    title={row.focusKeyword ? `Focus keyword: ${row.focusKeyword}` : "No focus keyword"}
+                    title={
+                      row.focusKeyword ? `Focus keyword: ${row.focusKeyword}` : "No focus keyword"
+                    }
                   >
                     <SeoBadge score={row.seoScore} />
                   </td>

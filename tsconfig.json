@@ -1,5 +1,6 @@
 {
   "include": [
+    ".next/types/**/*.ts",
     "app/**/*.ts",
     "app/**/*.tsx",
     "eslint.config.js",
@@ -14,7 +15,7 @@
     "src/store/**/*.tsx",
     "src/types/**/*.ts",
     "src/types/**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next-verify/types/**/*.ts"
   ],
   "exclude": [
     "src/api",
@@ -30,8 +31,15 @@
     "target": "ES2022",
     "jsx": "preserve",
     "module": "ESNext",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["vite/client", "node"],
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "types": [
+      "vite/client",
+      "node"
+    ],
     /* Bundler mode */
     "moduleResolution": "Bundler",
     "allowImportingTsExtensions": true,
@@ -45,7 +53,9 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ]
     },
     "allowJs": true,
     "incremental": true,

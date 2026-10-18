@@ -1,7 +1,7 @@
 # Graph Report - noors-elegance-main  (2026-10-16)
 
 ## Corpus Check
-- 533 files · ~543,655 words
+- 533 files · ~543,664 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 66 file(s) not represented in the graph (top: .csv 53, (none) 4, .woff2 3)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `778e50be`
+- Built from commit: `0ecb25c6`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -314,8 +314,8 @@
   .agents/skills/brand/references/typography-specifications.md → .agents/skills/design-system/references/tailwind-integration.md
 - `Crawler Allow-All Policy (Googlebot, Bingbot, Twitterbot, facebookexternalhit, *)` --conceptually_related_to--> `Enterprise Admin Operations Hub (/admin)`  [AMBIGUOUS]
   public/robots.txt → README.md
-- `loadProduct` --calls--> `getProductPageData()`  [EXTRACTED]
-  app/(store)/product/[slug]/page.tsx → src/server/catalog.ts
+- `PUT()` --calls--> `cleanInvoiceInput`  [EXTRACTED]
+  app/api/admin/invoices/[id]/route.ts → src/server/invoices.ts
 
 ## Import Cycles
 - None detected.
@@ -1025,7 +1025,7 @@ Nodes (3): white, $type, $value
   public/shajgoj.bd final.png · relation: conceptually_related_to
 
 ## Knowledge Gaps
-- **974 isolated node(s):** `Params`, `Ctx`, `SORTS`, `name`, `private` (+969 more)
+- **974 isolated node(s):** `Row`, `ListResponse`, `STATUS_TABS`, `SORTS`, `include` (+969 more)
   These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1526 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **113 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -1041,8 +1041,8 @@ _Questions this graph is uniquely positioned to answer:_
 - **What is the exact relationship between `Droplet & Sparkle Emblem (gold #C59B6D)` and `Pink/Gold Offset Ring Emblem (pink upper arc, gold lower arc forming an S-like ring)`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
 - **Why does `next` connect `next` to `connectDB`, `react`, `site-data.ts`, `api`, `session.ts`, `marketplace.ts`, `package.json`, `server/db/connection.ts`, `blog/page.tsx`, `getProductPageData`, `product/[slug]/page.tsx`, `app/layout.tsx`, `Header.tsx`, `serverError`, `brand/[slug]/page.tsx`, `auth/permissions.ts`, `uploads.ts`, `VendorDashboardClient.tsx`, `account/page.tsx`, `activity.ts`, `ProductListing.tsx`, `requirePermission`, `DesktopMegaMenu.tsx`, `products/page.tsx`, `auth/[slug]/page.tsx`, `(store)/page.tsx`, `useCartStore`, `lib/storefront.ts`, `uploads/route.ts`, `invoices.ts`, `activity-client.ts`?**
-  _High betweenness centrality (0.062) - this node is a cross-community bridge._
+  _High betweenness centrality (0.082) - this node is a cross-community bridge._
 - **Why does `react` connect `react` to `cn`, `site-data.ts`, `sidebar.tsx`, `api`, `package.json`, `carousel.tsx`, `scroll-area.tsx`, `select.tsx`, `product/[slug]/page.tsx`, `utils.ts`, `Header.tsx`, `InvoicesModule.tsx`, `OrderManagementModule.tsx`, `shared.tsx`, `charts.tsx`, `command.tsx`, `class-variance-authority`, `VendorDashboardClient.tsx`, `account/page.tsx`, `RolesModule.tsx`, `form.tsx`, `SeoPanel.tsx`, `MultiVendorModule.tsx`, `ProductListing.tsx`, `chart.tsx`, `DesktopMegaMenu.tsx`, `auth/[slug]/page.tsx`, `(store)/page.tsx`, `navigation-menu.tsx`, `invoice.ts`, `useCartStore`, `drawer.tsx`, `activity-client.ts`?**
-  _High betweenness centrality (0.053) - this node is a cross-community bridge._
+  _High betweenness centrality (0.057) - this node is a cross-community bridge._
 - **Why does `mongoose` connect `mongoose` to `invoice.model.ts`, `marketplace.ts`, `package.json`, `next`, `server/db/connection.ts`, `backend/db/models/review.model.ts`, `backend/db/models/homepage-section.model.ts`, `serverError`, `types/index.ts`, `migrate-images-to-cloudinary.mjs`, `backend/db/models/index.ts`, `backend/db/models/analytics.model.ts`, `backend/db/models/category.model.ts`, `server/db/models/payment.model.ts`, `auth/permissions.ts`, `backend/db/models/order.model.ts`, `activity.ts`, `requirePermission`, `backend/db/models/cart.model.ts`, `backend/db/models/wishlist.model.ts`, `backend/db/models/product.model.ts`, `update-passwords.mjs`, `backend/db/models/notification.model.ts`, `seed-catalog.mjs`, `uploads/route.ts`?**
-  _High betweenness centrality (0.035) - this node is a cross-community bridge._
+  _High betweenness centrality (0.048) - this node is a cross-community bridge._

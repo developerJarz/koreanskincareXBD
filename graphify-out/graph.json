@@ -37098,7 +37098,7 @@
       "file_type": "code",
       "norm_label": "compileroptions",
       "source_file": "tsconfig.json",
-      "source_location": "L29"
+      "source_location": "L30"
     },
     {
       "id": "tsconfig_compileroptions_allowimportingtsextensions",
@@ -37109,7 +37109,7 @@
       "file_type": "code",
       "norm_label": "allowimportingtsextensions",
       "source_file": "tsconfig.json",
-      "source_location": "L37"
+      "source_location": "L45"
     },
     {
       "id": "tsconfig_compileroptions_allowjs",
@@ -37120,7 +37120,7 @@
       "file_type": "code",
       "norm_label": "allowjs",
       "source_file": "tsconfig.json",
-      "source_location": "L50"
+      "source_location": "L60"
     },
     {
       "id": "tsconfig_compileroptions_esmoduleinterop",
@@ -37131,7 +37131,7 @@
       "file_type": "code",
       "norm_label": "esmoduleinterop",
       "source_file": "tsconfig.json",
-      "source_location": "L52"
+      "source_location": "L62"
     },
     {
       "id": "tsconfig_compileroptions_incremental",
@@ -37142,7 +37142,7 @@
       "file_type": "code",
       "norm_label": "incremental",
       "source_file": "tsconfig.json",
-      "source_location": "L51"
+      "source_location": "L61"
     },
     {
       "id": "tsconfig_compileroptions_isolatedmodules",
@@ -37153,7 +37153,7 @@
       "file_type": "code",
       "norm_label": "isolatedmodules",
       "source_file": "tsconfig.json",
-      "source_location": "L54"
+      "source_location": "L64"
     },
     {
       "id": "tsconfig_compileroptions_jsx",
@@ -37164,7 +37164,7 @@
       "file_type": "code",
       "norm_label": "jsx",
       "source_file": "tsconfig.json",
-      "source_location": "L31"
+      "source_location": "L32"
     },
     {
       "id": "tsconfig_compileroptions_lib",
@@ -37175,7 +37175,7 @@
       "file_type": "code",
       "norm_label": "lib",
       "source_file": "tsconfig.json",
-      "source_location": "L33"
+      "source_location": "L34"
     },
     {
       "id": "tsconfig_compileroptions_module",
@@ -37186,7 +37186,7 @@
       "file_type": "code",
       "norm_label": "module",
       "source_file": "tsconfig.json",
-      "source_location": "L32"
+      "source_location": "L33"
     },
     {
       "id": "tsconfig_compileroptions_moduleresolution",
@@ -37197,7 +37197,7 @@
       "file_type": "code",
       "norm_label": "moduleresolution",
       "source_file": "tsconfig.json",
-      "source_location": "L36"
+      "source_location": "L44"
     },
     {
       "id": "tsconfig_compileroptions_noemit",
@@ -37208,7 +37208,7 @@
       "file_type": "code",
       "norm_label": "noemit",
       "source_file": "tsconfig.json",
-      "source_location": "L39"
+      "source_location": "L47"
     },
     {
       "id": "tsconfig_compileroptions_nofallthroughcasesinswitch",
@@ -37219,7 +37219,7 @@
       "file_type": "code",
       "norm_label": "nofallthroughcasesinswitch",
       "source_file": "tsconfig.json",
-      "source_location": "L45"
+      "source_location": "L53"
     },
     {
       "id": "tsconfig_compileroptions_nouncheckedsideeffectimports",
@@ -37230,7 +37230,7 @@
       "file_type": "code",
       "norm_label": "nouncheckedsideeffectimports",
       "source_file": "tsconfig.json",
-      "source_location": "L46"
+      "source_location": "L54"
     },
     {
       "id": "tsconfig_compileroptions_nounusedlocals",
@@ -37241,7 +37241,7 @@
       "file_type": "code",
       "norm_label": "nounusedlocals",
       "source_file": "tsconfig.json",
-      "source_location": "L43"
+      "source_location": "L51"
     },
     {
       "id": "tsconfig_compileroptions_nounusedparameters",
@@ -37252,7 +37252,7 @@
       "file_type": "code",
       "norm_label": "nounusedparameters",
       "source_file": "tsconfig.json",
-      "source_location": "L44"
+      "source_location": "L52"
     },
     {
       "id": "tsconfig_compileroptions_paths",
@@ -37263,7 +37263,7 @@
       "file_type": "code",
       "norm_label": "paths",
       "source_file": "tsconfig.json",
-      "source_location": "L47"
+      "source_location": "L55"
     },
     {
       "id": "tsconfig_compileroptions_plugins",
@@ -37274,7 +37274,7 @@
       "file_type": "code",
       "norm_label": "plugins",
       "source_file": "tsconfig.json",
-      "source_location": "L55"
+      "source_location": "L65"
     },
     {
       "id": "tsconfig_compileroptions_resolvejsonmodule",
@@ -37285,7 +37285,7 @@
       "file_type": "code",
       "norm_label": "resolvejsonmodule",
       "source_file": "tsconfig.json",
-      "source_location": "L53"
+      "source_location": "L63"
     },
     {
       "id": "tsconfig_compileroptions_skiplibcheck",
@@ -37296,7 +37296,7 @@
       "file_type": "code",
       "norm_label": "skiplibcheck",
       "source_file": "tsconfig.json",
-      "source_location": "L41"
+      "source_location": "L49"
     },
     {
       "id": "tsconfig_compileroptions_strict",
@@ -37307,7 +37307,7 @@
       "file_type": "code",
       "norm_label": "strict",
       "source_file": "tsconfig.json",
-      "source_location": "L42"
+      "source_location": "L50"
     },
     {
       "id": "tsconfig_compileroptions_target",
@@ -37318,7 +37318,7 @@
       "file_type": "code",
       "norm_label": "target",
       "source_file": "tsconfig.json",
-      "source_location": "L30"
+      "source_location": "L31"
     },
     {
       "id": "tsconfig_compileroptions_types",
@@ -37329,7 +37329,7 @@
       "file_type": "code",
       "norm_label": "types",
       "source_file": "tsconfig.json",
-      "source_location": "L34"
+      "source_location": "L39"
     },
     {
       "id": "tsconfig_compileroptions_verbatimmodulesyntax",
@@ -37340,7 +37340,7 @@
       "file_type": "code",
       "norm_label": "verbatimmodulesyntax",
       "source_file": "tsconfig.json",
-      "source_location": "L38"
+      "source_location": "L46"
     },
     {
       "id": "tsconfig_exclude",
@@ -37351,7 +37351,7 @@
       "file_type": "code",
       "norm_label": "exclude",
       "source_file": "tsconfig.json",
-      "source_location": "L19"
+      "source_location": "L20"
     },
     {
       "id": "tsconfig_include",
@@ -68668,7 +68668,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/admin/catalog/ProductManagerModule.tsx",
-      "source_location": "L552",
+      "source_location": "L554",
       "weight": 1.0
     },
     {
@@ -68680,7 +68680,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/admin/catalog/ProductManagerModule.tsx",
-      "source_location": "L555",
+      "source_location": "L557",
       "weight": 1.0
     },
     {
@@ -68692,7 +68692,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/admin/catalog/ProductManagerModule.tsx",
-      "source_location": "L581",
+      "source_location": "L583",
       "weight": 1.0
     },
     {
@@ -68704,7 +68704,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/admin/catalog/ProductManagerModule.tsx",
-      "source_location": "L699",
+      "source_location": "L701",
       "weight": 1.0
     },
     {
@@ -154095,17 +154095,6 @@
     },
     {
       "source": "tsconfig",
-      "target": "tsconfig_exclude",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tsconfig.json",
-      "source_location": "L19",
-      "weight": 1.0
-    },
-    {
-      "source": "tsconfig",
       "target": "tsconfig_include",
       "relation": "contains",
       "_origin": "ast",
@@ -154117,18 +154106,18 @@
     },
     {
       "source": "tsconfig",
-      "target": "tsconfig_compileroptions",
+      "target": "tsconfig_exclude",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tsconfig.json",
-      "source_location": "L29",
+      "source_location": "L20",
       "weight": 1.0
     },
     {
-      "source": "tsconfig_compileroptions",
-      "target": "tsconfig_compileroptions_target",
+      "source": "tsconfig",
+      "target": "tsconfig_compileroptions",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -154139,7 +154128,7 @@
     },
     {
       "source": "tsconfig_compileroptions",
-      "target": "tsconfig_compileroptions_jsx",
+      "target": "tsconfig_compileroptions_target",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -154150,7 +154139,7 @@
     },
     {
       "source": "tsconfig_compileroptions",
-      "target": "tsconfig_compileroptions_module",
+      "target": "tsconfig_compileroptions_jsx",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -154161,7 +154150,7 @@
     },
     {
       "source": "tsconfig_compileroptions",
-      "target": "tsconfig_compileroptions_lib",
+      "target": "tsconfig_compileroptions_module",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -154172,7 +154161,7 @@
     },
     {
       "source": "tsconfig_compileroptions",
-      "target": "tsconfig_compileroptions_types",
+      "target": "tsconfig_compileroptions_lib",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -154183,40 +154172,7 @@
     },
     {
       "source": "tsconfig_compileroptions",
-      "target": "tsconfig_compileroptions_moduleresolution",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tsconfig.json",
-      "source_location": "L36",
-      "weight": 1.0
-    },
-    {
-      "source": "tsconfig_compileroptions",
-      "target": "tsconfig_compileroptions_allowimportingtsextensions",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tsconfig.json",
-      "source_location": "L37",
-      "weight": 1.0
-    },
-    {
-      "source": "tsconfig_compileroptions",
-      "target": "tsconfig_compileroptions_verbatimmodulesyntax",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tsconfig.json",
-      "source_location": "L38",
-      "weight": 1.0
-    },
-    {
-      "source": "tsconfig_compileroptions",
-      "target": "tsconfig_compileroptions_noemit",
+      "target": "tsconfig_compileroptions_types",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -154227,40 +154183,7 @@
     },
     {
       "source": "tsconfig_compileroptions",
-      "target": "tsconfig_compileroptions_skiplibcheck",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tsconfig.json",
-      "source_location": "L41",
-      "weight": 1.0
-    },
-    {
-      "source": "tsconfig_compileroptions",
-      "target": "tsconfig_compileroptions_strict",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tsconfig.json",
-      "source_location": "L42",
-      "weight": 1.0
-    },
-    {
-      "source": "tsconfig_compileroptions",
-      "target": "tsconfig_compileroptions_nounusedlocals",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tsconfig.json",
-      "source_location": "L43",
-      "weight": 1.0
-    },
-    {
-      "source": "tsconfig_compileroptions",
-      "target": "tsconfig_compileroptions_nounusedparameters",
+      "target": "tsconfig_compileroptions_moduleresolution",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -154271,7 +154194,7 @@
     },
     {
       "source": "tsconfig_compileroptions",
-      "target": "tsconfig_compileroptions_nofallthroughcasesinswitch",
+      "target": "tsconfig_compileroptions_allowimportingtsextensions",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -154282,7 +154205,7 @@
     },
     {
       "source": "tsconfig_compileroptions",
-      "target": "tsconfig_compileroptions_nouncheckedsideeffectimports",
+      "target": "tsconfig_compileroptions_verbatimmodulesyntax",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -154293,7 +154216,7 @@
     },
     {
       "source": "tsconfig_compileroptions",
-      "target": "tsconfig_compileroptions_paths",
+      "target": "tsconfig_compileroptions_noemit",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -154304,7 +154227,18 @@
     },
     {
       "source": "tsconfig_compileroptions",
-      "target": "tsconfig_compileroptions_allowjs",
+      "target": "tsconfig_compileroptions_skiplibcheck",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tsconfig.json",
+      "source_location": "L49",
+      "weight": 1.0
+    },
+    {
+      "source": "tsconfig_compileroptions",
+      "target": "tsconfig_compileroptions_strict",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -154315,7 +154249,7 @@
     },
     {
       "source": "tsconfig_compileroptions",
-      "target": "tsconfig_compileroptions_incremental",
+      "target": "tsconfig_compileroptions_nounusedlocals",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -154326,7 +154260,7 @@
     },
     {
       "source": "tsconfig_compileroptions",
-      "target": "tsconfig_compileroptions_esmoduleinterop",
+      "target": "tsconfig_compileroptions_nounusedparameters",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -154337,7 +154271,7 @@
     },
     {
       "source": "tsconfig_compileroptions",
-      "target": "tsconfig_compileroptions_resolvejsonmodule",
+      "target": "tsconfig_compileroptions_nofallthroughcasesinswitch",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -154348,7 +154282,7 @@
     },
     {
       "source": "tsconfig_compileroptions",
-      "target": "tsconfig_compileroptions_isolatedmodules",
+      "target": "tsconfig_compileroptions_nouncheckedsideeffectimports",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -154359,13 +154293,79 @@
     },
     {
       "source": "tsconfig_compileroptions",
-      "target": "tsconfig_compileroptions_plugins",
+      "target": "tsconfig_compileroptions_paths",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tsconfig.json",
       "source_location": "L55",
+      "weight": 1.0
+    },
+    {
+      "source": "tsconfig_compileroptions",
+      "target": "tsconfig_compileroptions_allowjs",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tsconfig.json",
+      "source_location": "L60",
+      "weight": 1.0
+    },
+    {
+      "source": "tsconfig_compileroptions",
+      "target": "tsconfig_compileroptions_incremental",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tsconfig.json",
+      "source_location": "L61",
+      "weight": 1.0
+    },
+    {
+      "source": "tsconfig_compileroptions",
+      "target": "tsconfig_compileroptions_esmoduleinterop",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tsconfig.json",
+      "source_location": "L62",
+      "weight": 1.0
+    },
+    {
+      "source": "tsconfig_compileroptions",
+      "target": "tsconfig_compileroptions_resolvejsonmodule",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tsconfig.json",
+      "source_location": "L63",
+      "weight": 1.0
+    },
+    {
+      "source": "tsconfig_compileroptions",
+      "target": "tsconfig_compileroptions_isolatedmodules",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tsconfig.json",
+      "source_location": "L64",
+      "weight": 1.0
+    },
+    {
+      "source": "tsconfig_compileroptions",
+      "target": "tsconfig_compileroptions_plugins",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tsconfig.json",
+      "source_location": "L65",
       "weight": 1.0
     },
     {
@@ -167447,5 +167447,5 @@
       "source_file": ".agents/skills/ui-styling/references/shadcn-theming.md"
     }
   ],
-  "built_at_commit": "778e50becac4f0ee1112eb14b8f101d09df4283b"
+  "built_at_commit": "0ecb25c675d4bf5c13a3119d94f558384237eb94"
 }

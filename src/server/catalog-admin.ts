@@ -223,7 +223,7 @@ export async function validateProduct(
       seoTitle: cleanString(raw?.seoTitle, 120) ?? "",
       seoDescription: cleanString(raw?.seoDescription, 320) ?? "",
       seoKeywords: cleanList(raw?.seoKeywords, 20, 60),
-      focusKeyword: cleanString(raw?.focusKeyword, 100)?.replace(/s+/g, " ") ?? "",
+      focusKeyword: cleanString(raw?.focusKeyword, 100)?.replace(/\s+/g, " ") ?? "",
       canonicalUrl,
     },
   };

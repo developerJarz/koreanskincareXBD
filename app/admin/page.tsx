@@ -49,18 +49,32 @@ export default async function AdminPage() {
         })
       : zero,
     can("vendors.view")
-      ? Product.countDocuments({ vendor: { $ne: null }, approvalStatus: "pending", status: { $ne: "archived" } })
+      ? Product.countDocuments({
+          vendor: { $ne: null },
+          approvalStatus: "pending",
+          status: { $ne: "archived" },
+        })
       : zero,
     can("vendors.view") ? Vendor.countDocuments({ status: "pending" }) : zero,
     can("reviews.manage") ? Review.countDocuments({ status: "pending" }) : zero,
     can("returns.manage")
-      ? Order.countDocuments({ status: "returned", paymentStatus: { $nin: ["refunded", "partially_refunded"] } })
+      ? Order.countDocuments({
+          status: "returned",
+          paymentStatus: { $nin: ["refunded", "partially_refunded"] },
+        })
       : zero,
     can("invoices.view")
-      ? Invoice.countDocuments({ status: { $in: ["issued", "partially_paid"] }, dueDate: { $lt: now } })
+      ? Invoice.countDocuments({
+          status: { $in: ["issued", "partially_paid"] },
+          dueDate: { $lt: now },
+        })
       : zero,
-    can("vendors.view") ? Category.find().select("name").sort({ name: 1 }).lean() : Promise.resolve([]),
-    can("settings.manage") ? Settings.findOne().select("siteDescription shipping").lean() : Promise.resolve(null),
+    can("vendors.view")
+      ? Category.find().select("name").sort({ name: 1 }).lean()
+      : Promise.resolve([]),
+    can("settings.manage")
+      ? Settings.findOne().select("siteDescription shipping").lean()
+      : Promise.resolve(null),
   ]);
 
   const counts: AdminCounts = {

@@ -277,7 +277,9 @@ export function GlobalCommandPalette({
                       onMouseEnter={() => setActive(i)}
                       onClick={() => choose(i)}
                       className={`group flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-left transition-colors ${
-                        isSelected ? "bg-secondary text-foreground" : "hover:bg-secondary/60 text-muted-foreground"
+                        isSelected
+                          ? "bg-secondary text-foreground"
+                          : "hover:bg-secondary/60 text-muted-foreground"
                       }`}
                     >
                       <span className="flex min-w-0 items-center gap-2.5">
@@ -316,7 +318,9 @@ export function GlobalCommandPalette({
                       onMouseEnter={() => setActive(index)}
                       onClick={() => choose(index)}
                       className={`group flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-left transition-colors ${
-                        isSelected ? "bg-secondary text-foreground" : "hover:bg-secondary/60 text-muted-foreground"
+                        isSelected
+                          ? "bg-secondary text-foreground"
+                          : "hover:bg-secondary/60 text-muted-foreground"
                       }`}
                     >
                       <span className="flex min-w-0 items-center gap-2.5">

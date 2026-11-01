@@ -15,7 +15,8 @@ import { shippingCostFor } from "@/lib/checkout";
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, getSubtotal, couponCode, couponDiscount, clearCart, removeCoupon } = useCartStore();
+  const { items, getSubtotal, couponCode, couponDiscount, clearCart, removeCoupon } =
+    useCartStore();
   const { user } = useAuthStore();
   const [mounted, setMounted] = useState(false);
 
@@ -183,7 +184,10 @@ export default function CheckoutPage() {
         </h1>
       </div>
 
-      <form onSubmit={handleSubmitOrder} className="w-full max-w-full min-w-0 grid lg:grid-cols-3 gap-6 lg:gap-10 items-start">
+      <form
+        onSubmit={handleSubmitOrder}
+        className="w-full max-w-full min-w-0 grid lg:grid-cols-3 gap-6 lg:gap-10 items-start"
+      >
         <div className="lg:col-span-2 space-y-6 lg:space-y-8 min-w-0 w-full">
           {/* Step 1: Contact */}
           <div className="bg-card p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl border border-border space-y-4 shadow-sm min-w-0">
@@ -403,12 +407,16 @@ export default function CheckoutPage() {
             {couponDiscount > 0 && (
               <div className="flex justify-between items-center gap-2 min-w-0 text-primary font-medium">
                 <span className="truncate">Coupon ({couponCode})</span>
-                <span className="font-sans font-bold shrink-0 tabular-nums">-৳{couponDiscount.toLocaleString()}</span>
+                <span className="font-sans font-bold shrink-0 tabular-nums">
+                  -৳{couponDiscount.toLocaleString()}
+                </span>
               </div>
             )}
 
             <div className="flex justify-between items-center gap-2 min-w-0 text-muted-foreground">
-              <span className="truncate">Shipping ({isDhaka ? "Inside Dhaka" : "Outside Dhaka"})</span>
+              <span className="truncate">
+                Shipping ({isDhaka ? "Inside Dhaka" : "Outside Dhaka"})
+              </span>
               <span className="font-sans font-medium text-foreground shrink-0 tabular-nums">
                 {shippingCost === 0 ? "FREE" : `৳${shippingCost}`}
               </span>
@@ -416,7 +424,9 @@ export default function CheckoutPage() {
 
             <div className="flex justify-between items-center gap-2 min-w-0 text-base sm:text-lg font-bold border-t border-border pt-3">
               <span>Total Payable</span>
-              <span className="font-sans font-bold text-primary shrink-0 tabular-nums">৳{total.toLocaleString()}</span>
+              <span className="font-sans font-bold text-primary shrink-0 tabular-nums">
+                ৳{total.toLocaleString()}
+              </span>
             </div>
           </div>
 
@@ -425,7 +435,9 @@ export default function CheckoutPage() {
             disabled={loading}
             className="w-full py-3.5 sm:py-4 px-4 rounded-full bg-primary text-primary-foreground font-medium text-sm sm:text-base hover:opacity-90 transition shadow-lg shadow-primary/20 flex items-center justify-center gap-2 disabled:opacity-50 min-w-0"
           >
-            <span className="truncate">{loading ? "Processing Order..." : `Place Order — ৳${total.toLocaleString()}`}</span>
+            <span className="truncate">
+              {loading ? "Processing Order..." : `Place Order — ৳${total.toLocaleString()}`}
+            </span>
             {!loading && <ArrowRight className="w-4 h-4 shrink-0" />}
           </button>
 

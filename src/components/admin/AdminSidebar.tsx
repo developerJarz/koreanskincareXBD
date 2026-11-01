@@ -157,7 +157,9 @@ export function AdminSidebar({
                         >
                           <Icon
                             className={`h-4 w-4 shrink-0 transition-colors ${
-                              isActive ? "text-rose" : "text-sidebar-muted group-hover:text-sidebar-foreground"
+                              isActive
+                                ? "text-rose"
+                                : "text-sidebar-muted group-hover:text-sidebar-foreground"
                             }`}
                             aria-hidden="true"
                           />

@@ -329,7 +329,8 @@ export function OverviewModule({
           </div>
 
           <p className="mt-3.5 text-[10px] sm:text-[11px] text-muted-foreground/80">
-            Revenue excludes cancelled and refunded orders. Resets automatically at 00:00 Dhaka time.
+            Revenue excludes cancelled and refunded orders. Resets automatically at 00:00 Dhaka
+            time.
           </p>
         </div>
       </section>
@@ -362,11 +363,7 @@ export function OverviewModule({
             <StatTile
               label="Visitor Conversion"
               value={m.totals.conversionRate == null ? "—" : fmtPercent(m.totals.conversionRate)}
-              hint={
-                m.totals.visitors
-                  ? `${fmtNumber(m.totals.visitors)} visits`
-                  : "Needs activity"
-              }
+              hint={m.totals.visitors ? `${fmtNumber(m.totals.visitors)} visits` : "Needs activity"}
               icon={Users}
             />
           </div>
@@ -451,14 +448,18 @@ export function OverviewModule({
                 <div>
                   <span className="text-muted-foreground block text-[11px]">30-Day Period</span>
                   <span className="font-semibold text-foreground text-sm tabular-nums">
-                    {chartMetric === "revenue" ? fmtTaka(m.totals.revenue) : `${fmtNumber(m.totals.orders)} orders`}
+                    {chartMetric === "revenue"
+                      ? fmtTaka(m.totals.revenue)
+                      : `${fmtNumber(m.totals.orders)} orders`}
                   </span>
                 </div>
                 {peakDayStat && (
                   <div>
                     <span className="text-muted-foreground block text-[11px]">Peak Day</span>
                     <span className="font-semibold text-emerald-600 dark:text-emerald-400 text-sm tabular-nums">
-                      {chartMetric === "revenue" ? fmtTaka(peakDayStat.revenue) : `${peakDayStat.orders} orders`}
+                      {chartMetric === "revenue"
+                        ? fmtTaka(peakDayStat.revenue)
+                        : `${peakDayStat.orders} orders`}
                     </span>
                   </div>
                 )}
@@ -534,9 +535,7 @@ export function OverviewModule({
                             >
                               {i + 1}
                             </span>
-                            <span className="truncate font-medium text-foreground">
-                              {p.name}
-                            </span>
+                            <span className="truncate font-medium text-foreground">{p.name}</span>
                           </div>
                           <span className="shrink-0 font-semibold tabular-nums text-foreground">
                             {fmtTaka(p.revenue)}{" "}
@@ -600,7 +599,9 @@ export function OverviewModule({
                         <div className="flex items-center justify-between gap-2">
                           <span className="font-medium text-foreground truncate">{d.name}</span>
                           <span className="shrink-0 tabular-nums text-muted-foreground">
-                            <span className="font-semibold text-foreground">{fmtTaka(d.revenue)}</span>
+                            <span className="font-semibold text-foreground">
+                              {fmtTaka(d.revenue)}
+                            </span>
                             {" · "}
                             {d.orders} orders
                           </span>
@@ -647,7 +648,10 @@ export function OverviewModule({
                 <div className="space-y-3 pt-1">
                   {m.byPayment.map((p) => {
                     const totalRevenue = m.totals.revenue || 1;
-                    const percent = Math.min(100, Math.round(((p.revenue || 0) / totalRevenue) * 100));
+                    const percent = Math.min(
+                      100,
+                      Math.round(((p.revenue || 0) / totalRevenue) * 100),
+                    );
                     return (
                       <div key={p.name} className="space-y-1 text-xs">
                         <div className="flex items-center justify-between gap-2">
@@ -655,7 +659,9 @@ export function OverviewModule({
                             {p.name.replace(/_/g, " ")}
                           </span>
                           <span className="shrink-0 tabular-nums text-muted-foreground">
-                            <span className="font-semibold text-foreground">{fmtTaka(p.revenue)}</span>
+                            <span className="font-semibold text-foreground">
+                              {fmtTaka(p.revenue)}
+                            </span>
                             {" · "}
                             {p.orders} orders ({percent}%)
                           </span>
@@ -695,11 +701,12 @@ export function OverviewModule({
           <div className="overflow-x-auto">
             <ul className="divide-y divide-border/60 text-xs min-w-0">
               {orders.data.items.map((o) => {
-                const statusMeta =
-                  ORDER_STATUS_CONFIG[o.status as keyof typeof ORDER_STATUS_CONFIG] || {
-                    label: o.status,
-                    color: "#888888",
-                  };
+                const statusMeta = ORDER_STATUS_CONFIG[
+                  o.status as keyof typeof ORDER_STATUS_CONFIG
+                ] || {
+                  label: o.status,
+                  color: "#888888",
+                };
                 const initials = (o.shippingAddress?.fullName || "Guest")
                   .trim()
                   .slice(0, 2)
@@ -725,7 +732,8 @@ export function OverviewModule({
                           </span>
                         </div>
                         <p className="text-[11px] text-muted-foreground truncate">
-                          {o.shippingAddress?.district || "Dhaka"} · {o.paymentMethod?.toUpperCase()}
+                          {o.shippingAddress?.district || "Dhaka"} ·{" "}
+                          {o.paymentMethod?.toUpperCase()}
                         </p>
                       </div>
                     </div>

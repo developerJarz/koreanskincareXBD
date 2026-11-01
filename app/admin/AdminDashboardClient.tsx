@@ -83,7 +83,9 @@ const CmsBlogSeoModule = load(() =>
   import("@/components/admin/CmsBlogSeoModule").then((m) => m.CmsBlogSeoModule),
 );
 const ReviewsAbandonedCartsModule = load(() =>
-  import("@/components/admin/ReviewsAbandonedCartsModule").then((m) => m.ReviewsAbandonedCartsModule),
+  import("@/components/admin/ReviewsAbandonedCartsModule").then(
+    (m) => m.ReviewsAbandonedCartsModule,
+  ),
 );
 const MediaLibraryModule = load(() =>
   import("@/components/admin/MediaLibraryModule").then((m) => m.MediaLibraryModule),
@@ -97,9 +99,7 @@ const StorefrontModule = load(() =>
 const ActivityModule = load(() =>
   import("@/components/admin/ActivityModule").then((m) => m.ActivityModule),
 );
-const RolesModule = load(() =>
-  import("@/components/admin/RolesModule").then((m) => m.RolesModule),
-);
+const RolesModule = load(() => import("@/components/admin/RolesModule").then((m) => m.RolesModule));
 
 export type AdminCounts = {
   pendingOrders: number;
@@ -437,7 +437,9 @@ export default function AdminDashboardClient({
                 />
               )}
               {activeTab === "products" && <ProductManagerModule />}
-              {activeTab === "brands" && <BrandManagerModule canManage={can("catalog.structure")} />}
+              {activeTab === "brands" && (
+                <BrandManagerModule canManage={can("catalog.structure")} />
+              )}
               {activeTab === "categories" && (
                 <CategoryManagerModule canManage={can("catalog.structure")} />
               )}
@@ -449,10 +451,7 @@ export default function AdminDashboardClient({
                 />
               )}
               {activeTab === "vendors" && (
-                <MultiVendorModule
-                  categories={categories}
-                  canManage={can("vendors.manage")}
-                />
+                <MultiVendorModule categories={categories} canManage={can("vendors.manage")} />
               )}
               {activeTab === "returns" && <ReturnsRefundsModule />}
               {activeTab === "couriers_payments" && <CouriersPaymentsModule />}
@@ -470,10 +469,7 @@ export default function AdminDashboardClient({
               {activeTab === "activity" && <ActivityModule />}
               {activeTab === "roles" && <RolesModule />}
               {activeTab === "settings" && settings && (
-                <StoreSettings
-                  initial={settings}
-                  onOpenDesign={() => setActiveTab("storefront")}
-                />
+                <StoreSettings initial={settings} onOpenDesign={() => setActiveTab("storefront")} />
               )}
             </div>
           </main>
@@ -561,7 +557,10 @@ function StoreSettings({
 
       <form onSubmit={save} className="space-y-4 text-sm">
         <div>
-          <label htmlFor="site-description" className="mb-1 block text-xs font-semibold text-foreground">
+          <label
+            htmlFor="site-description"
+            className="mb-1 block text-xs font-semibold text-foreground"
+          >
             Store description (shown to Google and when links are shared)
           </label>
           <textarea
@@ -585,7 +584,10 @@ function StoreSettings({
               ["free", "Free delivery from (৳)", freeShippingThreshold, setFreeShippingThreshold],
             ].map(([id, label, value, set]) => (
               <div key={id as string}>
-                <label htmlFor={`ship-${id}`} className="mb-1 block text-xs font-medium text-foreground">
+                <label
+                  htmlFor={`ship-${id}`}
+                  className="mb-1 block text-xs font-medium text-foreground"
+                >
                   {label as string}
                 </label>
                 <input
@@ -686,7 +688,10 @@ function ChangePasswordModal({ userId, onClose }: { userId: string; onClose: () 
 
         <form onSubmit={submit} className="space-y-3.5 text-sm">
           <div>
-            <label htmlFor="pw-current" className="mb-1 block text-xs font-semibold text-foreground">
+            <label
+              htmlFor="pw-current"
+              className="mb-1 block text-xs font-semibold text-foreground"
+            >
               Current password
             </label>
             <div className="relative">
@@ -736,7 +741,9 @@ function ChangePasswordModal({ userId, onClose }: { userId: string; onClose: () 
             {next && (
               <p
                 className={`mt-1 text-[11px] font-medium ${
-                  next.length >= 10 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
+                  next.length >= 10
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : "text-rose-600 dark:text-rose-400"
                 }`}
               >
                 {strength} · use 3 of: lowercase, uppercase, number, symbol
@@ -745,7 +752,10 @@ function ChangePasswordModal({ userId, onClose }: { userId: string; onClose: () 
           </div>
 
           <div>
-            <label htmlFor="pw-confirm" className="mb-1 block text-xs font-semibold text-foreground">
+            <label
+              htmlFor="pw-confirm"
+              className="mb-1 block text-xs font-semibold text-foreground"
+            >
               Confirm new password
             </label>
             <input

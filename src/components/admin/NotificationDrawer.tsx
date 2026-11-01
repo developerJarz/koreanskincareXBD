@@ -27,9 +27,18 @@ interface NotificationDrawerProps {
 
 const ICONS: Record<AdminNotification["type"], { icon: React.ElementType; color: string }> = {
   order: { icon: ShoppingBag, color: "bg-primary/12 text-primary border-primary/20" },
-  inventory: { icon: AlertTriangle, color: "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/20" },
-  refund: { icon: RotateCcw, color: "bg-rose-500/12 text-rose-700 dark:text-rose-400 border-rose-500/20" },
-  security: { icon: ShieldAlert, color: "bg-purple-500/12 text-purple-700 dark:text-purple-400 border-purple-500/20" },
+  inventory: {
+    icon: AlertTriangle,
+    color: "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/20",
+  },
+  refund: {
+    icon: RotateCcw,
+    color: "bg-rose-500/12 text-rose-700 dark:text-rose-400 border-rose-500/20",
+  },
+  security: {
+    icon: ShieldAlert,
+    color: "bg-purple-500/12 text-purple-700 dark:text-purple-400 border-purple-500/20",
+  },
   system: { icon: Bell, color: "bg-sky-500/12 text-sky-700 dark:text-sky-400 border-sky-500/20" },
 };
 
@@ -156,9 +165,7 @@ export function NotificationDrawer({
                       {n.title}
                     </p>
                   </div>
-                  <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">
-                    {n.message}
-                  </p>
+                  <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">{n.message}</p>
                   <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
                     <span>{fmtRelative(n.at)}</span>
                     <span className="inline-flex items-center gap-1 font-semibold text-primary opacity-0 transition-opacity group-hover:opacity-100">

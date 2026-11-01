@@ -70,7 +70,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     // differences on these two tags — mismatches anywhere inside the page are still reported.
     <html lang="en" className={`${serif.variable} ${sans.variable}`} suppressHydrationWarning>
       <head>
-        <meta name="google-site-verification" content="zckOEbhGrzJuooeHnt9PFadiWMj73gER5O7NABQm0zQ" />
+        <meta
+          name="google-site-verification"
+          content="zckOEbhGrzJuooeHnt9PFadiWMj73gER5O7NABQm0zQ"
+        />
 
         {/* Google tag (gtag.js) */}
         <Script

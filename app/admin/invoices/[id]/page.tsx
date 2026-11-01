@@ -44,7 +44,11 @@ export default async function InvoicePrintPage({
         @page { size: ${PAGE_SIZE[template.paperSize] ?? "A4"}; margin: ${template.paperSize === "80mm" ? "4mm" : "10mm"}; }
         @media print { html, body { background: #fff !important; } .no-print { display: none !important; } .invoice-sheet { box-shadow: none !important; } }
       `}</style>
-      <PrintToolbar invoiceNumber={invoice.invoiceNumber} autoPrint={autoPrint} paperSize={template.paperSize} />
+      <PrintToolbar
+        invoiceNumber={invoice.invoiceNumber}
+        autoPrint={autoPrint}
+        paperSize={template.paperSize}
+      />
       <div
         className="invoice-sheet mx-auto bg-white shadow-xl print:shadow-none"
         style={{ maxWidth: template.paperSize === "80mm" ? 340 : 860 }}

@@ -22,7 +22,7 @@ export default async function StoreLayout({ children }: Readonly<{ children: Rea
         <AnnouncementBar messages={storefront.announcement.messages} />
       )}
       <Header nav={nav} branding={storefront.branding} />
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 min-w-0 w-full">{children}</main>
       <Footer config={storefront} />
       {/* Room for the phone tab bar so it never covers the end of the page */}
       <div className="h-[calc(3.75rem+env(safe-area-inset-bottom))] lg:hidden" aria-hidden="true" />

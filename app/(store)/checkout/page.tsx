@@ -173,27 +173,29 @@ export default function CheckoutPage() {
   }
 
   return (
-    <section className="container-x py-10 lg:py-16">
-      <div className="text-center mb-10">
+    <section className="container-x py-8 sm:py-10 lg:py-16 w-full max-w-full overflow-x-hidden">
+      <div className="text-center mb-8 sm:mb-10 max-w-xl mx-auto px-2">
         <p className="text-xs uppercase tracking-[0.2em] text-primary font-semibold">
           Order Checkout
         </p>
-        <h1 className="font-serif text-4xl lg:text-5xl mt-2">Delivery & Payment</h1>
+        <h1 className="font-serif text-2xl sm:text-4xl lg:text-5xl mt-2 tracking-tight break-words">
+          Delivery & Payment
+        </h1>
       </div>
 
-      <form onSubmit={handleSubmitOrder} className="grid lg:grid-cols-3 gap-10 items-start">
-        <div className="lg:col-span-2 space-y-8">
+      <form onSubmit={handleSubmitOrder} className="w-full max-w-full min-w-0 grid lg:grid-cols-3 gap-6 lg:gap-10 items-start">
+        <div className="lg:col-span-2 space-y-6 lg:space-y-8 min-w-0 w-full">
           {/* Step 1: Contact */}
-          <div className="bg-card p-6 lg:p-8 rounded-3xl border border-border space-y-4 shadow-sm">
-            <h2 className="font-serif text-2xl flex items-center gap-2">
-              <span className="w-7 h-7 rounded-full bg-primary text-primary-foreground text-xs font-sans font-bold flex items-center justify-center">
+          <div className="bg-card p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl border border-border space-y-4 shadow-sm min-w-0">
+            <h2 className="font-serif text-xl sm:text-2xl flex items-center gap-2.5">
+              <span className="w-7 h-7 shrink-0 rounded-full bg-primary text-primary-foreground text-xs font-sans font-bold flex items-center justify-center">
                 1
               </span>
-              Contact Information
+              <span>Contact Information</span>
             </h2>
 
             <div className="grid sm:grid-cols-2 gap-4">
-              <div>
+              <div className="min-w-0">
                 <label className="text-xs text-muted-foreground block mb-1 font-medium">
                   Full Name *
                 </label>
@@ -203,11 +205,11 @@ export default function CheckoutPage() {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="e.g. Nusrat Jahan"
-                  className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-full max-w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl border border-border bg-background text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors box-border"
                 />
               </div>
 
-              <div>
+              <div className="min-w-0">
                 <label className="text-xs text-muted-foreground block mb-1 font-medium">
                   Phone Number *
                 </label>
@@ -217,12 +219,12 @@ export default function CheckoutPage() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="01XXXXXXXXX"
-                  className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-full max-w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl border border-border bg-background text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors box-border"
                 />
               </div>
             </div>
 
-            <div>
+            <div className="min-w-0">
               <label className="text-xs text-muted-foreground block mb-1 font-medium">
                 Email Address *
               </label>
@@ -232,29 +234,29 @@ export default function CheckoutPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com"
-                className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                className="w-full max-w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl border border-border bg-background text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors box-border"
               />
             </div>
           </div>
 
           {/* Step 2: Shipping */}
-          <div className="bg-card p-6 lg:p-8 rounded-3xl border border-border space-y-4 shadow-sm">
-            <h2 className="font-serif text-2xl flex items-center gap-2">
-              <span className="w-7 h-7 rounded-full bg-primary text-primary-foreground text-xs font-sans font-bold flex items-center justify-center">
+          <div className="bg-card p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl border border-border space-y-4 shadow-sm min-w-0">
+            <h2 className="font-serif text-xl sm:text-2xl flex items-center gap-2.5">
+              <span className="w-7 h-7 shrink-0 rounded-full bg-primary text-primary-foreground text-xs font-sans font-bold flex items-center justify-center">
                 2
               </span>
-              Shipping Address
+              <span>Shipping Address</span>
             </h2>
 
             <div className="grid sm:grid-cols-2 gap-4">
-              <div>
+              <div className="min-w-0">
                 <label className="text-xs text-muted-foreground block mb-1 font-medium">
                   Division *
                 </label>
                 <select
                   value={division}
                   onChange={(e) => handleDivisionChange(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-full max-w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl border border-border bg-background text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors box-border"
                 >
                   {BD_DIVISIONS.map((d) => (
                     <option key={d} value={d}>
@@ -264,14 +266,14 @@ export default function CheckoutPage() {
                 </select>
               </div>
 
-              <div>
+              <div className="min-w-0">
                 <label className="text-xs text-muted-foreground block mb-1 font-medium">
                   District *
                 </label>
                 <select
                   value={district}
                   onChange={(e) => setDistrict(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-full max-w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl border border-border bg-background text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors box-border"
                 >
                   {(BD_DISTRICTS[division] || []).map((dst) => (
                     <option key={dst} value={dst}>
@@ -283,7 +285,7 @@ export default function CheckoutPage() {
             </div>
 
             <div className="grid sm:grid-cols-2 gap-4">
-              <div>
+              <div className="min-w-0">
                 <label className="text-xs text-muted-foreground block mb-1 font-medium">
                   Area / Thana *
                 </label>
@@ -293,11 +295,11 @@ export default function CheckoutPage() {
                   value={area}
                   onChange={(e) => setArea(e.target.value)}
                   placeholder="e.g. Banani, Gulshan, Uttara"
-                  className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-full max-w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl border border-border bg-background text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors box-border"
                 />
               </div>
 
-              <div>
+              <div className="min-w-0">
                 <label className="text-xs text-muted-foreground block mb-1 font-medium">
                   House / Street Address *
                 </label>
@@ -307,12 +309,12 @@ export default function CheckoutPage() {
                   value={streetAddress}
                   onChange={(e) => setStreetAddress(e.target.value)}
                   placeholder="House 12, Road 5, Block B"
-                  className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-full max-w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl border border-border bg-background text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors box-border"
                 />
               </div>
             </div>
 
-            <div>
+            <div className="min-w-0">
               <label className="text-xs text-muted-foreground block mb-1 font-medium">
                 Delivery Notes (Optional)
               </label>
@@ -321,41 +323,43 @@ export default function CheckoutPage() {
                 value={deliveryNotes}
                 onChange={(e) => setDeliveryNotes(e.target.value)}
                 placeholder="Call before arrival, gate code, preferred delivery time..."
-                className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                className="w-full max-w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl border border-border bg-background text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors box-border"
               />
             </div>
           </div>
 
           {/* Step 3: Payment */}
-          <div className="bg-card p-6 lg:p-8 rounded-3xl border border-border space-y-4 shadow-sm">
-            <h2 className="font-serif text-2xl flex items-center gap-2">
-              <span className="w-7 h-7 rounded-full bg-primary text-primary-foreground text-xs font-sans font-bold flex items-center justify-center">
+          <div className="bg-card p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl border border-border space-y-4 shadow-sm min-w-0">
+            <h2 className="font-serif text-xl sm:text-2xl flex items-center gap-2.5">
+              <span className="w-7 h-7 shrink-0 rounded-full bg-primary text-primary-foreground text-xs font-sans font-bold flex items-center justify-center">
                 3
               </span>
-              Payment Method
+              <span>Payment Method</span>
             </h2>
 
-            <div className="grid sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
               {config.paymentMethods.map((method) => (
                 <label
                   key={method.id}
-                  className={`p-4 rounded-2xl border cursor-pointer transition flex flex-col justify-between ${
+                  className={`p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border cursor-pointer transition flex flex-col justify-between gap-2 min-w-0 ${
                     activePaymentMethod === method.id
                       ? "border-primary bg-primary/5 ring-2 ring-primary/20"
                       : "border-border hover:bg-accent"
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium text-sm">{method.title}</span>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-medium text-sm truncate">{method.title}</span>
                     <input
                       type="radio"
                       name="payment"
                       checked={activePaymentMethod === method.id}
                       onChange={() => setPaymentMethod(method.id)}
-                      className="accent-primary"
+                      className="accent-primary shrink-0 w-4 h-4"
                     />
                   </div>
-                  <span className="text-xs text-muted-foreground">{method.description}</span>
+                  <span className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                    {method.description}
+                  </span>
                 </label>
               ))}
             </div>
@@ -363,25 +367,25 @@ export default function CheckoutPage() {
         </div>
 
         {/* Sidebar Summary */}
-        <div className="bg-card p-6 lg:p-8 rounded-3xl border border-border space-y-6 sticky top-24 shadow-sm">
-          <h2 className="font-serif text-2xl">Order Summary</h2>
+        <div className="bg-card p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl border border-border space-y-5 lg:space-y-6 lg:sticky lg:top-24 shadow-sm min-w-0 w-full">
+          <h2 className="font-serif text-xl sm:text-2xl">Order Summary</h2>
 
           <div className="max-h-60 overflow-y-auto space-y-3 pr-1 border-b border-border pb-4">
             {items.map((item) => (
               <div
                 key={`${item.productId}-${item.variant?.sku ?? ""}`}
-                className="flex gap-3 text-xs"
+                className="flex items-center gap-3 text-xs min-w-0"
               >
                 <img
                   src={optimizedImageUrl(item.image, 120)}
                   alt={item.name}
-                  className="w-12 h-14 object-cover rounded-lg shrink-0"
+                  className="w-12 h-14 object-cover rounded-lg shrink-0 border border-border/50"
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{item.name}</p>
+                  <p className="font-medium truncate text-foreground">{item.name}</p>
                   <p className="text-muted-foreground mt-0.5">Qty: {item.quantity}</p>
                 </div>
-                <span className="font-sans font-semibold text-foreground">
+                <span className="font-sans font-semibold text-foreground shrink-0 tabular-nums">
                   ৳{(item.price * item.quantity).toLocaleString()}
                 </span>
               </div>
@@ -389,44 +393,44 @@ export default function CheckoutPage() {
           </div>
 
           <div className="space-y-2.5 text-sm">
-            <div className="flex justify-between text-muted-foreground">
-              <span>Subtotal</span>
-              <span className="font-sans font-bold text-foreground">
+            <div className="flex justify-between items-center gap-2 min-w-0 text-muted-foreground">
+              <span className="truncate">Subtotal</span>
+              <span className="font-sans font-bold text-foreground shrink-0 tabular-nums">
                 ৳{subtotal.toLocaleString()}
               </span>
             </div>
 
             {couponDiscount > 0 && (
-              <div className="flex justify-between text-primary font-medium">
-                <span>Coupon ({couponCode})</span>
-                <span className="font-sans font-bold">-৳{couponDiscount.toLocaleString()}</span>
+              <div className="flex justify-between items-center gap-2 min-w-0 text-primary font-medium">
+                <span className="truncate">Coupon ({couponCode})</span>
+                <span className="font-sans font-bold shrink-0 tabular-nums">-৳{couponDiscount.toLocaleString()}</span>
               </div>
             )}
 
-            <div className="flex justify-between text-muted-foreground">
-              <span>Shipping ({isDhaka ? "Inside Dhaka" : "Outside Dhaka"})</span>
-              <span className="font-sans font-medium text-foreground">
+            <div className="flex justify-between items-center gap-2 min-w-0 text-muted-foreground">
+              <span className="truncate">Shipping ({isDhaka ? "Inside Dhaka" : "Outside Dhaka"})</span>
+              <span className="font-sans font-medium text-foreground shrink-0 tabular-nums">
                 {shippingCost === 0 ? "FREE" : `৳${shippingCost}`}
               </span>
             </div>
 
-            <div className="flex justify-between text-lg font-bold border-t border-border pt-3">
+            <div className="flex justify-between items-center gap-2 min-w-0 text-base sm:text-lg font-bold border-t border-border pt-3">
               <span>Total Payable</span>
-              <span className="font-sans font-bold text-primary">৳{total.toLocaleString()}</span>
+              <span className="font-sans font-bold text-primary shrink-0 tabular-nums">৳{total.toLocaleString()}</span>
             </div>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-4 rounded-full bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 transition shadow-lg shadow-primary/20 flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full py-3.5 sm:py-4 px-4 rounded-full bg-primary text-primary-foreground font-medium text-sm sm:text-base hover:opacity-90 transition shadow-lg shadow-primary/20 flex items-center justify-center gap-2 disabled:opacity-50 min-w-0"
           >
-            {loading ? "Processing Order..." : `Place Order — ৳${total.toLocaleString()}`}
-            {!loading && <ArrowRight className="w-4 h-4" />}
+            <span className="truncate">{loading ? "Processing Order..." : `Place Order — ৳${total.toLocaleString()}`}</span>
+            {!loading && <ArrowRight className="w-4 h-4 shrink-0" />}
           </button>
 
-          <div className="text-xs text-center text-muted-foreground flex items-center justify-center gap-1">
-            <ShieldCheck className="w-4 h-4 text-emerald-600" />
+          <div className="text-xs text-center text-muted-foreground flex items-center justify-center gap-1.5">
+            <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>Guaranteed Safe Checkout</span>
           </div>
         </div>

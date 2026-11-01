@@ -3,6 +3,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
+  Command,
+  FileText,
+  Layers,
   Loader2,
   Package,
   ReceiptText,
@@ -27,12 +30,15 @@ interface GlobalCommandPaletteProps {
 type Hit = {
   key: string;
   tab: AdminTab;
+  category: "orders" | "customers" | "invoices" | "products";
   query: string;
   title: string;
   sub: string;
   badge?: string;
   icon: React.ElementType;
 };
+
+type FilterCategory = "all" | "pages" | "orders" | "products" | "customers" | "invoices";
 
 async function getJson(url: string, signal: AbortSignal) {
   const res = await fetch(url, { cache: "no-store", signal });
@@ -51,6 +57,7 @@ export function GlobalCommandPalette({
 }: GlobalCommandPaletteProps) {
   const { can } = useAccess();
   const [query, setQuery] = useState("");
+  const [activeCategory, setActiveCategory] = useState<FilterCategory>("all");
   const [hits, setHits] = useState<Hit[]>([]);
   const [searching, setSearching] = useState(false);
   const [active, setActive] = useState(0);
@@ -60,6 +67,8 @@ export function GlobalCommandPalette({
     if (!isOpen) {
       setQuery("");
       setHits([]);
+      setActiveCategory("all");
+      setActive(0);
     }
   }, [isOpen]);
 
@@ -86,6 +95,7 @@ export function GlobalCommandPalette({
           list.push({
             key: `o${o._id}`,
             tab: "orders",
+            category: "orders",
             query: o.orderNumber,
             title: o.orderNumber,
             sub: `${o.shippingAddress?.fullName ?? ""} · ${o.shippingAddress?.phone ?? ""} · ${fmtTaka(o.total)}`,
@@ -97,6 +107,7 @@ export function GlobalCommandPalette({
           list.push({
             key: `c${c.id}`,
             tab: "customers",
+            category: "customers",
             query: c.email,
             title: c.name,
             sub: `${c.email} · ${c.orders} orders · ${fmtTaka(c.spent)}`,
@@ -107,6 +118,7 @@ export function GlobalCommandPalette({
           list.push({
             key: `i${i._id}`,
             tab: "invoices",
+            category: "invoices",
             query: i.invoiceNumber,
             title: i.invoiceNumber,
             sub: `${i.customer?.name ?? ""} · ${fmtTaka(i.total)}`,
@@ -118,6 +130,7 @@ export function GlobalCommandPalette({
           list.push({
             key: `p${p._id}`,
             tab: "products",
+            category: "products",
             query: p.name,
             title: p.name,
             sub: `${fmtTaka(p.price)} · ${p.stock ?? 0} in stock`,
@@ -134,17 +147,27 @@ export function GlobalCommandPalette({
   }, [q, isOpen, can]);
 
   const pages = useMemo(() => {
+    if (activeCategory !== "all" && activeCategory !== "pages") return [];
     const needle = query.trim().toLowerCase();
     return groups
       .flatMap((g) => g.items)
       .filter((i) => !needle || `${i.label} ${i.description}`.toLowerCase().includes(needle))
       .slice(0, needle ? 6 : 8);
-  }, [groups, query]);
+  }, [groups, query, activeCategory]);
 
-  const all = [
-    ...pages.map((p) => ({ key: `nav-${p.tab}`, run: () => onSelectTab(p.tab) })),
-    ...hits.map((h) => ({ key: h.key, run: () => onSelectTab(h.tab, h.query) })),
-  ];
+  const filteredHits = useMemo(() => {
+    if (activeCategory === "pages") return [];
+    if (activeCategory === "all") return hits;
+    return hits.filter((h) => h.category === activeCategory);
+  }, [hits, activeCategory]);
+
+  const all = useMemo(
+    () => [
+      ...pages.map((p) => ({ key: `nav-${p.tab}`, run: () => onSelectTab(p.tab) })),
+      ...filteredHits.map((h) => ({ key: h.key, run: () => onSelectTab(h.tab, h.query) })),
+    ],
+    [pages, filteredHits, onSelectTab],
+  );
 
   if (!isOpen) return null;
 
@@ -153,24 +176,18 @@ export function GlobalCommandPalette({
     onClose();
   };
 
-  const row = (index: number, content: React.ReactNode, key: string) => (
-    <button
-      key={key}
-      type="button"
-      onMouseEnter={() => setActive(index)}
-      onClick={() => choose(index)}
-      className={`group flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-left ${
-        index === active ? "bg-secondary" : "hover:bg-secondary/60"
-      }`}
-    >
-      {content}
-      <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-    </button>
-  );
+  const CATEGORIES: { id: FilterCategory; label: string }[] = [
+    { id: "all", label: "All" },
+    { id: "pages", label: "Pages" },
+    { id: "orders", label: "Orders" },
+    { id: "products", label: "Products" },
+    { id: "customers", label: "Customers" },
+    { id: "invoices", label: "Invoices" },
+  ];
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 px-4 pt-20"
+      className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 backdrop-blur-xs px-4 pt-16 sm:pt-20"
       onClick={onClose}
     >
       <div
@@ -178,11 +195,12 @@ export function GlobalCommandPalette({
         aria-modal="true"
         aria-label="Search the admin"
         onClick={(e) => e.stopPropagation()}
-        className="flex max-h-[80vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl"
+        className="flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl animate-in fade-in-50 zoom-in-95 duration-150"
       >
+        {/* Search Input Bar */}
         <div className="flex items-center gap-3 border-b border-border px-4 py-3.5">
           {searching ? (
-            <Loader2 className="h-5 w-5 shrink-0 animate-spin text-muted-foreground" />
+            <Loader2 className="h-5 w-5 shrink-0 animate-spin text-primary" />
           ) : (
             <Search className="h-5 w-5 shrink-0 text-muted-foreground" />
           )}
@@ -206,93 +224,149 @@ export function GlobalCommandPalette({
               }
             }}
             autoFocus
-            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-hidden"
+            className="flex-1 bg-transparent text-sm font-medium text-foreground placeholder:text-muted-foreground focus:outline-hidden"
           />
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg p-1 text-muted-foreground hover:bg-secondary"
-            aria-label="Close"
-          >
-            <X className="h-4 w-4" />
-          </button>
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              className="rounded-lg p-1 text-muted-foreground hover:bg-secondary"
+              aria-label="Clear search"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
         </div>
 
+        {/* Filter Pills */}
+        <div className="flex items-center gap-1.5 overflow-x-auto border-b border-border/60 bg-secondary/30 px-4 py-2 text-xs no-scrollbar">
+          {CATEGORIES.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => {
+                setActiveCategory(c.id);
+                setActive(0);
+              }}
+              className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
+                activeCategory === c.id
+                  ? "bg-primary text-primary-foreground shadow-xs"
+                  : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
+              }`}
+            >
+              {c.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Results Area */}
         <div className="space-y-4 overflow-y-auto p-3 text-xs">
           {pages.length > 0 && (
             <div>
-              <p className="px-3 py-1 text-[11px] font-medium text-muted-foreground">Pages</p>
+              <p className="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                Pages & Navigation
+              </p>
               <div className="mt-1 space-y-0.5">
                 {pages.map((p, i) => {
                   const Icon = p.icon;
-                  return row(
-                    i,
-                    <span className="flex min-w-0 items-center gap-2.5">
-                      <span className="rounded-lg bg-primary/10 p-1.5 text-primary">
-                        <Icon className="h-4 w-4" />
-                      </span>
-                      <span className="min-w-0">
-                        <span className="block font-medium text-foreground">{p.label}</span>
-                        <span className="block truncate text-[11px] text-muted-foreground">
-                          {p.description}
+                  const isSelected = i === active;
+                  return (
+                    <button
+                      key={p.tab}
+                      type="button"
+                      onMouseEnter={() => setActive(i)}
+                      onClick={() => choose(i)}
+                      className={`group flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-left transition-colors ${
+                        isSelected ? "bg-secondary text-foreground" : "hover:bg-secondary/60 text-muted-foreground"
+                      }`}
+                    >
+                      <span className="flex min-w-0 items-center gap-2.5">
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                          <Icon className="h-4 w-4" />
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block font-semibold text-foreground">{p.label}</span>
+                          <span className="block truncate text-[11px] text-muted-foreground">
+                            {p.description}
+                          </span>
                         </span>
                       </span>
-                    </span>,
-                    p.tab,
+                      <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                    </button>
                   );
                 })}
               </div>
             </div>
           )}
 
-          {hits.length > 0 && (
+          {filteredHits.length > 0 && (
             <div>
-              <p className="px-3 py-1 text-[11px] font-medium text-muted-foreground">
-                From the database
+              <p className="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                Database Records
               </p>
               <div className="mt-1 space-y-0.5">
-                {hits.map((h, i) => {
+                {filteredHits.map((h, i) => {
                   const Icon = h.icon;
-                  return row(
-                    pages.length + i,
-                    <span className="flex min-w-0 items-center gap-2.5">
-                      <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
-                      <span className="min-w-0">
-                        <span className="block font-semibold text-foreground">
-                          {h.title}
-                          {h.badge && (
-                            <span className="ml-2 rounded-full bg-secondary px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
-                              {h.badge}
-                            </span>
-                          )}
+                  const index = pages.length + i;
+                  const isSelected = index === active;
+                  return (
+                    <button
+                      key={h.key}
+                      type="button"
+                      onMouseEnter={() => setActive(index)}
+                      onClick={() => choose(index)}
+                      className={`group flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-left transition-colors ${
+                        isSelected ? "bg-secondary text-foreground" : "hover:bg-secondary/60 text-muted-foreground"
+                      }`}
+                    >
+                      <span className="flex min-w-0 items-center gap-2.5">
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-secondary text-muted-foreground">
+                          <Icon className="h-4 w-4 shrink-0" />
                         </span>
-                        <span className="block truncate text-[11px] text-muted-foreground">
-                          {h.sub}
+                        <span className="min-w-0">
+                          <span className="flex items-center gap-2 font-semibold text-foreground">
+                            <span>{h.title}</span>
+                            {h.badge && (
+                              <span className="rounded-full bg-secondary/80 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                                {h.badge}
+                              </span>
+                            )}
+                          </span>
+                          <span className="block truncate text-[11px] text-muted-foreground">
+                            {h.sub}
+                          </span>
                         </span>
                       </span>
-                    </span>,
-                    h.key,
+                      <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                    </button>
                   );
                 })}
               </div>
             </div>
           )}
 
-          {pages.length === 0 && hits.length === 0 && !searching && (
-            <div className="py-8 text-center text-muted-foreground">
+          {pages.length === 0 && filteredHits.length === 0 && !searching && (
+            <div className="py-12 text-center text-muted-foreground">
               <Search className="mx-auto mb-2 h-8 w-8 opacity-30" />
-              <p>
+              <p className="text-sm font-medium text-foreground">
                 {q.length < 2
                   ? "Type at least 2 characters to search the database."
                   : `Nothing found for “${query}”.`}
               </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Search order numbers (e.g. ORD-), product names, customer emails, or invoice IDs.
+              </p>
             </div>
           )}
         </div>
 
+        {/* Footer shortcuts info */}
         <div className="flex items-center justify-between border-t border-border bg-secondary/40 px-4 py-2.5 text-[11px] text-muted-foreground">
-          <span>↑↓ to move · Enter to open</span>
-          <span>Esc to close</span>
+          <div className="flex items-center gap-3">
+            <span>↑↓ to navigate</span>
+            <span>↵ to select</span>
+          </div>
+          <span>Esc to exit</span>
         </div>
       </div>
     </div>

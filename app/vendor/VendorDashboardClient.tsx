@@ -738,7 +738,7 @@ function ProductDialog({
     category: product ? String(product.category) : (categories[0]?.id ?? ""),
     price: product ? String(product.price) : "",
     compareAtPrice: product?.compareAtPrice ? String(product.compareAtPrice) : "",
-    stock: product ? String(product.stock) : "10",
+    stock: product ? String(product.stock) : "100",
     images: product?.media?.length
       ? product.media
       : ((product?.images ?? []).map((url) => ({ url, alt: "" })) as MediaItem[]),
@@ -900,6 +900,7 @@ function ProductDialog({
               inputMode="numeric"
               value={form.stock}
               onChange={set("stock")}
+              placeholder="100"
               className={inputClass}
             />
           </label>

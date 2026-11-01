@@ -131,7 +131,9 @@ export async function validateProduct(
       ? undefined
       : toNonNegativeNumber(raw.costPrice, 10_000_000);
 
-  const stock = toNonNegativeNumber(raw?.stock ?? 0, 1_000_000);
+  const rawStock =
+    raw?.stock === undefined || raw?.stock === "" || raw?.stock === null ? 100 : raw.stock;
+  const stock = toNonNegativeNumber(rawStock, 1_000_000);
   if (stock === undefined || !Number.isInteger(stock))
     errors.stock = "Stock must be a whole number.";
   const lowStock = toNonNegativeNumber(raw?.lowStockThreshold ?? 5, 100_000);
@@ -208,7 +210,7 @@ export async function validateProduct(
       price: sale ?? regular ?? 0,
       compareAtPrice: sale !== undefined ? regular : undefined,
       costPrice: cost,
-      stock: stock ?? 0,
+      stock: stock ?? 100,
       lowStockThreshold: lowStock ?? 5,
       trackInventory: raw?.trackInventory !== false,
       allowBackorders: Boolean(raw?.allowBackorders),

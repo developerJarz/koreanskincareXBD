@@ -744,9 +744,9 @@
     "semantic_hash": "c4c59ba724a80419e6bbfdf313fa591f"
   },
   "next-env.d.ts": {
-    "mtime": 1792170828.1961827,
-    "seen": 1792171420.8083818,
-    "ast_hash": "1977dd4aa66833eef8ae95b31ca3bfe8",
+    "mtime": 1792223359.677851,
+    "seen": 1792353309.653256,
+    "ast_hash": "ba64ff7d54714a8f64db89b1003207d8",
     "semantic_hash": ""
   },
   "next.config.mjs": {
@@ -1590,9 +1590,9 @@
     "semantic_hash": "ff5d431f0fce12b1fbdb2edc007a899d"
   },
   "src/server/catalog-admin.ts": {
-    "mtime": 1792168322.8261225,
-    "seen": 1792170588.8880954,
-    "ast_hash": "7a3c10e04bffda9babc4b8bef02cbe95",
+    "mtime": 1792352976.9647443,
+    "seen": 1792353309.6536677,
+    "ast_hash": "a420c552fd24b467abff988c13cb4c6f",
     "semantic_hash": ""
   },
   "src/server/catalog.ts": {
@@ -2802,9 +2802,9 @@
     "semantic_hash": ""
   },
   "skills-lock.json": {
-    "mtime": 1791836151.0123565,
-    "seen": 1791912746.5198166,
-    "ast_hash": "a64472ec8b3e1840c9af7d53ad2f42fd",
+    "mtime": 1792353110.9524608,
+    "seen": 1792353309.6532893,
+    "ast_hash": "19ac55637afca8c7ac47ef056f2e87ac",
     "semantic_hash": ""
   },
   "src/components/ActivityTracker.tsx": {

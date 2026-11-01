@@ -93,7 +93,9 @@ export function checkVendorProduct(
     }
   }
 
-  const stock = toNonNegativeNumber(raw?.stock ?? 0, 100_000);
+  const rawStock =
+    raw?.stock === undefined || raw?.stock === "" || raw?.stock === null ? 100 : raw.stock;
+  const stock = toNonNegativeNumber(rawStock, 100_000);
   if (stock === undefined || !Number.isInteger(stock)) {
     return { error: "Stock must be a whole number of 0 or more." };
   }
@@ -125,7 +127,7 @@ export function checkVendorProduct(
       description: cleanString(raw?.description, 5000) ?? "",
       price,
       compareAtPrice,
-      stock,
+      stock: stock ?? 100,
       images,
       ...(media ? { media } : {}),
       category: raw.category,

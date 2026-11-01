@@ -260,19 +260,28 @@ export function StatTile({
   hint,
   change,
   invertChange,
+  icon: Icon,
 }: {
   label: string;
   value: React.ReactNode;
   hint?: React.ReactNode;
   change?: number | null;
   invertChange?: boolean;
+  icon?: React.ElementType;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-4">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="mt-1.5 text-2xl font-semibold tabular-nums text-foreground">{value}</p>
+    <div className="group relative overflow-hidden rounded-2xl border border-border bg-card p-4.5 transition-all duration-200 hover:border-border/80 hover:shadow-sm">
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-xs font-medium text-muted-foreground">{label}</p>
+        {Icon && (
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-secondary/80 text-muted-foreground transition-colors group-hover:bg-primary/10 group-hover:text-primary">
+            <Icon className="h-4 w-4" aria-hidden="true" />
+          </div>
+        )}
+      </div>
+      <p className="mt-2 text-2xl font-bold tracking-tight tabular-nums text-foreground">{value}</p>
       {(hint || change !== undefined) && (
-        <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
+        <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
           {change !== undefined && <ChangeBadge value={change} invert={invertChange} />}
           {hint && <span>{hint}</span>}
         </div>
@@ -319,7 +328,7 @@ export function EmptyState({
 export function Skeleton({ className = "h-40" }: { className?: string }) {
   return (
     <div
-      className={`animate-pulse rounded-2xl border border-border bg-card ${className}`}
+      className={`animate-pulse rounded-2xl border border-border/70 bg-secondary/60 ${className}`}
       aria-hidden="true"
     />
   );

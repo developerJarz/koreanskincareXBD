@@ -13,7 +13,7 @@ const productVariantSchema = new Schema<IProductVariant>(
     material: { type: String },
     price: { type: Number, required: true, min: 0 },
     compareAtPrice: { type: Number, min: 0 },
-    stock: { type: Number, default: 0, min: 0 },
+    stock: { type: Number, default: 100, min: 0 },
     images: [{ type: String }],
     isActive: { type: Boolean, default: true },
   },
@@ -55,7 +55,7 @@ const productSchema = new Schema<ProductDocument>(
     // Inventory
     sku: { type: String },
     barcode: { type: String },
-    stock: { type: Number, default: 0, min: 0 },
+    stock: { type: Number, default: 100, min: 0 },
     lowStockThreshold: { type: Number, default: 5 },
     trackInventory: { type: Boolean, default: true },
 

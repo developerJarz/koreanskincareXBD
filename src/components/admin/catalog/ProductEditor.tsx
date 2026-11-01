@@ -85,7 +85,7 @@ const EMPTY: EditorState = {
   regularPrice: "",
   salePrice: "",
   costPrice: "",
-  stock: "0",
+  stock: "100",
   lowStockThreshold: "5",
   trackInventory: true,
   allowBackorders: false,
@@ -784,6 +784,7 @@ export function ProductEditor({
                     inputMode="numeric"
                     value={form.stock}
                     onChange={(e) => set("stock", e.target.value)}
+                    placeholder="100"
                     className={inputClass}
                   />
                 </Field>

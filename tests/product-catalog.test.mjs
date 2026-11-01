@@ -114,3 +114,30 @@ test("changing vendor image alt text requires the same review as other visible c
   const before = { ...result.value, media: [{ ...media[0], alt: "Old description" }] };
   assert.equal(needsReReview(before, result.value), true);
 });
+
+test("new products default stock quantity to 100", async () => {
+  const { Product } = await importTypeScript("../src/server/db/models/product.model.ts");
+  const product = new Product({
+    name: "Test Product",
+    slug: "test-product",
+    category: new mongoose.Types.ObjectId(),
+    price: 150,
+  });
+  assert.equal(product.stock, 100);
+
+  const { checkVendorProduct } = await vendorValidation();
+  const withoutStock = {
+    name: "Vendor Product",
+    price: 200,
+    category: "000000000000000000000001",
+    images: ["https://example.com/item.webp"],
+  };
+  const result = checkVendorProduct(vendor, withoutStock);
+  assert.ok(result.value, result.error);
+  assert.equal(result.value.stock, 100);
+
+  // Explicit stock of 0 should still be preserved
+  const withZeroStock = checkVendorProduct(vendor, { ...withoutStock, stock: 0 });
+  assert.ok(withZeroStock.value, withZeroStock.error);
+  assert.equal(withZeroStock.value.stock, 0);
+});

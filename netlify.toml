@@ -1,6 +1,6 @@
 # Netlify's secrets scanner fails the build when the value of any env var marked "secret"
-# appears in the repo or build output. These four are public by design (they are sent to
+# appears in the repo or build output. These five are public by design (they are sent to
 # the browser or are plain hostnames), so they are excluded from the scan. Real secrets
 # (database, auth, SMTP password, API secrets) are still scanned.
 [build.environment]
-  SECRETS_SCAN_OMIT_KEYS = "CLOUDINARY_CLOUD_NAME,NEXT_PUBLIC_APP_URL,SMTP_HOST,SMTP_FROM"
+  SECRETS_SCAN_OMIT_KEYS = "CLOUDINARY_CLOUD_NAME,NEXT_PUBLIC_APP_URL,BETTER_AUTH_URL,SMTP_HOST,SMTP_FROM"

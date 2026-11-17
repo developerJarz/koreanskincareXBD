@@ -18,6 +18,7 @@ import { createdAtMatch, resolveRange } from "@/server/admin/range";
 import { isPubliclyVisible } from "@/server/marketplace";
 import { recordServerEvent } from "@/server/activity";
 import { evaluateCoupon, getCheckoutConfig, shippingCostFor } from "@/server/checkout-config";
+import { captureOrderLocation } from "@/server/orders/location";
 
 const ORDER_STATUSES = [
   "pending",
@@ -174,11 +175,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Delivery charges come from admin Settings (free delivery is judged after the discount)
-    const shippingCost = shippingCostFor(subtotal - discount, shippingAddress, config, freeShipping);
+    const shippingCost = shippingCostFor(
+      subtotal - discount,
+      shippingAddress,
+      config,
+      freeShipping,
+    );
     const total = Math.max(0, subtotal - discount + shippingCost);
 
     // Secret that lets the buyer (incl. guests) open their confirmation page; only its hash is stored
     const accessToken = crypto.randomBytes(24).toString("base64url");
+    const orderLocation = await captureOrderLocation(request.headers);
 
     const order = await Order.create({
       user: sessionUser?._id,
@@ -196,6 +203,7 @@ export async function POST(request: NextRequest) {
       billingAddress: shippingAddress,
       deliveryNotes: cleanString(data.deliveryNotes, 1000),
       accessTokenHash: crypto.createHash("sha256").update(accessToken).digest("hex"),
+      orderLocation,
     });
 
     if (couponId) {
@@ -272,10 +280,14 @@ export async function GET(request: NextRequest) {
       const payment = cleanString(searchParams.get("payment"), 30);
       if (payment) query.paymentMethod = payment;
       const paymentStatus = searchParams.get("paymentStatus");
-      if (paymentStatus && ["pending", "paid", "failed", "refunded", "partially_refunded"].includes(paymentStatus)) {
+      if (
+        paymentStatus &&
+        ["pending", "paid", "failed", "refunded", "partially_refunded"].includes(paymentStatus)
+      ) {
         query.paymentStatus = paymentStatus;
       }
-      if (searchParams.get("range")) Object.assign(query, createdAtMatch(resolveRange(searchParams, "all")));
+      if (searchParams.get("range"))
+        Object.assign(query, createdAtMatch(resolveRange(searchParams, "all")));
       const q = searchParams.get("q")?.trim().slice(0, 100);
       if (q) {
         const rx = new RegExp(escapeRegex(q), "i");
@@ -293,15 +305,22 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const sort: Record<string, 1 | -1> =
-      ({
+    const sort: Record<string, 1 | -1> = (
+      {
         oldest: { createdAt: 1 },
         total_desc: { total: -1 },
         total_asc: { total: 1 },
-      } as Record<string, Record<string, 1 | -1>>)[searchParams.get("sort") ?? ""] ?? { createdAt: -1 };
+      } as Record<string, Record<string, 1 | -1>>
+    )[searchParams.get("sort") ?? ""] ?? { createdAt: -1 };
 
     const [orders, total, statusCounts] = await Promise.all([
-      Order.find(query).sort(sort).skip(skip).limit(pageSize).populate("user", "name email").lean(),
+      Order.find(query)
+        .select(canSeeAll && searchParams.get("mine") !== "1" ? "+orderLocation" : "")
+        .sort(sort)
+        .skip(skip)
+        .limit(pageSize)
+        .populate("user", "name email")
+        .lean(),
       Order.countDocuments(query),
       canSeeAll && searchParams.get("counts") === "1"
         ? Order.aggregate([{ $group: { _id: "$status", count: { $sum: 1 } } }])
@@ -314,7 +333,9 @@ export async function GET(request: NextRequest) {
       page,
       pageSize,
       totalPages: Math.ceil(total / pageSize),
-      statusCounts: statusCounts ? Object.fromEntries(statusCounts.map((r: any) => [r._id, r.count])) : undefined,
+      statusCounts: statusCounts
+        ? Object.fromEntries(statusCounts.map((r: any) => [r._id, r.count]))
+        : undefined,
     });
   } catch (err) {
     return serverError("List orders error", err, "Failed to fetch orders");

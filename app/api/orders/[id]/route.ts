@@ -39,7 +39,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     const filter = isObjectId(id) ? { _id: id } : { orderNumber: String(id).slice(0, 40) };
     const order = await Order.findOne(filter)
-      .select("+accessTokenHash")
+      .select("+accessTokenHash +orderLocation")
       .populate("user", "name email");
 
     const notFound = NextResponse.json({ error: "Order not found" }, { status: 404 });
@@ -56,7 +56,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     // Same 404 as a missing order, so order numbers cannot be probed
     if (!isStaff && !isOwner && !tokenMatches(token, order.accessTokenHash)) return notFound;
 
-    return NextResponse.json(order.toJSON(), { headers: { "Cache-Control": "no-store" } });
+    const body = order.toJSON();
+    if (isStaff && order.orderLocation) body.orderLocation = order.orderLocation;
+    return NextResponse.json(body, { headers: { "Cache-Control": "no-store" } });
   } catch (err) {
     return serverError("Get order error", err, "Failed to fetch order");
   }
@@ -84,7 +86,10 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const touchesRefund =
       ["returned", "refunded"].includes(data.status) ||
       ["refunded", "partially_refunded"].includes(data.paymentStatus);
-    const auth = await requirePermission(request, touchesRefund ? "returns.manage" : "orders.manage");
+    const auth = await requirePermission(
+      request,
+      touchesRefund ? "returns.manage" : "orders.manage",
+    );
     if (!auth.ok) return auth.response;
 
     const { id } = await params;
@@ -137,14 +142,19 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     }
 
     if (!changes.length) {
-      return NextResponse.json(JSON.parse(JSON.stringify(await Order.findById(id).lean())));
+      const current = await Order.findById(id)
+        .select(auth.permissions.includes("orders.view") ? "+orderLocation" : "")
+        .lean();
+      return NextResponse.json(JSON.parse(JSON.stringify(current)));
     }
 
     const order = await Order.findByIdAndUpdate(
       id,
       { $set: updates, ...(Object.keys(unset).length ? { $unset: unset } : {}) },
       { new: true },
-    ).lean();
+    )
+      .select(auth.permissions.includes("orders.view") ? "+orderLocation" : "")
+      .lean();
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }

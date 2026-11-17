@@ -206,6 +206,16 @@ export interface IOrderItem {
   vendor?: any;
 }
 
+export interface IOrderLocation {
+  status: "located" | "unavailable" | "private_network";
+  city?: string;
+  region?: string;
+  country?: string;
+  countryCode?: string;
+  source?: "vercel" | "ipwhois";
+  capturedAt: Date;
+}
+
 export interface IOrder {
   _id?: any;
   orderNumber?: string;
@@ -245,6 +255,8 @@ export interface IOrder {
   invoiceUrl?: string;
   notes?: string;
   accessTokenHash?: string;
+  /** Approximate checkout city. Selected explicitly by authorized staff APIs only. */
+  orderLocation?: IOrderLocation;
   createdAt?: Date;
   updatedAt?: Date;
 }

@@ -448,7 +448,7 @@ export function RangePicker({
   options?: RangeKey[];
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex min-w-0 max-w-full flex-wrap items-center gap-2">
       <Segmented
         label="Date range"
         value={value.key}
@@ -462,7 +462,7 @@ export function RangePicker({
         options={options.map((k) => ({ value: k, label: RANGE_LABELS[k] }))}
       />
       {value.key === "custom" && (
-        <div className="flex items-center gap-1.5 text-xs">
+        <div className="flex min-w-0 max-w-full flex-wrap items-center gap-1.5 text-xs">
           <input
             type="date"
             aria-label="From"

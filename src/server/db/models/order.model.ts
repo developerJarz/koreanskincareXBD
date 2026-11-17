@@ -1,5 +1,5 @@
 import mongoose, { Schema, type Document, type Model } from "mongoose";
-import type { IOrder, OrderStatus, PaymentStatus, IOrderItem } from "@/types";
+import type { IOrder, OrderStatus, PaymentStatus, IOrderItem, IOrderLocation } from "@/types";
 
 export interface OrderDocument extends Omit<IOrder, "_id">, Document {}
 
@@ -41,6 +41,19 @@ const optionalAddressSubSchema = {
   streetAddress: { type: String },
   postalCode: { type: String },
 };
+
+const locationSchema = new Schema<IOrderLocation>(
+  {
+    status: { type: String, enum: ["located", "unavailable", "private_network"], required: true },
+    city: String,
+    region: String,
+    country: String,
+    countryCode: String,
+    source: { type: String, enum: ["vercel", "ipwhois"] },
+    capturedAt: { type: Date, required: true },
+  },
+  { _id: false },
+);
 
 const orderSchema = new Schema<OrderDocument>(
   {
@@ -91,6 +104,7 @@ const orderSchema = new Schema<OrderDocument>(
     notes: { type: String },
     // SHA-256 of the secret given to the buyer at checkout; lets guests view only their own order
     accessTokenHash: { type: String, select: false },
+    orderLocation: { type: locationSchema, select: false, default: undefined },
   },
   {
     timestamps: true,
@@ -98,6 +112,7 @@ const orderSchema = new Schema<OrderDocument>(
       transform(_doc, ret: Record<string, any>) {
         ret._id = ret._id.toString();
         delete ret.accessTokenHash;
+        delete ret.orderLocation;
         delete ret.__v;
         return ret;
       },
